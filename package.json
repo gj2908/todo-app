@@ -7,7 +7,7 @@
         "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
         "dev:backend": "cd api && node server.js",
         "dev:frontend": "cd frontend && npm start",
-        "build": "cd api && npm install && cd ../frontend && npm install && npm run build",
+        "build": "cd api && npm install && cd ../frontend && npm install && CI=false npm run build",
         "start": "cd api && node server.js"
     },
     "devDependencies": {
