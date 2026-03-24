@@ -24,4 +24,9 @@ app.use("/api/todos", todoRoutes);
 app.use("/api/projects", projectRoutes);
 
 const PORT = process.env.PORT || 6002;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+if (process.env.NODE_ENV !== "PROD") {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
