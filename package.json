@@ -5,10 +5,10 @@
     "private": true,
     "scripts": {
         "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-        "dev:backend": "cd backend && node server.js",
+        "dev:backend": "cd api && node server.js",
         "dev:frontend": "cd frontend && npm start",
-        "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
-        "start": "cd backend && node server.js"
+        "build": "cd api && npm install && cd ../frontend && npm install && npm run build",
+        "start": "cd api && node server.js"
     },
     "devDependencies": {
         "concurrently": "^9.1.0"

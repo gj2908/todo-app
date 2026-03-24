@@ -1,6 +1,4 @@
 import { format, isPast, isToday, isTomorrow } from "date-fns";
-import { toast } from "react-toastify";
-import axios from "../axiosConfig";
 
 interface TodoItemProps {
   todo: any;
