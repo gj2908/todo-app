@@ -55,6 +55,22 @@ export const scheduleTaskReminder = (taskTitle: string, dueDate: Date, minutesBe
   return null;
 };
 
+export const scheduleExactReminder = (title: string, reminderAt: Date, body?: string) => {
+  const timeUntilReminder = reminderAt.getTime() - Date.now();
+
+  if (timeUntilReminder > 0) {
+    return setTimeout(() => {
+      sendNotification(`Reminder: ${title}`, {
+        body: body || `Reminder set for ${reminderAt.toLocaleString()}`,
+        tag: `custom-reminder-${reminderAt.getTime()}`,
+        requireInteraction: false,
+      });
+    }, timeUntilReminder);
+  }
+
+  return null;
+};
+
 export const getNotificationPermissionStatus = (): "granted" | "denied" | "default" => {
   if (!("Notification" in window)) return "denied";
   return Notification.permission || "default";

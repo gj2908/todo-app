@@ -4,6 +4,7 @@ import RegisterPage from "./Pages/RegisterPage";
 import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
 import HomePage from "./Pages/HomePage";
 import ProfilePage from "./Pages/ProfilePage";
+import DocumentViewerPage from "./Pages/DocumentViewerPage";
 import { ToastContainer } from "react-toastify";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import "react-toastify/dist/ReactToastify.css";
@@ -35,6 +36,12 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute element={<ProfilePage />} path="/profile" />
+            }
+          />
+          <Route
+            path="/document-vault/:documentId"
+            element={
+              <ProtectedRoute element={<DocumentViewerPage />} path="/document-vault/:documentId" />
             }
           />
           <Route path="/" element={<Navigate to="/home" />} />

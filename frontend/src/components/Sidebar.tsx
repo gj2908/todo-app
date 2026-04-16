@@ -108,6 +108,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
         color: "#f59e0b",
       });
       setProjects([res.data, ...projects]);
+      window.dispatchEvent(new Event("projects:changed"));
       setNewProjectName("");
       setShowNewProject(false);
       toast.success("Project created!");
@@ -121,6 +122,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
     try {
       await axios.delete(`/projects/${id}`);
       setProjects(projects.filter(p => p._id !== id));
+      window.dispatchEvent(new Event("projects:changed"));
       if (activeView === `project_${id}`) onViewChange("inbox");
       toast.success("Project deleted!");
     } catch { toast.error("Failed to delete project"); }

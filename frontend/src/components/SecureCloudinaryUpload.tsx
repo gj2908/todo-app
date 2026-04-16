@@ -36,6 +36,8 @@ interface UploadState {
   progress: number;
 }
 
+const getResourceType = (file: File) => (file.type === 'application/pdf' ? 'raw' : 'image');
+
 const SecureCloudinaryUpload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -67,7 +69,7 @@ const SecureCloudinaryUpload: React.FC = () => {
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/cloudinary-signature`,
-        { folder, resource_type: 'auto' },
+        { folder, resource_type: 'image' },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -116,13 +118,12 @@ const SecureCloudinaryUpload: React.FC = () => {
         formData.append('signature', signatureData.signature);
         formData.append('timestamp', signatureData.timestamp.toString());
         formData.append('folder', signatureData.folder);
-        formData.append('resource_type', signatureData.resource_type);
 
         // Optional: Upload preset (if unsigned upload is configured in Cloudinary dashboard)
         // formData.append('upload_preset', 'your_unsigned_preset');
 
         // Build Cloudinary upload URL
-        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/auto/upload`;
+        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/${getResourceType(file)}/upload`;
 
         // Upload to Cloudinary with progress tracking
         const response = await axios.post<CloudinaryResponse>(
@@ -187,6 +188,7 @@ const SecureCloudinaryUpload: React.FC = () => {
             title: originalFileName.replace(/\.[^/.]+$/, ''), // Remove file extension
             size: cloudinaryResponse.bytes,
             resource_type: cloudinaryResponse.resource_type,
+            format: cloudinaryResponse.resource_type === 'raw' ? 'pdf' : undefined,
           },
           {
             headers: {

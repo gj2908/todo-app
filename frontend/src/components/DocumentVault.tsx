@@ -195,7 +195,7 @@ export default function DocumentVault() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <a
-                    href={doc.url}
+                    href={`/document-vault/${doc._id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"

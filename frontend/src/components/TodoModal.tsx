@@ -85,6 +85,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
         color: "#f59e0b",
       });
       setProjects([res.data, ...projects]);
+      window.dispatchEvent(new Event("projects:changed"));
       set("project", res.data._id);
       setNewProjectName("");
       setShowNewProjectForm(false);

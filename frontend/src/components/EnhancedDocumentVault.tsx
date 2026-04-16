@@ -28,6 +28,8 @@ interface UploadProgress {
   error: string | null;
 }
 
+const getResourceType = (file: File) => (file.type === "application/pdf" ? "raw" : "image");
+
 const EnhancedDocumentVault: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -93,7 +95,7 @@ const EnhancedDocumentVault: React.FC = () => {
         `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/cloudinary-signature`,
         {
           folder: "taskflow/documents",
-          resource_type: "auto",
+          resource_type: "image",
         },
         {
           headers: {
@@ -114,9 +116,8 @@ const EnhancedDocumentVault: React.FC = () => {
       formData.append("signature", signatureData.signature);
       formData.append("timestamp", signatureData.timestamp.toString());
       formData.append("folder", signatureData.folder);
-      formData.append("resource_type", signatureData.resource_type);
 
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/auto/upload`;
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/${getResourceType(selectedFile)}/upload`;
 
       const uploadResponse = await axios.post(
         cloudinaryUrl,
@@ -150,6 +151,7 @@ const EnhancedDocumentVault: React.FC = () => {
           title: title.trim(),
           size: uploadResponse.data.bytes,
           resource_type: uploadResponse.data.resource_type,
+          format: uploadResponse.data.resource_type === "raw" ? "pdf" : undefined,
         },
         {
           headers: {
