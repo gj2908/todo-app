@@ -38,7 +38,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar-root border-b border-zinc-800 bg-zinc-950 text-zinc-100">
-      <div className="flex items-center justify-between px-5 py-3">
+      <div className="flex items-center justify-between px-3 sm:px-5 py-3 gap-2">
         {/* Logo */}
         <div
           className="flex items-center gap-3 cursor-pointer group"
@@ -52,13 +52,13 @@ export default function Navbar() {
               <rect x="11" y="11" width="6" height="6" rx="1" fill="white" />
             </svg>
           </div>
-          <span className="font-bold text-lg tracking-tight text-white">
+          <span className="font-bold text-base sm:text-lg tracking-tight text-white">
             Taskflow<span className="text-amber-500">.</span>
           </span>
         </div>
 
         {/* Center - clock */}
-        <div className="hidden md:flex flex-col items-center">
+        <div className="hidden lg:flex flex-col items-center">
           <span className="text-xl font-mono font-bold text-white tabular-nums tracking-widest">
             {formatTime(currentTime)}
           </span>
@@ -68,7 +68,7 @@ export default function Navbar() {
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700">
             <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-xs font-bold text-black">
               {userEmail.charAt(0).toUpperCase()}
@@ -78,7 +78,7 @@ export default function Navbar() {
 
           <button
             onClick={() => navigate("/profile")}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               location.pathname === "/profile"
                 ? "bg-zinc-700 text-white"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-800"
@@ -89,7 +89,7 @@ export default function Navbar() {
 
           <button
             onClick={handleLogout}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20"
+            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20"
           >
             Sign out
           </button>

@@ -103,16 +103,16 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-2 sm:p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-lg max-h-[92vh] bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-zinc-800">
           <div>
             <h2 className="text-base font-bold text-zinc-100">
               {todo ? "Edit Task" : "New Task"}
@@ -130,7 +130,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {/* Title */}
           <div>
             <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
@@ -161,7 +161,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           </div>
 
           {/* Priority + Category row */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Priority */}
             <div>
               <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
@@ -206,7 +206,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           </div>
 
           {/* Due Date + Project row */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Due Date */}
             <div>
               <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
@@ -257,7 +257,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
         </form>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-zinc-800 bg-zinc-900/50">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 px-4 sm:px-6 py-4 border-t border-zinc-800 bg-zinc-900/50">
           <button
             type="button"
             onClick={onClose}

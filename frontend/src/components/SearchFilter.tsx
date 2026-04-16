@@ -68,7 +68,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
   return (
     <div className="space-y-3">
       {/* Search + filter toggle */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex-1 relative">
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
             <SearchIcon />
@@ -92,7 +92,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+          className={`flex items-center justify-center sm:justify-start gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition-all ${
             showFilters || hasActiveFilters
               ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
               : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
@@ -110,11 +110,11 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
       {/* Filters panel */}
       {showFilters && (
-        <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl space-y-4">
+        <div className="p-3 sm:p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl space-y-4">
           {/* Priority pills */}
           <div>
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Priority</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {priorities.map(p => (
                 <button
                   key={p.value}
@@ -162,7 +162,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
           {/* Sort */}
           <div>
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Sort by</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {sorts.map(s => (
                 <button
                   key={s.value}

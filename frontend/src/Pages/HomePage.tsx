@@ -27,10 +27,23 @@ const PlusIcon = () => (
   </svg>
 );
 
+const MenuIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
 export default function HomePage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [activeView, setActiveView] = useState("inbox");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [search, setSearch] = useState("");
@@ -52,6 +65,14 @@ export default function HomePage() {
   };
 
   useEffect(() => { fetchTodos(); }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 1024) setSidebarOpen(false);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const todoCounts = useMemo(() => ({
     inbox:     todos.filter(t => !t.completed).length,
@@ -132,11 +153,13 @@ export default function HomePage() {
     setSearch("");
     setPriorityFilter("");
     setCategoryFilter("");
+    setSidebarOpen(false);
   };
 
   const handleProjectSelect = (projectId: string) => {
     setActiveView(`project_${projectId}`);
     setSelectedProject(projectId);
+    setSidebarOpen(false);
   };
 
   const filteredTodos = getFilteredTodos();
@@ -159,22 +182,42 @@ export default function HomePage() {
   }, [todos, todoCounts]);
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-zinc-950 overflow-hidden">
       <Navbar />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          activeView={activeView}
-          onViewChange={handleViewChange}
-          onProjectSelect={handleProjectSelect}
-          todoCounts={todoCounts}
-        />
+        <div className="hidden lg:block">
+          <Sidebar
+            activeView={activeView}
+            onViewChange={handleViewChange}
+            onProjectSelect={handleProjectSelect}
+            todoCounts={todoCounts}
+          />
+        </div>
+
+        <div
+          className={`fixed inset-0 z-40 lg:hidden transition ${sidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+          aria-hidden={!sidebarOpen}
+        >
+          <div
+            className={`absolute inset-0 bg-black/55 transition-opacity ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className={`absolute left-0 top-0 h-full transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+            <Sidebar
+              activeView={activeView}
+              onViewChange={handleViewChange}
+              onProjectSelect={handleProjectSelect}
+              todoCounts={todoCounts}
+            />
+          </div>
+        </div>
 
         <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
           {/* Header */}
-          <div className="px-6 pt-5 pb-4 border-b border-zinc-800 bg-zinc-900/40">
+          <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-4 border-b border-zinc-800 bg-zinc-900/40">
             {/* Stats bar */}
-            <div className="flex items-center gap-4 mb-4 text-xs">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
                 <span className="text-zinc-500">{todos.length} total</span>
@@ -190,8 +233,8 @@ export default function HomePage() {
                 </div>
               )}
               {todos.length > 0 && (
-                <div className="flex items-center gap-2 ml-auto">
-                  <div className="w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="flex items-center gap-2 ml-0 sm:ml-auto w-full sm:w-auto">
+                  <div className="w-full sm:w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 rounded-full transition-all duration-700"
                       style={{ width: `${stats.rate}%` }}
@@ -203,21 +246,32 @@ export default function HomePage() {
             </div>
 
             {/* Title + Add */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  {filteredTodos.length} task{filteredTodos.length !== 1 ? "s" : ""}
-                  {" · "}{viewInfo.desc}
-                </p>
+            <div className="flex items-start sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-start sm:items-center gap-2.5">
+                <button
+                  onClick={() => setSidebarOpen(v => !v)}
+                  className="lg:hidden mt-0.5 sm:mt-0 p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
+                  aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+                >
+                  {sidebarOpen ? <CloseIcon /> : <MenuIcon />}
+                </button>
+
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    {filteredTodos.length} task{filteredTodos.length !== 1 ? "s" : ""}
+                    {" · "}{viewInfo.desc}
+                  </p>
+                </div>
               </div>
 
               <button
                 onClick={handleAddNew}
-                className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-95"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-95"
               >
                 <PlusIcon />
-                New Task
+                <span className="hidden sm:inline">New Task</span>
+                <span className="sm:hidden">Add</span>
               </button>
             </div>
 
@@ -231,7 +285,7 @@ export default function HomePage() {
           </div>
 
           {/* Task List */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
@@ -250,7 +304,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-4">
+              <div className="flex flex-col items-center justify-center h-full gap-4 px-2">
                 <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                     <rect x="4" y="6" width="20" height="18" rx="3" stroke="#52525b" strokeWidth="1.5" />
@@ -269,7 +323,7 @@ export default function HomePage() {
                 {!search && activeView !== "completed" && (
                   <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                    className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
                   >
                     <PlusIcon />
                     Add Task

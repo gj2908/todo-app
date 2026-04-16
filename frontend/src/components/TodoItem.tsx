@@ -49,7 +49,7 @@ export default function TodoItem({ todo, onEdit, onDelete, onToggle }: TodoItemP
 
   return (
     <div
-      className={`group relative flex items-start gap-3.5 p-4 rounded-xl border-l-2 border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150 ${pc.border} ${
+      className={`group relative flex items-start gap-3 p-3.5 sm:gap-3.5 sm:p-4 rounded-xl border-l-2 border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150 ${pc.border} ${
         todo.completed ? "opacity-50" : ""
       }`}
     >
@@ -72,13 +72,13 @@ export default function TodoItem({ todo, onEdit, onDelete, onToggle }: TodoItemP
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <h3 className={`text-sm font-semibold leading-snug ${todo.completed ? "line-through text-zinc-500" : "text-zinc-100"}`}>
             {todo.title}
           </h3>
 
           {/* Actions - visible on hover */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
             <button
               onClick={() => onEdit(todo)}
               className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all"

@@ -113,7 +113,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
   ];
 
   return (
-    <div className="sidebar w-60 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0">
+    <div className="sidebar w-72 sm:w-64 lg:w-60 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0">
       {/* Views */}
       <div className="p-3 border-b border-zinc-800">
         <p className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-2">Views</p>
@@ -212,7 +212,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
                 </span>
                 <button
                   onClick={e => handleDeleteProject(project._id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition ml-1 shrink-0"
+                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition ml-1 shrink-0"
                 >
                   <TrashIcon />
                 </button>
