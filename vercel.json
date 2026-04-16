@@ -25,7 +25,7 @@
       "dest": "/logo"
     },
     {
-      "src": "/(.*\\..*)",
+      "src": "/(.*\\.(?:js|mjs|css|map|png|jpg|jpeg|gif|svg|ico|webp|json|txt|xml|webmanifest|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },
     {
