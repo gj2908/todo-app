@@ -2,172 +2,121 @@ import { useState } from "react";
 import axios from "../axiosConfig";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { motion } from "framer-motion";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState(
-    () => localStorage.getItem("lastEmail") || "",
-  );
+  const [email, setEmail] = useState(() => localStorage.getItem("lastEmail") || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!email || !password) {
-      toast.error("Please fill in all fields!");
-      return;
-    }
-
+    if (!email || !password) { toast.error("Please fill in all fields"); return; }
     try {
       setLoading(true);
       const res = await axios.post("/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("lastEmail", email);
-      toast.success("✅ Login successful!");
+      toast.success("Welcome back!");
       navigate("/home");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "❌ Login failed!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6 },
-    },
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 relative overflow-hidden">
-      {/* Animated background blobs */}
-      <motion.div
-        animate={{ x: [0, 50, 0], y: [0, 50, 0] }}
-        transition={{ duration: 20, repeat: Infinity }}
-        className="absolute top-10 right-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10"
-      />
-      <motion.div
-        animate={{ x: [0, -50, 0], y: [0, -50, 0] }}
-        transition={{ duration: 25, repeat: Infinity }}
-        className="absolute bottom-10 left-10 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10"
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+      {/* Background grid */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
+          backgroundSize: "40px 40px",
+        }}
       />
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 w-full max-w-md"
-      >
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-t-4 border-blue-600">
-          {/* Header with gradient */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-8 text-center">
-            <motion.img
-              src="/Todo-logo.png"
-              alt="Todo Logo"
-              className="h-20 w-20 rounded-full mx-auto mb-4 shadow-lg border-4 border-white"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-            />
-            <h1 className="text-4xl font-bold text-white mb-2">
-              📝 Welcome Back
-            </h1>
-            <p className="text-blue-100 font-medium">
-              Manage your tasks efficiently
-            </p>
+      <div className="relative w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex items-center gap-3 justify-center mb-10">
+          <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/40">
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+              <rect x="3" y="3" width="6" height="6" rx="1" fill="white" />
+              <rect x="11" y="3" width="6" height="6" rx="1" fill="white" opacity="0.6" />
+              <rect x="3" y="11" width="6" height="6" rx="1" fill="white" opacity="0.6" />
+              <rect x="11" y="11" width="6" height="6" rx="1" fill="white" />
+            </svg>
           </div>
+          <span className="text-2xl font-bold text-white tracking-tight">
+            Taskflow<span className="text-amber-500">.</span>
+          </span>
+        </div>
 
-          {/* Form section */}
-          <form onSubmit={handleLogin} className="p-8 flex flex-col gap-6">
-            <motion.div className="relative">
-              <label className="block text-sm font-bold text-gray-800 mb-2 ml-1">
-                📧 Email Address
+        {/* Card */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+          <h1 className="text-xl font-bold text-zinc-100 mb-1">Sign in</h1>
+          <p className="text-sm text-zinc-500 mb-7">Access your workspace</p>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                Email
               </label>
               <input
                 type="email"
-                placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onFocus={() => setFocused("email")}
-                onBlur={() => setFocused(null)}
-                className={`w-full px-5 py-3 rounded-lg border-2 font-medium transition duration-300 ${
-                  focused === "email"
-                    ? "border-blue-500 bg-blue-50 ring-2 ring-blue-300"
-                    : "border-gray-300 hover:border-blue-400"
-                }`}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-600 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
               />
-            </motion.div>
+            </div>
 
-            <motion.div className="relative">
-              <label className="block text-sm font-bold text-gray-800 mb-2 ml-1">
-                🔐 Password
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                Password
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setFocused("password")}
-                  onBlur={() => setFocused(null)}
-                  className={`w-full px-5 py-3 rounded-lg border-2 font-medium transition duration-300 pr-12 ${
-                    focused === "password"
-                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-300"
-                      : "border-gray-300 hover:border-blue-400"
-                  }`}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-600 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition pr-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-600 hover:text-blue-600 text-lg"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs font-medium transition"
                 >
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.button
+            <button
               type="submit"
               disabled={loading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-blue-400/50 disabled:opacity-50 disabled:cursor-not-allowed transition duration-300 mt-2"
+              className="w-full py-3 mt-2 rounded-xl font-bold text-sm text-black bg-amber-500 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               {loading ? (
-                <span className="inline-flex items-center gap-2">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                  >
-                    ⏳
-                  </motion.div>
-                  Logging in...
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                  Signing in...
                 </span>
-              ) : (
-                "🚀 Login"
-              )}
-            </motion.button>
+              ) : "Sign in"}
+            </button>
           </form>
-
-          {/* Footer */}
-          <div className="px-8 pb-8 text-center border-t border-gray-200">
-            <p className="text-gray-700 text-sm font-medium">
-              Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="font-bold text-blue-600 hover:text-blue-700 transition hover:underline"
-              >
-                Create one
-              </Link>
-            </p>
-          </div>
         </div>
-      </motion.div>
+
+        <p className="text-center text-sm text-zinc-600 mt-5">
+          No account?{" "}
+          <Link to="/register" className="text-amber-500 hover:text-amber-400 font-semibold transition">
+            Create one
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

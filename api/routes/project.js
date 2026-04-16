@@ -19,11 +19,9 @@ const auth = (req, res, next) => {
 // GET all projects
 router.get("/", auth, async (req, res) => {
   try {
-    const projects = await Project.find({ user: req.user }).sort({
-      createdAt: -1,
-    });
+    const projects = await Project.find({ user: req.user }).sort({ createdAt: -1 });
     res.json(projects);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Error fetching projects" });
   }
 });
@@ -31,32 +29,38 @@ router.get("/", auth, async (req, res) => {
 // POST create project
 router.post("/", auth, async (req, res) => {
   try {
-    const project = new Project({ ...req.body, user: req.user });
+    const { name, icon, color } = req.body;
+    if (!name?.trim()) return res.status(400).json({ message: "Project name required" });
+    const project = new Project({ name: name.trim(), icon, color, user: req.user });
     await project.save();
     res.json(project);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Error creating project" });
   }
 });
 
-// PUT update project
+// PUT update project - ownership check
 router.put("/:id", auth, async (req, res) => {
   try {
-    const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const project = await Project.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { ...req.body, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!project) return res.status(404).json({ message: "Project not found" });
     res.json(project);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Error updating project" });
   }
 });
 
-// DELETE project
+// DELETE project - ownership check
 router.delete("/:id", auth, async (req, res) => {
   try {
-    await Project.findByIdAndDelete(req.params.id);
+    const project = await Project.findOneAndDelete({ _id: req.params.id, user: req.user });
+    if (!project) return res.status(404).json({ message: "Project not found" });
     res.json({ message: "Project deleted" });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Error deleting project" });
   }
 });

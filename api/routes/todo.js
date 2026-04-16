@@ -19,7 +19,7 @@ const auth = (req, res, next) => {
 // GET all todos for user
 router.get("/", auth, async (req, res) => {
   try {
-    const todos = await Todo.find({ user: req.user });
+    const todos = await Todo.find({ user: req.user }).sort({ createdAt: -1 });
     res.json(todos);
   } catch (error) {
     res.status(500).json({ message: "Error fetching todos" });
@@ -37,22 +37,26 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// PUT update todo
+// PUT update todo - ensures user owns it
 router.put("/:id", auth, async (req, res) => {
   try {
-    const todo = await Todo.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const todo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { ...req.body, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!todo) return res.status(404).json({ message: "Todo not found" });
     res.json(todo);
   } catch (error) {
     res.status(500).json({ message: "Error updating todo" });
   }
 });
 
-// DELETE todo
+// DELETE todo - ensures user owns it
 router.delete("/:id", auth, async (req, res) => {
   try {
-    await Todo.findByIdAndDelete(req.params.id);
+    const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.user });
+    if (!todo) return res.status(404).json({ message: "Todo not found" });
     res.json({ message: "Todo deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting todo" });

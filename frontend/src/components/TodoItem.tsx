@@ -7,131 +7,128 @@ interface TodoItemProps {
   onToggle: (id: string, completed: boolean) => void;
 }
 
-const TodoItem: React.FC<TodoItemProps> = ({
-  todo,
-  onEdit,
-  onDelete,
-  onToggle,
-}) => {
-  const getDateLabel = (date: string) => {
-    const d = new Date(date);
-    if (isToday(d)) return "Today";
-    if (isTomorrow(d)) return "Tomorrow";
-    if (isPast(d)) return "Overdue";
-    return format(d, "MMM d");
+const EditIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <path d="M9.5 2L11 3.5l-7 7H2.5V9l7-7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    <path d="M8 3.5l1.5 1.5" stroke="currentColor" strokeWidth="1.3" />
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <path d="M2 3.5h9M5 3.5V2.5h3v1M3.5 3.5l.5 7h5l.5-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const priorityConfig: Record<string, { dot: string; badge: string; border: string }> = {
+  high:   { dot: "bg-red-500",    badge: "bg-red-500/15 text-red-400 border-red-500/30",    border: "border-l-red-500" },
+  medium: { dot: "bg-amber-500",  badge: "bg-amber-500/15 text-amber-400 border-amber-500/30", border: "border-l-amber-500" },
+  low:    { dot: "bg-green-500",  badge: "bg-green-500/15 text-green-400 border-green-500/30", border: "border-l-green-500" },
+};
+
+const categoryColors: Record<string, string> = {
+  work:     "bg-blue-500/15 text-blue-400 border-blue-500/25",
+  personal: "bg-purple-500/15 text-purple-400 border-purple-500/25",
+  shopping: "bg-pink-500/15 text-pink-400 border-pink-500/25",
+  health:   "bg-teal-500/15 text-teal-400 border-teal-500/25",
+  general:  "bg-zinc-700 text-zinc-400 border-zinc-600",
+};
+
+export default function TodoItem({ todo, onEdit, onDelete, onToggle }: TodoItemProps) {
+  const pc = priorityConfig[todo.priority] || priorityConfig.medium;
+
+  const getDateInfo = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isPast(d) && !isToday(d)) return { label: "Overdue", cls: "text-red-400 bg-red-500/10 border-red-500/20" };
+    if (isToday(d)) return { label: "Today", cls: "text-amber-400 bg-amber-500/10 border-amber-500/20" };
+    if (isTomorrow(d)) return { label: "Tomorrow", cls: "text-blue-400 bg-blue-500/10 border-blue-500/20" };
+    return { label: format(d, "MMM d"), cls: "text-zinc-400 bg-zinc-800 border-zinc-700" };
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors: { [key: string]: string } = {
-      high: "bg-red-100 border-red-300 text-red-800",
-      medium: "bg-yellow-100 border-yellow-300 text-yellow-800",
-      low: "bg-green-100 border-green-300 text-green-800",
-    };
-    return colors[priority] || colors.medium;
-  };
-
-  const getDueDateColor = (date: string) => {
-    const d = new Date(date);
-    if (isPast(d) && !isToday(d)) return "text-red-600 font-semibold";
-    if (isToday(d)) return "text-orange-600 font-semibold";
-    return "text-gray-500";
-  };
+  const dateInfo = todo.dueDate ? getDateInfo(todo.dueDate) : null;
 
   return (
     <div
-      className={`p-4 border rounded-lg shadow-sm bg-white hover:shadow-md transition ${
-        todo.completed ? "opacity-60" : ""
+      className={`group relative flex items-start gap-3.5 p-4 rounded-xl border-l-2 border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150 ${pc.border} ${
+        todo.completed ? "opacity-50" : ""
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        {/* Left side - Checkbox and content */}
-        <div className="flex items-start gap-3 flex-1">
-          <input
-            type="checkbox"
-            checked={todo.completed}
-            onChange={() => onToggle(todo._id, !todo.completed)}
-            className="mt-1 w-5 h-5 cursor-pointer accent-blue-500"
-          />
+      {/* Checkbox */}
+      <button
+        onClick={() => onToggle(todo._id, !todo.completed)}
+        className={`mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+          todo.completed
+            ? "bg-amber-500 border-amber-500"
+            : "border-zinc-600 hover:border-amber-500"
+        }`}
+        aria-label="Toggle complete"
+      >
+        {todo.completed && (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 5l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </button>
 
-          <div className="flex-1">
-            {/* Title */}
-            <h3
-              className={`text-lg font-semibold ${
-                todo.completed ? "line-through text-gray-400" : "text-gray-800"
-              }`}
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className={`text-sm font-semibold leading-snug ${todo.completed ? "line-through text-zinc-500" : "text-zinc-100"}`}>
+            {todo.title}
+          </h3>
+
+          {/* Actions - visible on hover */}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <button
+              onClick={() => onEdit(todo)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all"
             >
-              {todo.title}
-            </h3>
-
-            {/* Description */}
-            {todo.description && (
-              <p className="text-sm text-gray-600 mt-1">{todo.description}</p>
-            )}
-
-            {/* Metadata row */}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {/* Priority badge */}
-              <span
-                className={`text-xs px-2 py-1 rounded border ${getPriorityColor(
-                  todo.priority,
-                )}`}
-              >
-                {todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}
-              </span>
-
-              {/* Category badge */}
-              {todo.category && todo.category !== "general" && (
-                <span className="text-xs px-2 py-1 rounded bg-blue-100 border border-blue-300 text-blue-800">
-                  {todo.category}
-                </span>
-              )}
-
-              {/* Due date */}
-              {todo.dueDate && (
-                <span
-                  className={`text-xs px-2 py-1 rounded ${getDueDateColor(todo.dueDate)}`}
-                >
-                  📅 {getDateLabel(todo.dueDate)}
-                </span>
-              )}
-
-              {/* Tags */}
-              {todo.tags && todo.tags.length > 0 && (
-                <div className="flex gap-1 flex-wrap">
-                  {todo.tags.map((tag: string, idx: number) => (
-                    <span
-                      key={idx}
-                      className="text-xs px-2 py-1 rounded bg-purple-100 border border-purple-300 text-purple-800"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+              <EditIcon />
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(todo._id)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-zinc-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
+            >
+              <DeleteIcon />
+            </button>
           </div>
         </div>
 
-        {/* Right side - Action buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => onEdit(todo)}
-            className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition font-semibold flex items-center gap-1 shadow-md hover:shadow-lg"
-            title="Edit this task"
-          >
-            ✏️ Edit
-          </button>
-          <button
-            onClick={() => onDelete(todo._id)}
-            className="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-semibold flex items-center gap-1 shadow-md hover:shadow-lg"
-            title="Delete this task"
-          >
-            🗑️ Delete
-          </button>
+        {todo.description && (
+          <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed line-clamp-2">{todo.description}</p>
+        )}
+
+        {/* Tags row */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          {/* Priority */}
+          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${pc.badge}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${pc.dot}`} />
+            {todo.priority}
+          </span>
+
+          {/* Category */}
+          {todo.category && todo.category !== "general" && (
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider ${categoryColors[todo.category] || categoryColors.general}`}>
+              {todo.category}
+            </span>
+          )}
+
+          {/* Due date */}
+          {dateInfo && (
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${dateInfo.cls}`}>
+              ⏰ {dateInfo.label}
+            </span>
+          )}
+
+          {/* Tags */}
+          {todo.tags?.map((tag: string, idx: number) => (
+            <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-400">
+              #{tag}
+            </span>
+          ))}
         </div>
       </div>
     </div>
   );
-};
-
-export default TodoItem;
+}

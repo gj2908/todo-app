@@ -8,102 +8,178 @@ interface SearchFilterProps {
   totalTodos: number;
 }
 
-export default function SearchFilter({
-  onSearch,
-  onFilterPriority,
-  onFilterCategory,
-  onSort,
-  totalTodos,
-}: SearchFilterProps) {
+const SearchIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-500">
+    <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const FilterIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+export default function SearchFilter({ onSearch, onFilterPriority, onFilterCategory, onSort, totalTodos }: SearchFilterProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [activePriority, setActivePriority] = useState("");
+  const [activeCategory, setActiveCategory] = useState("");
+  const [activeSort, setActiveSort] = useState("dueDate");
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    onSearch(query);
+  const handleSearch = (val: string) => {
+    setSearchQuery(val);
+    onSearch(val);
   };
 
+  const handlePriority = (val: string) => {
+    const next = activePriority === val ? "" : val;
+    setActivePriority(next);
+    onFilterPriority(next);
+  };
+
+  const handleCategory = (val: string) => {
+    const next = activeCategory === val ? "" : val;
+    setActiveCategory(next);
+    onFilterCategory(next);
+  };
+
+  const handleSort = (val: string) => {
+    setActiveSort(val);
+    onSort(val);
+  };
+
+  const priorities = [
+    { value: "high",   label: "High",   color: "text-red-400 border-red-500/40 bg-red-500/10" },
+    { value: "medium", label: "Med",    color: "text-amber-400 border-amber-500/40 bg-amber-500/10" },
+    { value: "low",    label: "Low",    color: "text-green-400 border-green-500/40 bg-green-500/10" },
+  ];
+
+  const sorts = [
+    { value: "dueDate",  label: "Due date" },
+    { value: "priority", label: "Priority" },
+    { value: "newest",   label: "Newest" },
+    { value: "oldest",   label: "Oldest" },
+  ];
+
+  const hasActiveFilters = activePriority || activeCategory;
+
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4">
-      {/* Search Bar */}
-      <div className="flex gap-2 mb-4">
+    <div className="space-y-3">
+      {/* Search + filter toggle */}
+      <div className="flex gap-2">
         <div className="flex-1 relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2">
+            <SearchIcon />
+          </div>
           <input
             type="text"
-            placeholder="🔍 Search tasks..."
+            placeholder="Search tasks..."
             value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full px-4 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            onChange={e => handleSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
           />
+          {searchQuery && (
+            <button
+              onClick={() => handleSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+            >
+              ✕
+            </button>
+          )}
         </div>
+
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition flex items-center gap-2"
+          className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+            showFilters || hasActiveFilters
+              ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+              : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+          }`}
         >
-          ⚙️ Filters
+          <FilterIcon />
+          Filters
+          {hasActiveFilters && (
+            <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center">
+              {(activePriority ? 1 : 0) + (activeCategory ? 1 : 0)}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Filters Panel */}
+      {/* Filters panel */}
       {showFilters && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          {/* Priority Filter */}
+        <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl space-y-4">
+          {/* Priority pills */}
           <div>
-            <label className="block text-sm font-semibold mb-2 dark:text-gray-200">
-              Priority
-            </label>
-            <select
-              onChange={(e) => onFilterPriority(e.target.value)}
-              className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg dark:bg-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Priority</p>
+            <div className="flex gap-2">
+              {priorities.map(p => (
+                <button
+                  key={p.value}
+                  onClick={() => handlePriority(p.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                    activePriority === p.value
+                      ? p.color
+                      : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+              {activePriority && (
+                <button
+                  onClick={() => handlePriority("")}
+                  className="px-2 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-300 transition"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Category Filter */}
+          {/* Category */}
           <div>
-            <label className="block text-sm font-semibold mb-2 dark:text-gray-200">
-              Category
-            </label>
-            <select
-              onChange={(e) => onFilterCategory(e.target.value)}
-              className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg dark:bg-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              <option value="work">Work</option>
-              <option value="personal">Personal</option>
-              <option value="shopping">Shopping</option>
-              <option value="health">Health</option>
-              <option value="general">General</option>
-            </select>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Category</p>
+            <div className="flex flex-wrap gap-2">
+              {["work", "personal", "shopping", "health", "general"].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => handleCategory(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all capitalize ${
+                    activeCategory === cat
+                      ? "bg-zinc-600 text-zinc-100 border-zinc-500"
+                      : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Sort */}
           <div>
-            <label className="block text-sm font-semibold mb-2 dark:text-gray-200">
-              Sort By
-            </label>
-            <select
-              onChange={(e) => onSort(e.target.value)}
-              className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg dark:bg-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="dueDate">Due Date</option>
-              <option value="priority">Priority</option>
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-            </select>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Sort by</p>
+            <div className="flex gap-2">
+              {sorts.map(s => (
+                <button
+                  key={s.value}
+                  onClick={() => handleSort(s.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                    activeSort === s.value
+                      ? "bg-zinc-600 text-zinc-100 border-zinc-500"
+                      : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
-
-      {/* Info Bar */}
-      <div className="text-sm text-gray-600 dark:text-gray-400">
-        📊 Total tasks: <span className="font-semibold">{totalTodos}</span>
-      </div>
     </div>
   );
 }
