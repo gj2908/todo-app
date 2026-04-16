@@ -2,7 +2,57 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const User = require("../models/User");
+
+const getResetTokenSecret = () => {
+  return (
+    process.env.RESET_TOKEN_SECRET ||
+    process.env.JWT_SECRET ||
+    "dev-reset-secret-change-me"
+  );
+};
+
+const sendResetEmail = async (toEmail, resetLink) => {
+  const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, SMTP_FROM } =
+    process.env;
+
+  // No email provider configured, caller should fall back to manual link.
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    return { sent: false, reason: "smtp-not-configured" };
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT || 587),
+    secure: SMTP_SECURE === "true",
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: SMTP_FROM || SMTP_USER,
+    to: toEmail,
+    subject: "Taskflow Password Reset",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+        <h2>Reset your password</h2>
+        <p>We received a request to reset your Taskflow password.</p>
+        <p>
+          <a href="${resetLink}" style="display:inline-block;padding:10px 16px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:700;">
+            Reset Password
+          </a>
+        </p>
+        <p>If you did not request this, you can ignore this email.</p>
+        <p>This link expires in 1 hour.</p>
+      </div>
+    `,
+  });
+
+  return { sent: true };
+};
 
 // Auth middleware
 const auth = (req, res, next) => {
@@ -96,7 +146,7 @@ router.get("/profile", auth, async (req, res) => {
 // Forgot Password - Generate reset token
 router.post("/forgot-password", async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.body?.email?.trim()?.toLowerCase();
     if (!email) return res.status(400).json({ message: "Email required" });
 
     const user = await User.findOne({ email });
@@ -108,19 +158,34 @@ router.post("/forgot-password", async (req, res) => {
     // Generate reset token (valid for 1 hour)
     const resetToken = jwt.sign(
       { id: user._id, email: user.email, type: "reset" },
-      process.env.JWT_SECRET,
+      getResetTokenSecret(),
       { expiresIn: "1h" }
     );
 
-    // In production, send email with reset link
-    // For now, log it or send via your email service
-    const resetLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${resetToken}`;
-    console.log(`Reset link for ${email}: ${resetLink}`);
+    const appBaseUrl =
+      process.env.FRONTEND_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    const resetLink = `${appBaseUrl}/reset-password/${resetToken}`;
 
-    // TODO: Send email with resetLink
-    // const emailResponse = await sendEmail(email, "Password Reset", resetLink);
+    try {
+      const mailResult = await sendResetEmail(email, resetLink);
+      if (mailResult.sent) {
+        return res.json({ message: "Reset link sent to email" });
+      }
 
-    res.json({ message: "Reset link sent to email" });
+      // SMTP not configured: return the link so flow still works.
+      return res.json({
+        message: "Email service not configured yet. Use the generated reset link.",
+        resetLink,
+      });
+    } catch (mailError) {
+      console.error("Email send error:", mailError);
+      // If email fails, still return the link to avoid blocking the user.
+      return res.json({
+        message: "Could not send email right now. Use the generated reset link.",
+        resetLink,
+      });
+    }
   } catch (error) {
     console.error("Forgot password error:", error);
     res.status(500).json({ message: "Failed to process request" });
@@ -140,7 +205,7 @@ router.post("/reset-password/:token", async (req, res) => {
     // Verify reset token
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      decoded = jwt.verify(token, getResetTokenSecret());
       if (decoded.type !== "reset") {
         return res.status(400).json({ message: "Invalid token" });
       }
