@@ -288,7 +288,7 @@ export default function HomePage() {
         </div>
 
         <div
-          className={`fixed inset-0 z-40 lg:hidden transition ${sidebarOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+          className={`fixed inset-0 z-40 lg:hidden transition ${sidebarOpen ? "block" : "hidden"}`}
           aria-hidden={!sidebarOpen}
         >
           <div
