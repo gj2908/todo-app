@@ -35,18 +35,6 @@ const PlusIcon = () => (
 
 const createReminderId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-const MenuIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
 interface Project {
   _id: string;
   name: string;
@@ -334,7 +322,13 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-zinc-950 overflow-hidden">
-      <Navbar onDateClick={() => setShowCalendar(true)} onTimeClick={() => setShowReminderModal(true)} />
+      <Navbar
+        onDateClick={() => setShowCalendar(true)}
+        onTimeClick={() => setShowReminderModal(true)}
+        onNewTaskClick={handleAddNew}
+        onMenuClick={() => setSidebarOpen((v) => !v)}
+        menuOpen={sidebarOpen}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="hidden lg:block">
@@ -367,80 +361,52 @@ export default function HomePage() {
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
-          {/* Header */}
-          <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-4 border-b border-zinc-800 bg-zinc-900/40">
-            {/* Stats bar */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                <span className="text-zinc-500">{todos.length} total</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                <span className="text-zinc-500">{todoCounts.completed} done</span>
-              </div>
-              {stats.overdueCount > 0 && (
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-4 sm:px-6 pt-4 sm:pt-5">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-pulse" />
-                  <span className="text-red-400 font-semibold">{stats.overdueCount} overdue</span>
+                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                  <span className="text-zinc-500">{todos.length} total</span>
                 </div>
-              )}
-              {todos.length > 0 && (
-                <div className="flex items-center gap-2 ml-0 sm:ml-auto w-full sm:w-auto">
-                  <div className="w-full sm:w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 rounded-full transition-all duration-700"
-                      style={{ width: `${stats.rate}%` }}
-                    />
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                  <span className="text-zinc-500">{todoCounts.completed} done</span>
+                </div>
+                {stats.overdueCount > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-pulse" />
+                    <span className="text-red-400 font-semibold">{stats.overdueCount} overdue</span>
                   </div>
-                  <span className="text-zinc-500 tabular-nums">{stats.rate}%</span>
-                </div>
-              )}
-            </div>
-
-            {/* Title + Add */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-              <div className="flex items-start sm:items-center gap-2.5">
-                <button
-                  onClick={() => setSidebarOpen(v => !v)}
-                  className="lg:hidden mt-0.5 sm:mt-0 p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
-                  aria-label={sidebarOpen ? "Close menu" : "Open menu"}
-                >
-                  {sidebarOpen ? <CloseIcon /> : <MenuIcon />}
-                </button>
-
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    {filteredTodos.length} task{filteredTodos.length !== 1 ? "s" : ""}
-                    {" · "}{viewInfo.desc}
-                  </p>
-                </div>
+                )}
+                {todos.length > 0 && (
+                  <div className="flex items-center gap-2 ml-0 sm:ml-auto w-full sm:w-auto">
+                    <div className="w-full sm:w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                        style={{ width: `${stats.rate}%` }}
+                      />
+                    </div>
+                    <span className="text-zinc-500 tabular-nums">{stats.rate}%</span>
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={handleAddNew}
-                className="flex w-full sm:w-auto items-center justify-center gap-2 px-3 sm:px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-95"
-              >
-                <PlusIcon />
-                <span className="hidden sm:inline">New Task</span>
-                <span className="sm:hidden">Add</span>
-              </button>
+              <div className="mt-3 mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
+              </div>
+
+              {activeView !== "calendar" && (
+                <SearchFilter
+                  onSearch={setSearch}
+                  onFilterPriority={setPriorityFilter}
+                  onFilterCategory={setCategoryFilter}
+                  onSort={setSort}
+                  totalTodos={todos.length}
+                />
+              )}
             </div>
 
-            {activeView !== "calendar" && (
-              <SearchFilter
-                onSearch={setSearch}
-                onFilterPriority={setPriorityFilter}
-                onFilterCategory={setCategoryFilter}
-                onSort={setSort}
-                totalTodos={todos.length}
-              />
-            )}
-          </div>
-
-          {/* Task List */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="p-4 sm:p-6 pt-4">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
@@ -546,9 +512,9 @@ export default function HomePage() {
             ) : activeView === "vault" ? (
               <DocumentVault />
             ) : showCalendarPreview ? (
-              <div className="max-w-6xl lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-4">
+              <div className="w-full lg:grid lg:grid-cols-[minmax(360px,40%)_minmax(520px,60%)] lg:items-start lg:gap-4">
                 {filteredTodos.length > 0 ? (
-                  <div className="space-y-1.5 max-w-3xl">
+                  <div className="space-y-1.5 w-full">
                     {filteredTodos.map(todo => (
                       <TodoItem
                         key={todo._id}
@@ -561,7 +527,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-4 px-2 max-w-3xl">
+                  <div className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-4 px-2 w-full">
                     <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                         <rect x="4" y="6" width="20" height="18" rx="3" stroke="#52525b" strokeWidth="1.5" />
@@ -589,7 +555,7 @@ export default function HomePage() {
                   </div>
                 )}
 
-                <div className="hidden lg:block sticky top-4">
+                <div className="hidden lg:block sticky top-3">
                   <CalendarPanel todos={todos} compact />
                 </div>
               </div>
@@ -634,6 +600,7 @@ export default function HomePage() {
                 )}
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>

@@ -4,9 +4,30 @@ import { useState, useEffect } from "react";
 interface NavbarProps {
   onDateClick?: () => void;
   onTimeClick?: () => void;
+  onNewTaskClick?: () => void;
+  onMenuClick?: () => void;
+  menuOpen?: boolean;
 }
 
-export default function Navbar({ onDateClick, onTimeClick }: NavbarProps) {
+const PlusIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const MenuIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+export default function Navbar({ onDateClick, onTimeClick, onNewTaskClick, onMenuClick, menuOpen = false }: NavbarProps) {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -59,10 +80,20 @@ export default function Navbar({ onDateClick, onTimeClick }: NavbarProps) {
     <nav className="navbar-root border-b border-zinc-800 bg-zinc-950 text-zinc-100">
       <div className="flex items-center justify-between px-3 sm:px-5 py-3 gap-2">
         {/* Logo */}
-        <div
-          className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => navigate("/home")}
-        >
+        <div className="flex items-center gap-2 sm:gap-3">
+          {onMenuClick && (
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+            >
+              {menuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          )}
+          <div
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => navigate("/home")}
+          >
           <div className="logo-mark w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <rect x="3" y="3" width="6" height="6" rx="1" fill="white" />
@@ -74,6 +105,7 @@ export default function Navbar({ onDateClick, onTimeClick }: NavbarProps) {
           <span className="font-bold text-base sm:text-lg tracking-tight text-white">
             Taskflow<span className="text-amber-500">.</span>
           </span>
+          </div>
         </div>
 
         {/* Center - clock */}
@@ -94,6 +126,17 @@ export default function Navbar({ onDateClick, onTimeClick }: NavbarProps) {
 
         {/* Right */}
         <div className="flex items-center gap-1.5 sm:gap-3">
+          {onNewTaskClick && (
+            <button
+              onClick={onNewTaskClick}
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
+            >
+              <PlusIcon />
+              <span className="hidden sm:inline">New Task</span>
+              <span className="sm:hidden">Add</span>
+            </button>
+          )}
+
           <div className="relative">
             <button
               id="profile-button"

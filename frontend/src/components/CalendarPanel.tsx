@@ -38,12 +38,12 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
   const selectedTodos = dueMap.get(selectedKey) || [];
 
   return (
-    <div className={compact ? "space-y-3" : "space-y-4"}>
+    <div className={compact ? "space-y-3 rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-3" : "space-y-4"}>
       <div className={`flex items-center justify-between gap-2 ${compact ? "flex-col items-start sm:flex-row sm:items-center" : ""}`}>
-        <h3 className={compact ? "text-sm font-bold text-zinc-100" : "text-lg font-bold text-zinc-100"}>
+        <h3 className={compact ? "text-sm font-bold text-zinc-100 tracking-tight" : "text-lg font-bold text-zinc-100"}>
           Monthly Deadlines
         </h3>
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-1.5 ${compact ? "rounded-lg border border-zinc-800 bg-zinc-900 px-1 py-1" : ""}`}>
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className={`${compact ? "px-2 py-1 text-xs" : "px-2.5 py-1.5 text-sm"} rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition`}
@@ -62,13 +62,13 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
         </div>
       </div>
 
-      <div className={`grid grid-cols-7 ${compact ? "gap-1.5" : "gap-2"} text-center text-[11px] font-bold uppercase tracking-wider text-zinc-500`}>
+      <div className={`grid grid-cols-7 ${compact ? "gap-1" : "gap-2"} text-center text-[11px] font-bold uppercase tracking-wider text-zinc-500`}>
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div key={d} className={compact ? "py-1" : "py-2"}>{d}</div>
         ))}
       </div>
 
-      <div className={`grid grid-cols-7 ${compact ? "gap-1.5" : "gap-2"}`}>
+      <div className={`grid grid-cols-7 ${compact ? "gap-1" : "gap-2"}`}>
         {emptyDays.map((_, idx) => (
           <div key={`empty-${idx}`} className="aspect-square" />
         ))}
@@ -84,9 +84,9 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
             <button
               key={dayKey}
               onClick={() => setSelectedDate(day)}
-              className={`aspect-square rounded-xl border ${compact ? "p-1" : "p-1.5"} text-left transition ${
+              className={`aspect-square rounded-xl border ${compact ? "p-1" : "p-1.5"} text-left transition-all duration-150 ${
                 isSelected
-                  ? "bg-amber-500/15 border-amber-500/40"
+                  ? "bg-amber-500/15 border-amber-500/40 shadow-[0_0_0_1px_rgba(245,158,11,0.15)]"
                   : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
               } ${!isSameMonth(day, currentMonth) ? "opacity-40" : "opacity-100"}`}
             >
@@ -106,7 +106,7 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
         })}
       </div>
 
-      <div className={`rounded-xl border border-zinc-800 bg-zinc-900 ${compact ? "p-3" : "p-4"}`}>
+      <div className={`rounded-xl border border-zinc-800 bg-zinc-900/90 ${compact ? "p-3" : "p-4"}`}>
         <p className={`${compact ? "text-xs" : "text-sm"} font-semibold text-zinc-200 mb-2`}>
           {format(selectedDate, "EEE, MMM d")} deadlines
         </p>

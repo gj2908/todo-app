@@ -9,7 +9,7 @@ const documentSchema = new mongoose.Schema({
   url: { type: String, required: true },
   publicId: { type: String, required: true, unique: true },
   bytes: { type: Number, default: 0 },
-  uploadedVia: { type: String, enum: ["direct-signed", "multipart"], default: "multipart" },
+  uploadedVia: { type: String, enum: ["multipart"], default: "multipart" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

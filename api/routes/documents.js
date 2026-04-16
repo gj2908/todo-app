@@ -88,6 +88,35 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
+router.get("/:id/download", auth, async (req, res) => {
+  try {
+    const document = await Document.findOne({ _id: req.params.id, user: req.user });
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    const response = await fetch(document.url);
+    if (!response.ok) {
+      return res.status(502).json({ message: "Failed to download from storage provider" });
+    }
+
+    const fileBuffer = Buffer.from(await response.arrayBuffer());
+    const inferredType =
+      response.headers.get("content-type") ||
+      (document.fileType === "pdf" ? "application/pdf" : "application/octet-stream");
+    const fileName = (document.originalName || `${document.title}.${document.fileType === "pdf" ? "pdf" : "bin"}`)
+      .replace(/[\r\n"\\/]/g, "_")
+      .trim();
+
+    res.setHeader("Content-Type", inferredType);
+    res.setHeader("Content-Disposition", `attachment; filename=\"${fileName}\"`);
+    res.setHeader("Content-Length", String(fileBuffer.length));
+    return res.send(fileBuffer);
+  } catch (_error) {
+    return res.status(500).json({ message: "Error downloading document" });
+  }
+});
+
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {

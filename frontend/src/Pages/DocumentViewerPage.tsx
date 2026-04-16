@@ -23,9 +23,10 @@ export default function DocumentViewerPage() {
   const { documentId } = useParams<{ documentId: string }>();
   const navigate = useNavigate();
 
-  const [document, setDocument] = useState<VaultDocument | null>(null);
+  const [doc, setDoc] = useState<VaultDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const loadDocument = async () => {
@@ -37,10 +38,11 @@ export default function DocumentViewerPage() {
 
       try {
         setLoading(true);
+        setError(null);
         const res = await axios.get(`/documents/${documentId}`);
-        setDocument(res.data);
-      } catch {
-        setError("Document not found or you do not have access.");
+        setDoc(res.data);
+      } catch (err: any) {
+        setError(err?.response?.data?.message || "Document not found or you do not have access.");
       } finally {
         setLoading(false);
       }
@@ -57,7 +59,7 @@ export default function DocumentViewerPage() {
     );
   }
 
-  if (error || !document) {
+  if (error || !doc) {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-200 flex items-center justify-center p-4">
         <div className="max-w-md w-full rounded-xl border border-zinc-800 bg-zinc-900 p-5 text-center">
@@ -73,14 +75,41 @@ export default function DocumentViewerPage() {
     );
   }
 
+  const handleDownload = async () => {
+    if (!doc?._id || downloading) return;
+
+    try {
+      setDownloading(true);
+      const response = await axios.get(`/documents/${doc._id}/download`, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], {
+        type: response.headers["content-type"] || "application/octet-stream",
+      });
+      const fileName = doc.originalName || `${doc.title}.${doc.fileType === "pdf" ? "pdf" : "bin"}`;
+
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      window.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-200 p-3 sm:p-5">
       <div className="max-w-6xl mx-auto space-y-3">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-base font-bold text-zinc-100 truncate">{document.title}</p>
+            <p className="text-base font-bold text-zinc-100 truncate">{doc.title}</p>
             <p className="text-xs text-zinc-500 mt-1">
-              {document.fileType.toUpperCase()} • {formatBytes(document.bytes)} • {new Date(document.createdAt).toLocaleString()}
+              {doc.fileType.toUpperCase()} • {formatBytes(doc.bytes)} • {new Date(doc.createdAt).toLocaleString()}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -90,30 +119,38 @@ export default function DocumentViewerPage() {
             >
               Back
             </Link>
-            <a
-              href={document.url}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400"
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400 disabled:opacity-60"
             >
-              Open Original
-            </a>
+              {downloading ? "Downloading..." : "Download"}
+            </button>
           </div>
         </div>
 
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-2 sm:p-3 min-h-[70vh]">
-          {document.fileType === "pdf" ? (
-            <iframe
-              title={document.title}
-              src={document.url}
-              className="w-full h-[70vh] sm:h-[78vh] rounded-lg bg-zinc-950"
-            />
+          {doc.fileType === "pdf" ? (
+            <object data={doc.url} type="application/pdf" className="w-full h-[70vh] sm:h-[78vh] rounded-lg bg-zinc-950">
+              <div className="h-full flex items-center justify-center text-center p-4">
+                <div>
+                  <p className="text-sm text-zinc-400">Preview is unavailable in this browser.</p>
+                  <button
+                    onClick={handleDownload}
+                    className="mt-3 rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400"
+                  >
+                    Download file
+                  </button>
+                </div>
+              </div>
+            </object>
           ) : (
             <div className="w-full h-[70vh] sm:h-[78vh] bg-zinc-950 rounded-lg overflow-auto flex items-center justify-center">
               <img
-                src={document.url}
-                alt={document.title}
+                src={doc.url}
+                alt={doc.title}
                 className="max-w-full max-h-full object-contain"
+                onError={() => setError("Image preview could not be loaded.")}
               />
             </div>
           )}
