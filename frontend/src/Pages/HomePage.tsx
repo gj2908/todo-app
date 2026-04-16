@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
@@ -7,7 +7,10 @@ import TodoItem from "../components/TodoItem";
 import TodoModal from "../components/TodoModal";
 import SearchFilter from "../components/SearchFilter";
 import CalendarModal from "../components/CalendarModal";
+import CalendarPanel from "../components/CalendarPanel";
+import ReminderModal from "../components/ReminderModal";
 import { isToday, isPast } from "date-fns";
+import { requestNotificationPermission, scheduleTaskReminder, sendNotification } from "../utils/notifications";
 
 interface Todo {
   _id: string;
@@ -62,6 +65,13 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarDate, setCalendarDate] = useState(new Date());
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminderMinutes, setReminderMinutes] = useState(() => {
+    const saved = localStorage.getItem("reminderMinutesBefore");
+    return saved ? Number(saved) : 15;
+  });
+  const [notificationReady, setNotificationReady] = useState(false);
+  const scheduledRef = useRef<number[]>([]);
 
   const fetchTodos = async () => {
     try {
@@ -94,6 +104,10 @@ export default function HomePage() {
   }, [activeView]);
 
   useEffect(() => {
+    localStorage.setItem("reminderMinutesBefore", String(reminderMinutes));
+  }, [reminderMinutes]);
+
+  useEffect(() => {
     const onResize = () => {
       if (window.innerWidth >= 1024) setSidebarOpen(false);
     };
@@ -108,6 +122,38 @@ export default function HomePage() {
     completed: todos.filter(t => t.completed).length,
   }), [todos]);
 
+  const reminderTodos = useMemo(() => {
+    const now = Date.now();
+    const in24h = now + 24 * 60 * 60 * 1000;
+    return todos.filter((t) => {
+      if (!t.dueDate || t.completed) return false;
+      const due = new Date(t.dueDate).getTime();
+      return due >= now && due <= in24h;
+    });
+  }, [todos]);
+
+  useEffect(() => {
+    requestNotificationPermission().then(setNotificationReady);
+  }, []);
+
+  useEffect(() => {
+    scheduledRef.current.forEach((id) => window.clearTimeout(id));
+    scheduledRef.current = [];
+
+    if (!notificationReady) return;
+
+    reminderTodos.forEach((todo) => {
+      if (!todo.dueDate) return;
+      const timeoutId = scheduleTaskReminder(todo.title, new Date(todo.dueDate), reminderMinutes);
+      if (timeoutId) scheduledRef.current.push(timeoutId as unknown as number);
+    });
+
+    return () => {
+      scheduledRef.current.forEach((id) => window.clearTimeout(id));
+      scheduledRef.current = [];
+    };
+  }, [reminderTodos, reminderMinutes, notificationReady]);
+
   const getFilteredTodos = () => {
     let filtered = [...todos];
 
@@ -120,6 +166,15 @@ export default function HomePage() {
       filtered = filtered.filter(t => t.dueDate && !isToday(new Date(t.dueDate)) && !isPast(new Date(t.dueDate)) && !t.completed);
     } else if (activeView === "completed") {
       filtered = filtered.filter(t => t.completed);
+    } else if (activeView === "calendar") {
+      filtered = filtered.filter(t => !t.completed);
+    } else if (activeView === "reminders") {
+      filtered = filtered.filter((t) => {
+        if (!t.dueDate || t.completed) return false;
+        const due = new Date(t.dueDate).getTime();
+        const now = Date.now();
+        return due >= now && due <= now + 24 * 60 * 60 * 1000;
+      });
     } else {
       filtered = filtered.filter(t => !t.completed);
     }
@@ -201,6 +256,8 @@ export default function HomePage() {
     today:     { label: "Today",     desc: "Tasks due today" },
     upcoming:  { label: "Upcoming",  desc: "Future tasks" },
     completed: { label: "Completed", desc: "Finished tasks" },
+    calendar:  { label: "Calendar",  desc: "Monthly deadlines and due tasks" },
+    reminders: { label: "Reminders", desc: "Tasks due in the next 24 hours" },
   };
 
   const viewInfo = viewTitles[activeView] || { label: "Project", desc: "Project tasks" };
@@ -215,7 +272,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-zinc-950 overflow-hidden">
-      <Navbar />
+      <Navbar onDateClick={() => setShowCalendar(true)} onTimeClick={() => setShowReminderModal(true)} />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="hidden lg:block">
@@ -224,6 +281,7 @@ export default function HomePage() {
             onViewChange={handleViewChange}
             onProjectSelect={handleProjectSelect}
             todoCounts={todoCounts}
+            reminderCount={reminderTodos.length}
           />
         </div>
 
@@ -241,6 +299,7 @@ export default function HomePage() {
               onViewChange={handleViewChange}
               onProjectSelect={handleProjectSelect}
               todoCounts={todoCounts}
+              reminderCount={reminderTodos.length}
             />
           </div>
         </div>
@@ -307,13 +366,15 @@ export default function HomePage() {
               </button>
             </div>
 
-            <SearchFilter
-              onSearch={setSearch}
-              onFilterPriority={setPriorityFilter}
-              onFilterCategory={setCategoryFilter}
-              onSort={setSort}
-              totalTodos={todos.length}
-            />
+            {activeView !== "calendar" && (
+              <SearchFilter
+                onSearch={setSearch}
+                onFilterPriority={setPriorityFilter}
+                onFilterCategory={setCategoryFilter}
+                onSort={setSort}
+                totalTodos={todos.length}
+              />
+            )}
           </div>
 
           {/* Task List */}
@@ -322,6 +383,49 @@ export default function HomePage() {
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
                 <p className="text-zinc-600 text-sm">Loading...</p>
+              </div>
+            ) : activeView === "calendar" ? (
+              <div className="max-w-5xl">
+                <CalendarPanel todos={todos} />
+              </div>
+            ) : activeView === "reminders" ? (
+              <div className="max-w-3xl space-y-3">
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                  <p className="text-sm text-zinc-300">
+                    Notifications: {notificationReady ? "Enabled" : "Disabled"}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Reminder time: {reminderMinutes} minutes before due date
+                  </p>
+                  <button
+                    onClick={async () => {
+                      const ok = await requestNotificationPermission();
+                      setNotificationReady(ok);
+                      if (ok) {
+                        sendNotification("Taskflow reminders enabled", {
+                          body: "You will receive due-date reminders in this browser.",
+                        });
+                      }
+                    }}
+                    className="mt-3 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
+                  >
+                    Re-check notification permission
+                  </button>
+                </div>
+                {filteredTodos.length > 0 ? (
+                  filteredTodos.map(todo => (
+                    <TodoItem
+                      key={todo._id}
+                      todo={todo}
+                      projectName={getProjectName(todo.project)}
+                      onEdit={handleEditTodo}
+                      onDelete={deleteTodo}
+                      onToggle={toggleComplete}
+                    />
+                  ))
+                ) : (
+                  <p className="text-sm text-zinc-500">No reminders due in the next 24 hours.</p>
+                )}
               </div>
             ) : filteredTodos.length > 0 ? (
               <div className="space-y-2 max-w-3xl">
@@ -381,6 +485,16 @@ export default function HomePage() {
         selectedDate={calendarDate}
         onSelect={(date) => setCalendarDate(date)}
         onClose={() => setShowCalendar(false)}
+      />
+
+      <ReminderModal
+        isOpen={showReminderModal}
+        defaultMinutes={reminderMinutes}
+        onSave={(minutes) => {
+          setReminderMinutes(minutes);
+          toast.success(`Reminder set to ${minutes} minutes before due time`);
+        }}
+        onClose={() => setShowReminderModal(false)}
       />
     </div>
   );

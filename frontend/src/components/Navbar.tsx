@@ -1,9 +1,13 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-export default function Navbar() {
+interface NavbarProps {
+  onDateClick?: () => void;
+  onTimeClick?: () => void;
+}
+
+export default function Navbar({ onDateClick, onTimeClick }: NavbarProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [userEmail, setUserEmail] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -74,12 +78,18 @@ export default function Navbar() {
 
         {/* Center - clock */}
         <div className="hidden lg:flex flex-col items-center">
-          <span className="text-xl font-mono font-bold text-white tabular-nums tracking-widest">
+          <button
+            onClick={onTimeClick}
+            className="text-xl font-mono font-bold text-white tabular-nums tracking-widest hover:text-amber-400 transition"
+          >
             {formatTime(currentTime)}
-          </span>
-          <span className="text-xs text-zinc-400 tracking-wider uppercase">
+          </button>
+          <button
+            onClick={onDateClick}
+            className="text-xs text-zinc-400 tracking-wider uppercase hover:text-amber-400 transition"
+          >
             {formatDate(currentTime)}
-          </span>
+          </button>
         </div>
 
         {/* Right */}

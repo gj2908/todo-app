@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 
@@ -15,6 +14,7 @@ interface SidebarProps {
   onViewChange: (view: string) => void;
   onProjectSelect?: (projectId: string) => void;
   todoCounts?: { [key: string]: number };
+  reminderCount?: number;
 }
 
 const InboxIcon = () => (
@@ -47,6 +47,20 @@ const CompletedIcon = () => (
   </svg>
 );
 
+const CalendarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const ReminderIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M8 2.5a3.5 3.5 0 0 1 3.5 3.5v2.2c0 .7.2 1.3.6 1.8l.8 1H3.1l.8-1c.4-.5.6-1.1.6-1.8V6A3.5 3.5 0 0 1 8 2.5Z" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M6.5 12.5a1.5 1.5 0 0 0 3 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
     <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -59,12 +73,11 @@ const TrashIcon = () => (
   </svg>
 );
 
-export default function Sidebar({ activeView, onViewChange, onProjectSelect, todoCounts = {} }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, onProjectSelect, todoCounts = {}, reminderCount = 0 }: SidebarProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const fetchProjects = async () => {
     try {
@@ -110,6 +123,8 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
     { id: "today", label: "Today", Icon: TodayIcon, key: "today" },
     { id: "upcoming", label: "Upcoming", Icon: UpcomingIcon, key: "upcoming" },
     { id: "completed", label: "Completed", Icon: CompletedIcon, key: "completed" },
+    { id: "calendar", label: "Calendar", Icon: CalendarIcon, key: "calendar" },
+    { id: "reminders", label: "Reminders", Icon: ReminderIcon, key: "reminders" },
   ];
 
   return (
@@ -120,7 +135,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
         <nav className="space-y-0.5">
           {menuItems.map(({ id, label, Icon, key }) => {
             const isActive = activeView === id;
-            const count = todoCounts[key] ?? 0;
+            const count = key === "reminders" ? reminderCount : (todoCounts[key] ?? 0);
             return (
               <button
                 key={id}
