@@ -142,9 +142,11 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       use_filename: false,
       unique_filename: false,
       overwrite: false,
+      ...(isPdf && { format: "pdf" }),
     });
 
     const title = requestedTitle || safeOriginalName;
+    const secureUrl = isPdf ? `${uploaded.secure_url.replace(/\/upload\//g, "/upload/f_pdf/")}.pdf` : uploaded.secure_url;
 
     const document = await Document.create({
       user: req.user,
@@ -152,7 +154,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       originalName: safeOriginalName,
       fileType,
       resourceType,
-      url: uploaded.secure_url,
+      url: secureUrl,
       publicId: uploaded.public_id,
       bytes: uploaded.bytes || req.file.size,
     });
