@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const streamifier = require("streamifier");
+const path = require("path");
 const { v2: cloudinary } = require("cloudinary");
 const Document = require("../models/Document");
 
@@ -104,7 +105,10 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       .trim();
     const requestedTitle = req.body?.title?.trim() || "";
     const baseName = sanitizeBaseName(requestedTitle || safeOriginalName) || "document";
-    const generatedPublicId = `${baseName}-${Date.now()}`;
+    const extension = (path.extname(safeOriginalName) || "").toLowerCase();
+    const generatedPublicId = isPdf
+      ? `${baseName}-${Date.now()}${extension || ".pdf"}`
+      : `${baseName}-${Date.now()}`;
 
     const uploaded = await uploadBufferToCloudinary(req.file.buffer, {
       folder: "taskflow/documents",
@@ -113,7 +117,6 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       use_filename: false,
       unique_filename: false,
       overwrite: false,
-      filename_override: safeOriginalName,
     });
 
     const title = requestedTitle || safeOriginalName;
