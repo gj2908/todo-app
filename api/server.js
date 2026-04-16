@@ -19,9 +19,11 @@ mongoose
 const authRoutes = require("./routes/auth");
 const todoRoutes = require("./routes/todo");
 const projectRoutes = require("./routes/project");
+const documentRoutes = require("./routes/documents");
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/documents", documentRoutes);
 
 const PORT = process.env.PORT || 6002;
 

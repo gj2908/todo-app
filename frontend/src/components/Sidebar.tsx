@@ -61,6 +61,14 @@ const ReminderIcon = () => (
   </svg>
 );
 
+const VaultIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2.5 5.5h11v7a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 2.5 12.5v-7Z" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M5 5.5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.5" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M6 9h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
     <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -125,6 +133,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
     { id: "completed", label: "Completed", Icon: CompletedIcon, key: "completed" },
     { id: "calendar", label: "Calendar", Icon: CalendarIcon, key: "calendar" },
     { id: "reminders", label: "Reminders", Icon: ReminderIcon, key: "reminders" },
+    { id: "vault", label: "Document Vault", Icon: VaultIcon, key: "vault" },
   ];
 
   return (

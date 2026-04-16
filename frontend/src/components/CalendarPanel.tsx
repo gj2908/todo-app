@@ -73,6 +73,7 @@ export default function CalendarPanel({ todos }: CalendarPanelProps) {
         {days.map((day) => {
           const dayKey = format(day, "yyyy-MM-dd");
           const dayTodos = dueMap.get(dayKey) || [];
+          const firstTitle = dayTodos[0]?.title || "";
           const isSelected = isSameDay(day, selectedDate);
           const isToday = isSameDay(day, new Date());
 
@@ -88,9 +89,14 @@ export default function CalendarPanel({ todos }: CalendarPanelProps) {
             >
               <p className={`text-xs font-bold ${isToday ? "text-amber-400" : "text-zinc-300"}`}>{format(day, "d")}</p>
               {dayTodos.length > 0 && (
-                <p className="text-[10px] text-zinc-400 mt-1 leading-tight">
-                  {dayTodos.length} due
-                </p>
+                <>
+                  <p className="text-[10px] text-zinc-300 mt-1 leading-tight truncate" title={firstTitle}>
+                    {firstTitle}
+                  </p>
+                  {dayTodos.length > 1 && (
+                    <p className="text-[10px] text-zinc-500 leading-tight">+{dayTodos.length - 1} more</p>
+                  )}
+                </>
               )}
             </button>
           );

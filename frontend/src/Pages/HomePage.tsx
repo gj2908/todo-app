@@ -9,6 +9,7 @@ import SearchFilter from "../components/SearchFilter";
 import CalendarModal from "../components/CalendarModal";
 import CalendarPanel from "../components/CalendarPanel";
 import ReminderModal from "../components/ReminderModal";
+import DocumentVault from "../components/DocumentVault";
 import { isToday, isPast } from "date-fns";
 import { requestNotificationPermission, scheduleTaskReminder, sendNotification } from "../utils/notifications";
 
@@ -258,6 +259,7 @@ export default function HomePage() {
     completed: { label: "Completed", desc: "Finished tasks" },
     calendar:  { label: "Calendar",  desc: "Monthly deadlines and due tasks" },
     reminders: { label: "Reminders", desc: "Tasks due in the next 24 hours" },
+    vault: { label: "Document Vault", desc: "Upload and manage images and PDFs" },
   };
 
   const viewInfo = viewTitles[activeView] || { label: "Project", desc: "Project tasks" };
@@ -427,6 +429,8 @@ export default function HomePage() {
                   <p className="text-sm text-zinc-500">No reminders due in the next 24 hours.</p>
                 )}
               </div>
+            ) : activeView === "vault" ? (
+              <DocumentVault />
             ) : filteredTodos.length > 0 ? (
               <div className="space-y-2 max-w-3xl">
                 {filteredTodos.map(todo => (
