@@ -1,0 +1,293 @@
+import { useState, useEffect, useMemo } from "react";
+import axios from "../axiosConfig";
+import { toast } from "react-toastify";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
+import TodoItem from "../components/TodoItem";
+import TodoModal from "../components/TodoModal";
+import SearchFilter from "../components/SearchFilter";
+import { isToday, isPast } from "date-fns";
+
+interface Todo {
+  _id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  priority: "low" | "medium" | "high";
+  category: string;
+  dueDate?: string;
+  tags?: string[];
+  project?: string;
+  createdAt: string;
+}
+
+const PlusIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export default function HomePage() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [activeView, setActiveView] = useState("inbox");
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [search, setSearch] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sort, setSort] = useState("dueDate");
+  const [loading, setLoading] = useState(true);
+
+  const fetchTodos = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/todos");
+      setTodos(res.data);
+    } catch {
+      toast.error("Failed to fetch todos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchTodos(); }, []);
+
+  const todoCounts = useMemo(() => ({
+    inbox:     todos.filter(t => !t.completed).length,
+    today:     todos.filter(t => t.dueDate && isToday(new Date(t.dueDate)) && !t.completed).length,
+    upcoming:  todos.filter(t => t.dueDate && !isToday(new Date(t.dueDate)) && !isPast(new Date(t.dueDate)) && !t.completed).length,
+    completed: todos.filter(t => t.completed).length,
+  }), [todos]);
+
+  const getFilteredTodos = () => {
+    let filtered = [...todos];
+
+    if (activeView.startsWith("project_")) {
+      const projectId = activeView.replace("project_", "");
+      filtered = filtered.filter(t => t.project === projectId);
+    } else if (activeView === "today") {
+      filtered = filtered.filter(t => t.dueDate && isToday(new Date(t.dueDate)) && !t.completed);
+    } else if (activeView === "upcoming") {
+      filtered = filtered.filter(t => t.dueDate && !isToday(new Date(t.dueDate)) && !isPast(new Date(t.dueDate)) && !t.completed);
+    } else if (activeView === "completed") {
+      filtered = filtered.filter(t => t.completed);
+    } else {
+      filtered = filtered.filter(t => !t.completed);
+    }
+
+    if (search) filtered = filtered.filter(t => t.title.toLowerCase().includes(search.toLowerCase()));
+    if (priorityFilter) filtered = filtered.filter(t => t.priority === priorityFilter);
+    if (categoryFilter) filtered = filtered.filter(t => t.category === categoryFilter);
+
+    filtered.sort((a, b) => {
+      if (sort === "dueDate") {
+        return (a.dueDate ? new Date(a.dueDate).getTime() : Infinity) -
+               (b.dueDate ? new Date(b.dueDate).getTime() : Infinity);
+      }
+      if (sort === "priority") {
+        const o: Record<string, number> = { high: 1, medium: 2, low: 3 };
+        return (o[a.priority] || 4) - (o[b.priority] || 4);
+      }
+      if (sort === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sort === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return 0;
+    });
+
+    return filtered;
+  };
+
+  const toggleComplete = async (id: string, completed: boolean) => {
+    try {
+      await axios.put(`/todos/${id}`, { completed });
+      setTodos(todos.map(t => t._id === id ? { ...t, completed } : t));
+      toast.success(completed ? "Task completed!" : "Task reopened");
+    } catch { toast.error("Failed to update task"); }
+  };
+
+  const deleteTodo = async (id: string) => {
+    if (!window.confirm("Delete this task?")) return;
+    try {
+      await axios.delete(`/todos/${id}`);
+      setTodos(todos.filter(t => t._id !== id));
+      toast.success("Task deleted");
+    } catch { toast.error("Failed to delete task"); }
+  };
+
+  const handleEditTodo = (todo: Todo) => {
+    setEditingTodo({ ...todo });
+    setIsModalOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingTodo(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveTodo = async () => { await fetchTodos(); };
+
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+    setSelectedProject(null);
+    setSearch("");
+    setPriorityFilter("");
+    setCategoryFilter("");
+  };
+
+  const handleProjectSelect = (projectId: string) => {
+    setActiveView(`project_${projectId}`);
+    setSelectedProject(projectId);
+  };
+
+  const filteredTodos = getFilteredTodos();
+
+  const viewTitles: Record<string, { label: string; desc: string }> = {
+    inbox:     { label: "Inbox",     desc: "All active tasks" },
+    today:     { label: "Today",     desc: "Tasks due today" },
+    upcoming:  { label: "Upcoming",  desc: "Future tasks" },
+    completed: { label: "Completed", desc: "Finished tasks" },
+  };
+
+  const viewInfo = viewTitles[activeView] || { label: "Project", desc: "Project tasks" };
+
+  const stats = useMemo(() => {
+    const overdueCount = todos.filter(t =>
+      t.dueDate && isPast(new Date(t.dueDate)) && !isToday(new Date(t.dueDate)) && !t.completed
+    ).length;
+    const rate = todos.length > 0 ? Math.round((todoCounts.completed / todos.length) * 100) : 0;
+    return { overdueCount, rate };
+  }, [todos, todoCounts]);
+
+  return (
+    <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
+      <Navbar />
+
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          activeView={activeView}
+          onViewChange={handleViewChange}
+          onProjectSelect={handleProjectSelect}
+          todoCounts={todoCounts}
+        />
+
+        <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
+          {/* Header */}
+          <div className="px-6 pt-5 pb-4 border-b border-zinc-800 bg-zinc-900/40">
+            {/* Stats bar */}
+            <div className="flex items-center gap-4 mb-4 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                <span className="text-zinc-500">{todos.length} total</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                <span className="text-zinc-500">{todoCounts.completed} done</span>
+              </div>
+              {stats.overdueCount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-pulse" />
+                  <span className="text-red-400 font-semibold">{stats.overdueCount} overdue</span>
+                </div>
+              )}
+              {todos.length > 0 && (
+                <div className="flex items-center gap-2 ml-auto">
+                  <div className="w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                      style={{ width: `${stats.rate}%` }}
+                    />
+                  </div>
+                  <span className="text-zinc-500 tabular-nums">{stats.rate}%</span>
+                </div>
+              )}
+            </div>
+
+            {/* Title + Add */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  {filteredTodos.length} task{filteredTodos.length !== 1 ? "s" : ""}
+                  {" · "}{viewInfo.desc}
+                </p>
+              </div>
+
+              <button
+                onClick={handleAddNew}
+                className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-95"
+              >
+                <PlusIcon />
+                New Task
+              </button>
+            </div>
+
+            <SearchFilter
+              onSearch={setSearch}
+              onFilterPriority={setPriorityFilter}
+              onFilterCategory={setCategoryFilter}
+              onSort={setSort}
+              totalTodos={todos.length}
+            />
+          </div>
+
+          {/* Task List */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center h-full gap-3">
+                <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
+                <p className="text-zinc-600 text-sm">Loading...</p>
+              </div>
+            ) : filteredTodos.length > 0 ? (
+              <div className="space-y-2 max-w-3xl">
+                {filteredTodos.map(todo => (
+                  <TodoItem
+                    key={todo._id}
+                    todo={todo}
+                    onEdit={handleEditTodo}
+                    onDelete={deleteTodo}
+                    onToggle={toggleComplete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect x="4" y="6" width="20" height="18" rx="3" stroke="#52525b" strokeWidth="1.5" />
+                    <path d="M9 14h10M9 18h7" stroke="#52525b" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M9 6V4M19 6V4" stroke="#52525b" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className="text-zinc-400 font-semibold">
+                    {search ? "No tasks match your search" : activeView === "completed" ? "No completed tasks" : "All clear"}
+                  </p>
+                  <p className="text-zinc-600 text-sm mt-1">
+                    {search ? "Try a different search term" : activeView !== "completed" ? "Add a task to get started" : "Complete some tasks first"}
+                  </p>
+                </div>
+                {!search && activeView !== "completed" && (
+                  <button
+                    onClick={handleAddNew}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                  >
+                    <PlusIcon />
+                    Add Task
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <TodoModal
+        isOpen={isModalOpen}
+        todo={editingTodo}
+        onClose={() => { setIsModalOpen(false); setEditingTodo(null); }}
+        onSave={handleSaveTodo}
+        defaultProject={selectedProject}
+      />
+    </div>
+  );
+}
