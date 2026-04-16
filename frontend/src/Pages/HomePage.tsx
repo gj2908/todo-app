@@ -310,7 +310,7 @@ export default function HomePage() {
   };
 
   const viewInfo = viewTitles[activeView] || { label: "Project", desc: "Project tasks" };
-  const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView);
+  const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || activeView.startsWith("project_");
 
   const stats = useMemo(() => {
     const overdueCount = todos.filter(t =>
@@ -413,7 +413,7 @@ export default function HomePage() {
                 <p className="text-zinc-600 text-sm">Loading...</p>
               </div>
             ) : activeView === "calendar" ? (
-              <div className="max-w-5xl">
+              <div className="w-full">
                 <CalendarPanel todos={todos} />
               </div>
             ) : activeView === "reminders" ? (
