@@ -17,8 +17,20 @@
       "dest": "api/server.js"
     },
     {
-      "src": "/(.*)",
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/logo.*",
+      "dest": "/logo"
+    },
+    {
+      "src": "/(.*\\..*)",
       "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

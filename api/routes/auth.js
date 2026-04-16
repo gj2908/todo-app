@@ -93,4 +93,70 @@ router.get("/profile", auth, async (req, res) => {
   res.json(user);
 });
 
+// Forgot Password - Generate reset token
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email required" });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Don't reveal if email exists for security
+      return res.json({ message: "If email exists, reset link sent" });
+    }
+
+    // Generate reset token (valid for 1 hour)
+    const resetToken = jwt.sign(
+      { id: user._id, email: user.email, type: "reset" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // In production, send email with reset link
+    // For now, log it or send via your email service
+    const resetLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${resetToken}`;
+    console.log(`Reset link for ${email}: ${resetLink}`);
+
+    // TODO: Send email with resetLink
+    // const emailResponse = await sendEmail(email, "Password Reset", resetLink);
+
+    res.json({ message: "Reset link sent to email" });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Failed to process request" });
+  }
+});
+
+// Reset Password - Validate token and update password
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    // Verify reset token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded.type !== "reset") {
+        return res.status(400).json({ message: "Invalid token" });
+      }
+    } catch (err) {
+      return res.status(400).json({ message: "Reset link expired or invalid" });
+    }
+
+    // Update user password
+    const hashed = await bcrypt.hash(password, 10);
+    await User.findByIdAndUpdate(decoded.id, { password: hashed });
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Failed to reset password" });
+  }
+});
+
 module.exports = router;
