@@ -21,13 +21,6 @@ export default function ProfilePage() {
     } catch { navigate("/login"); }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    toast.success("Signed out");
-    navigate("/login");
-  };
-
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPassword || newPassword.length < 6) { toast.error("Password must be at least 6 characters"); return; }
@@ -136,18 +129,6 @@ export default function ProfilePage() {
                 </button>
               </form>
             )}
-          </div>
-
-          {/* Danger zone */}
-          <div className="bg-zinc-900 border border-red-500/20 rounded-2xl p-6">
-            <h3 className="text-sm font-bold text-zinc-300 mb-1">Sign Out</h3>
-            <p className="text-xs text-zinc-500 mb-4">You'll need to sign in again to access your workspace.</p>
-            <button
-              onClick={handleLogout}
-              className="w-full py-2.5 rounded-lg font-bold text-sm text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition"
-            >
-              Sign out
-            </button>
           </div>
         </div>
       </div>

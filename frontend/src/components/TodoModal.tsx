@@ -50,6 +50,9 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
   const [projects, setProjects] = useState<Project[]>([]);
   const [formData, setFormData] = useState(() => getBlankForm(todo, defaultProject));
   const [saving, setSaving] = useState(false);
+  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [creatingProject, setCreatingProject] = useState(false);
 
   // KEY FIX: Reset form whenever `todo` changes (fixes edit not populating)
   useEffect(() => {
@@ -71,6 +74,24 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
   const set = (field: string, value: string) =>
     setFormData(prev => ({ ...prev, [field]: value }));
+
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) { toast.error("Project name required!"); return; }
+    setCreatingProject(true);
+    try {
+      const res = await axios.post("/projects", {
+        name: newProjectName.trim(),
+        icon: "◆",
+        color: "#f59e0b",
+      });
+      setProjects([res.data, ...projects]);
+      set("project", res.data._id);
+      setNewProjectName("");
+      setShowNewProjectForm(false);
+      toast.success("Project created!");
+    } catch { toast.error("Failed to create project"); }
+    finally { setCreatingProject(false); }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,18 +246,58 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
                 Project
               </label>
-              <select
-                value={formData.project}
-                onChange={e => set("project", e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
-              >
-                <option value="">No Project</option>
-                {projects.map(p => (
-                  <option key={p._id} value={p._id}>
-                    ◆ {p.name}
-                  </option>
-                ))}
-              </select>
+              {!showNewProjectForm ? (
+                <div className="flex gap-2">
+                  <select
+                    value={formData.project}
+                    onChange={e => set("project", e.target.value)}
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+                  >
+                    <option value="">No Project</option>
+                    {projects.map(p => (
+                      <option key={p._id} value={p._id}>
+                        ◆ {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewProjectForm(true)}
+                    className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded-lg transition"
+                    title="Create new project"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={newProjectName}
+                    onChange={e => setNewProjectName(e.target.value)}
+                    placeholder="Project name..."
+                    autoFocus
+                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCreateProject}
+                      disabled={creatingProject}
+                      className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg transition disabled:opacity-50"
+                    >
+                      {creatingProject ? "Creating..." : "Create"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowNewProjectForm(false); setNewProjectName(""); }}
+                      className="flex-1 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded-lg transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

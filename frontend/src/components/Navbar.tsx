@@ -6,6 +6,7 @@ export default function Navbar() {
   const location = useLocation();
   const [userEmail, setUserEmail] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -26,6 +27,18 @@ export default function Navbar() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const menu = document.getElementById("profile-menu");
+      const button = document.getElementById("profile-button");
+      if (menu && !menu.contains(e.target as Node) && !button?.contains(e.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
@@ -35,6 +48,8 @@ export default function Navbar() {
     d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const formatDate = (d: Date) =>
     d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+
+  const userInitials = userEmail.split("@")[0].slice(0, 2).toUpperCase() || "U";
 
   return (
     <nav className="navbar-root border-b border-zinc-800 bg-zinc-950 text-zinc-100">
@@ -69,30 +84,44 @@ export default function Navbar() {
 
         {/* Right */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700">
-            <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-xs font-bold text-black">
-              {userEmail.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-sm text-zinc-300 max-w-[140px] truncate">{userEmail}</span>
+          <div className="relative">
+            <button
+              id="profile-button"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="w-9 h-9 rounded-lg bg-amber-500 hover:bg-amber-400 flex items-center justify-center text-sm font-bold text-black transition cursor-pointer"
+              title={userEmail}
+            >
+              {userInitials}
+            </button>
+
+            {/* Profile dropdown menu */}
+            {showProfileMenu && (
+              <div
+                id="profile-menu"
+                className="absolute right-0 top-full mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg overflow-hidden z-50"
+              >
+                <div className="px-4 py-3 border-b border-zinc-800">
+                  <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Account</p>
+                  <p className="text-sm font-semibold text-zinc-200 truncate mt-1">{userEmail}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    navigate("/profile");
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-zinc-300 hover:text-amber-400 hover:bg-zinc-800 transition"
+                >
+                  Profile Settings
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 border-t border-zinc-800 transition"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
           </div>
-
-          <button
-            onClick={() => navigate("/profile")}
-            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-              location.pathname === "/profile"
-                ? "bg-zinc-700 text-white"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
-            }`}
-          >
-            Profile
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20"
-          >
-            Sign out
-          </button>
         </div>
       </div>
     </nav>

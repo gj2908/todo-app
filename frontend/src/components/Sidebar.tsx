@@ -224,12 +224,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
 
       {/* Footer */}
       <div className="p-3 border-t border-zinc-800">
-        <button
-          onClick={() => navigate("/profile")}
-          className="w-full px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition text-left"
-        >
-          ⚙ Settings & Profile
-        </button>
+        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
       </div>
     </div>
   );

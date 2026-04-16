@@ -6,6 +6,7 @@ import Sidebar from "../components/Sidebar";
 import TodoItem from "../components/TodoItem";
 import TodoModal from "../components/TodoModal";
 import SearchFilter from "../components/SearchFilter";
+import CalendarModal from "../components/CalendarModal";
 import { isToday, isPast } from "date-fns";
 
 interface Todo {
@@ -39,9 +40,17 @@ const CloseIcon = () => (
   </svg>
 );
 
+interface Project {
+  _id: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
 export default function HomePage() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [activeView, setActiveView] = useState("inbox");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activeView, setActiveView] = useState(() => localStorage.getItem("activeView") || "inbox");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,6 +60,8 @@ export default function HomePage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sort, setSort] = useState("dueDate");
   const [loading, setLoading] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const fetchTodos = async () => {
     try {
@@ -64,7 +75,23 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => { fetchTodos(); }, []);
+  const fetchProjects = async () => {
+    try {
+      const res = await axios.get("/projects");
+      setProjects(res.data);
+    } catch {
+      console.error("Failed to fetch projects");
+    }
+  };
+
+  useEffect(() => { 
+    fetchTodos();
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("activeView", activeView);
+  }, [activeView]);
 
   useEffect(() => {
     const onResize = () => {
@@ -160,6 +187,11 @@ export default function HomePage() {
     setActiveView(`project_${projectId}`);
     setSelectedProject(projectId);
     setSidebarOpen(false);
+  };
+
+  const getProjectName = (projectId: string | undefined) => {
+    if (!projectId) return null;
+    return projects.find(p => p._id === projectId)?.name || null;
   };
 
   const filteredTodos = getFilteredTodos();
@@ -297,6 +329,7 @@ export default function HomePage() {
                   <TodoItem
                     key={todo._id}
                     todo={todo}
+                    projectName={getProjectName(todo.project)}
                     onEdit={handleEditTodo}
                     onDelete={deleteTodo}
                     onToggle={toggleComplete}
@@ -341,6 +374,13 @@ export default function HomePage() {
         onClose={() => { setIsModalOpen(false); setEditingTodo(null); }}
         onSave={handleSaveTodo}
         defaultProject={selectedProject}
+      />
+
+      <CalendarModal
+        isOpen={showCalendar}
+        selectedDate={calendarDate}
+        onSelect={(date) => setCalendarDate(date)}
+        onClose={() => setShowCalendar(false)}
       />
     </div>
   );
