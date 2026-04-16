@@ -66,6 +66,18 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const document = await Document.findOne({ _id: req.params.id, user: req.user });
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+    res.json(document);
+  } catch (_error) {
+    res.status(500).json({ message: "Error fetching document" });
+  }
+});
+
 router.post("/upload", auth, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
@@ -102,6 +114,29 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error("Document upload error:", error?.message || error);
     res.status(500).json({ message: "Error uploading document" });
+  }
+});
+
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const title = req.body?.title?.trim();
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    const document = await Document.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { title },
+      { new: true }
+    );
+
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    res.json(document);
+  } catch (_error) {
+    res.status(500).json({ message: "Error updating document" });
   }
 });
 

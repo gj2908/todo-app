@@ -25,6 +25,9 @@ export default function DocumentVault() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchDocuments = async () => {
     try {
@@ -77,6 +80,35 @@ export default function DocumentVault() {
       toast.success("Document deleted");
     } catch {
       toast.error("Failed to delete document");
+    }
+  };
+
+  const startEdit = (doc: VaultDocument) => {
+    setEditingId(doc._id);
+    setEditTitle(doc.title);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+  };
+
+  const handleUpdate = async (id: string) => {
+    if (!editTitle.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+
+    try {
+      setSavingEdit(true);
+      const res = await axios.put(`/documents/${id}`, { title: editTitle.trim() });
+      setDocuments((prev) => prev.map((d) => (d._id === id ? res.data : d)));
+      toast.success("Document updated");
+      cancelEdit();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to update document");
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -133,7 +165,30 @@ export default function DocumentVault() {
             {documents.map((doc) => (
               <div key={doc._id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5">
                 <div className="min-w-0">
-                  <p className="text-sm text-zinc-100 truncate">{doc.title}</p>
+                  {editingId === doc._id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:border-amber-500"
+                      />
+                      <button
+                        onClick={() => handleUpdate(doc._id)}
+                        disabled={savingEdit}
+                        className="rounded-md bg-amber-500 px-2 py-1 text-xs font-bold text-black disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="rounded-md bg-zinc-800 px-2 py-1 text-xs text-zinc-300"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-zinc-100 truncate">{doc.title}</p>
+                  )}
                   <p className="text-xs text-zinc-500 truncate">
                     {doc.fileType.toUpperCase()} • {formatBytes(doc.bytes)} • {new Date(doc.createdAt).toLocaleDateString()}
                   </p>
@@ -147,6 +202,12 @@ export default function DocumentVault() {
                   >
                     Open
                   </a>
+                  <button
+                    onClick={() => startEdit(doc)}
+                    className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(doc._id)}
                     className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
