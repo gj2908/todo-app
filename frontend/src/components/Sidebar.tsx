@@ -142,7 +142,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
     <div className="sidebar w-72 sm:w-64 lg:w-60 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0">
       {/* Views */}
       <div className="p-3 border-b border-zinc-800">
-        <p className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-2">Views</p>
+        <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-2 mb-2">Views</p>
         <nav className="space-y-0.5">
           {menuItems.map(({ id, label, Icon, key }) => {
             const isActive = activeView === id;
@@ -151,7 +151,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
               <button
                 key={id}
                 onClick={() => onViewChange(id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all group ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-semibold transition-all group ${
                   isActive
                     ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
                     : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
@@ -162,7 +162,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
                   {label}
                 </span>
                 {count > 0 && (
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
+                  <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                     isActive ? "bg-amber-500/25 text-amber-400" : "bg-zinc-700 text-zinc-400"
                   }`}>
                     {count}
@@ -177,7 +177,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
       {/* Projects */}
       <div className="flex-1 p-3 overflow-y-auto">
         <div className="flex items-center justify-between px-2 mb-2">
-          <p className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Projects</p>
+          <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase">Projects</p>
           <button
             onClick={() => setShowNewProject(!showNewProject)}
             className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
@@ -218,7 +218,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
 
         <div className="space-y-0.5">
           {projects.length === 0 && (
-            <p className="text-xs text-zinc-600 px-2 py-3 text-center">No projects yet</p>
+            <p className="text-sm text-zinc-500 px-2 py-3 text-center font-medium">No projects yet</p>
           )}
           {projects.map(project => {
             const isActive = activeView === `project_${project._id}`;
@@ -232,7 +232,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
                     : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
                 }`}
               >
-                <span className="flex items-center gap-2 text-sm font-medium min-w-0">
+                <span className="flex items-center gap-2 text-base font-semibold min-w-0">
                   <span className="text-amber-500 text-xs">◆</span>
                   <span className="truncate">{project.name}</span>
                 </span>
@@ -250,7 +250,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
 
       {/* Footer */}
       <div className="p-3 border-t border-zinc-800">
-        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
+        <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
       </div>
     </div>
   );

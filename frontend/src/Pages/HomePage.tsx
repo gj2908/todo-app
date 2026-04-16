@@ -363,7 +363,7 @@ export default function HomePage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
           <div className="flex-1 overflow-y-auto">
             <div className="px-4 sm:px-6 pt-4 sm:pt-5">
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
                   <span className="text-zinc-500">{todos.length} total</span>
@@ -386,13 +386,13 @@ export default function HomePage() {
                         style={{ width: `${stats.rate}%` }}
                       />
                     </div>
-                    <span className="text-zinc-500 tabular-nums">{stats.rate}%</span>
+                    <span className="text-zinc-500 tabular-nums text-base font-bold">{stats.rate}%</span>
                   </div>
                 )}
               </div>
 
               <div className="mt-3 mb-4">
-                <h2 className="text-xl sm:text-2xl font-bold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
               </div>
 
               {activeView !== "calendar" && (

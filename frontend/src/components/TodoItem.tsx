@@ -74,7 +74,7 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
-          <h3 className={`text-xs sm:text-[13px] font-semibold leading-snug ${todo.completed ? "line-through text-zinc-500" : "text-zinc-100"}`}>
+          <h3 className={`text-sm sm:text-base font-bold leading-snug ${todo.completed ? "line-through text-zinc-500" : "text-zinc-100"}`}>
             {todo.title}
           </h3>
 
@@ -82,14 +82,14 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
           <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
             <button
               onClick={() => onEdit(todo)}
-              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-[10px] font-medium text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all"
             >
               <EditIcon />
               Edit
             </button>
             <button
               onClick={() => onDelete(todo._id)}
-              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-[10px] font-medium text-zinc-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-zinc-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
             >
               <DeleteIcon />
             </button>
@@ -97,41 +97,41 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
         </div>
 
         {todo.description && (
-          <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed line-clamp-2">{todo.description}</p>
+          <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed font-medium line-clamp-2">{todo.description}</p>
         )}
 
         {/* Tags row */}
         <div className="flex flex-wrap items-center gap-1 mt-1">
           {/* Project name */}
           {projectName && (
-            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded border bg-amber-500/10 text-amber-400 border-amber-500/30">
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded border bg-amber-500/10 text-amber-400 border-amber-500/30">
               ◆ {projectName}
             </span>
           )}
 
           {/* Priority */}
-          <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${pc.badge}`}>
+          <span className={`inline-flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${pc.badge}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${pc.dot}`} />
             {todo.priority}
           </span>
 
           {/* Category */}
           {todo.category && todo.category !== "general" && (
-            <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider ${categoryColors[todo.category] || categoryColors.general}`}>
+            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded border uppercase tracking-wider ${categoryColors[todo.category] || categoryColors.general}`}>
               {todo.category}
             </span>
           )}
 
           {/* Due date */}
           {dateInfo && (
-            <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded border ${dateInfo.cls}`}>
+            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded border ${dateInfo.cls}`}>
               ⏰ {dateInfo.label}
             </span>
           )}
 
           {/* Tags */}
           {todo.tags?.map((tag: string, idx: number) => (
-            <span key={idx} className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-400">
+            <span key={idx} className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-400">
               #{tag}
             </span>
           ))}

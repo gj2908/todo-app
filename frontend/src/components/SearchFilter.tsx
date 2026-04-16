@@ -78,7 +78,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={e => handleSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
+            className="w-full pl-9 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-base font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
           />
           {searchQuery && (
             <button
@@ -92,7 +92,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center justify-center sm:justify-start gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+          className={`flex items-center justify-center sm:justify-start gap-2 px-3 py-2.5 rounded-lg text-base font-semibold border transition-all ${
             showFilters || hasActiveFilters
               ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
               : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
@@ -113,13 +113,13 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
         <div className="p-3 sm:p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl space-y-4">
           {/* Priority pills */}
           <div>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Priority</p>
+            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Priority</p>
             <div className="flex flex-wrap gap-2">
               {priorities.map(p => (
                 <button
                   key={p.value}
                   onClick={() => handlePriority(p.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${
                     activePriority === p.value
                       ? p.color
                       : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
@@ -131,7 +131,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
               {activePriority && (
                 <button
                   onClick={() => handlePriority("")}
-                  className="px-2 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-300 transition"
+                  className="px-2 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-300 transition"
                 >
                   Clear
                 </button>
@@ -141,13 +141,13 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
           {/* Category */}
           <div>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Category</p>
+            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Category</p>
             <div className="flex flex-wrap gap-2">
               {["work", "personal", "shopping", "health", "general"].map(cat => (
                 <button
                   key={cat}
                   onClick={() => handleCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all capitalize ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all capitalize ${
                     activeCategory === cat
                       ? "bg-zinc-600 text-zinc-100 border-zinc-500"
                       : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
@@ -161,13 +161,13 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
           {/* Sort */}
           <div>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Sort by</p>
+            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Sort by</p>
             <div className="flex flex-wrap gap-2">
               {sorts.map(s => (
                 <button
                   key={s.value}
                   onClick={() => handleSort(s.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                     activeSort === s.value
                       ? "bg-zinc-600 text-zinc-100 border-zinc-500"
                       : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
