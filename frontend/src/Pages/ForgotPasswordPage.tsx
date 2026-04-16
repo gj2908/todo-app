@@ -7,7 +7,6 @@ export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const { token } = useParams<{ token?: string }>();
   const [email, setEmail] = useState("");
-  const [generatedLink, setGeneratedLink] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +19,6 @@ export default function ForgotPasswordPage() {
     try {
       setLoading(true);
       const res = await axios.post("/auth/forgot-password", { email });
-      setGeneratedLink(res.data?.resetLink || "");
       toast.success(res.data?.message || "Password reset link sent!");
       setEmail("");
     } catch (err: any) {
@@ -107,18 +105,6 @@ export default function ForgotPasswordPage() {
                     </span>
                   ) : "Send reset link"}
                 </button>
-
-                {generatedLink && (
-                  <div className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10">
-                    <p className="text-xs text-amber-300 font-semibold mb-1">Reset link generated:</p>
-                    <a
-                      href={generatedLink}
-                      className="text-xs break-all text-amber-400 hover:text-amber-300 underline"
-                    >
-                      {generatedLink}
-                    </a>
-                  </div>
-                )}
               </form>
             </>
           ) : (

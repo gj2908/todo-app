@@ -23,14 +23,19 @@ const sendResetEmail = async (toEmail, resetLink) => {
   }
 
   const transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT || 587),
-    secure: SMTP_SECURE === "true",
+    host: SMTP_HOST || "smtp.zoho.com",
+    port: Number(SMTP_PORT || (SMTP_SECURE === "true" ? 465 : 587)),
+    secure: SMTP_SECURE === "true" || SMTP_SECURE === "1",
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
+
+  await transporter.verify();
 
   await transporter.sendMail({
     from: SMTP_FROM || SMTP_USER,
@@ -166,6 +171,7 @@ router.post("/forgot-password", async (req, res) => {
       process.env.FRONTEND_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const resetLink = `${appBaseUrl}/reset-password/${resetToken}`;
+    const isProduction = process.env.NODE_ENV === "production";
 
     try {
       const mailResult = await sendResetEmail(email, resetLink);
@@ -173,16 +179,29 @@ router.post("/forgot-password", async (req, res) => {
         return res.json({ message: "Reset link sent to email" });
       }
 
-      // SMTP not configured: return the link so flow still works.
+      if (isProduction) {
+        return res.status(500).json({ message: "Unable to send reset email right now. Please try again." });
+      }
+
+      // Dev fallback only: return link for local testing.
       return res.json({
-        message: "Email service not configured yet. Use the generated reset link.",
+        message: "Email service not configured. Using local fallback reset link.",
         resetLink,
       });
     } catch (mailError) {
-      console.error("Email send error:", mailError);
-      // If email fails, still return the link to avoid blocking the user.
+      console.error("Email send error:", {
+        message: mailError?.message,
+        code: mailError?.code,
+        response: mailError?.response,
+      });
+
+      if (isProduction) {
+        return res.status(500).json({ message: "Unable to send reset email right now. Please try again." });
+      }
+
+      // Dev fallback only: return link for local testing.
       return res.json({
-        message: "Could not send email right now. Use the generated reset link.",
+        message: "Email sending failed in local mode. Using fallback reset link.",
         resetLink,
       });
     }
