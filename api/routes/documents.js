@@ -6,6 +6,15 @@ const streamifier = require("streamifier");
 const { v2: cloudinary } = require("cloudinary");
 const Document = require("../models/Document");
 
+const sanitizeBaseName = (value) =>
+  value
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[^a-zA-Z0-9-_ ]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .toLowerCase()
+    .slice(0, 80);
+
 const auth = (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -90,19 +99,29 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     const resourceType = isPdf ? "raw" : "image";
     const fileType = isPdf ? "pdf" : "image";
 
+    const safeOriginalName = (req.file.originalname || "document")
+      .replace(/[\\/]/g, "_")
+      .trim();
+    const requestedTitle = req.body?.title?.trim() || "";
+    const baseName = sanitizeBaseName(requestedTitle || safeOriginalName) || "document";
+    const generatedPublicId = `${baseName}-${Date.now()}`;
+
     const uploaded = await uploadBufferToCloudinary(req.file.buffer, {
       folder: "taskflow/documents",
       resource_type: resourceType,
-      use_filename: true,
-      unique_filename: true,
+      public_id: generatedPublicId,
+      use_filename: false,
+      unique_filename: false,
+      overwrite: false,
+      filename_override: safeOriginalName,
     });
 
-    const title = req.body?.title?.trim() || req.file.originalname;
+    const title = requestedTitle || safeOriginalName;
 
     const document = await Document.create({
       user: req.user,
       title,
-      originalName: req.file.originalname,
+      originalName: safeOriginalName,
       fileType,
       resourceType,
       url: uploaded.secure_url,
