@@ -1,6 +1,6 @@
 {
-  "short_name": "Todo App",
-  "name": "Advanced Todo App - Task Management",
+  "short_name": "Taskflow",
+  "name": "Taskflow - Smart Todo and Project Planner",
   "icons": [
     {
       "src": "favicon_io/favicon.ico",
@@ -27,7 +27,7 @@
   "start_url": ".",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#2563eb",
-  "background_color": "#ffffff",
+  "theme_color": "#f59e0b",
+  "background_color": "#09090b",
   "orientation": "portrait-primary"
 }
