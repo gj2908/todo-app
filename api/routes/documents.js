@@ -128,6 +128,18 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     const resourceType = isPdf ? "raw" : "image";
     const fileType = isPdf ? "pdf" : "image";
 
+    // Extract extension from original filename
+    const fileExtension = (req.file.originalname || "").split(".").pop()?.toLowerCase() || (isPdf ? "pdf" : "jpg");
+    
+    // Map MIME types to format codes
+    const mimeToFormat = {
+      "image/png": "png",
+      "image/jpeg": "jpg",
+      "image/jpg": "jpg",
+      "application/pdf": "pdf",
+    };
+    const format = mimeToFormat[req.file.mimetype] || fileExtension;
+
     const safeOriginalName = (req.file.originalname || "document")
       .replace(/[\\/]/g, "_")
       .trim();
@@ -146,7 +158,8 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     });
 
     const title = requestedTitle || safeOriginalName;
-    const secureUrl = isPdf ? `${uploaded.secure_url.replace(/\/upload\//g, "/upload/f_pdf/")}.pdf` : uploaded.secure_url;
+    // Add format transformation and extension to URL for all file types
+    const secureUrl = `${uploaded.secure_url.replace(/\/upload\//g, `/upload/f_${format}/`)}.${format}`;
 
     const document = await Document.create({
       user: req.user,
