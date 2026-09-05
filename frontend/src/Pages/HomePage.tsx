@@ -9,6 +9,7 @@ import TodoModal from "../components/TodoModal";
 import SearchFilter from "../components/SearchFilter";
 import CalendarPanel from "../components/CalendarPanel";
 import StatsStrip from "../components/StatsStrip";
+import BulkActionToolbar from "../components/BulkActionToolbar";
 import DashboardView from "../components/DashboardView";
 import DocumentVault from "../components/DocumentVault";
 import PersonalReminderModal from "../components/PersonalReminderModal";
@@ -77,6 +78,8 @@ export default function HomePage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sort, setSort] = useState("dueDate");
   const [loading, setLoading] = useState(true);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showPersonalReminderModal, setShowPersonalReminderModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Todo | null>(null);
   const [personalReminders, setPersonalReminders] = useState<PersonalReminder[]>(() => {
@@ -262,6 +265,73 @@ export default function HomePage() {
     } catch { toast.error("Failed to delete task"); }
   };
 
+  const toggleSelectMode = () => {
+    setSelectMode((v) => !v);
+    setSelectedIds([]);
+  };
+
+  const toggleSelectTodo = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+    setSelectMode(false);
+  };
+
+  const handleBulkComplete = async () => {
+    try {
+      await axios.patch("/todos/bulk", { ids: selectedIds, update: { completed: true } });
+      toast.success(`${selectedIds.length} task(s) completed`);
+      clearSelection();
+      await fetchTodos();
+    } catch { toast.error("Failed to update tasks"); }
+  };
+
+  const handleBulkMove = async (subjectId: string) => {
+    try {
+      await axios.patch("/todos/bulk", { ids: selectedIds, update: { subject: subjectId } });
+      toast.success(`${selectedIds.length} task(s) moved`);
+      clearSelection();
+      await fetchTodos();
+    } catch { toast.error("Failed to move tasks"); }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      await axios.delete("/todos/bulk", { data: { ids: selectedIds } });
+      toast.success(`${selectedIds.length} task(s) moved to trash`);
+      clearSelection();
+      await fetchTodos();
+    } catch { toast.error("Failed to delete tasks"); }
+  };
+
+  const handleBulkExport = async () => {
+    try {
+      const res = await axios.get(`/todos/export.ics?ids=${selectedIds.join(",")}`, { responseType: "blob" });
+      downloadIcsBlob(res.data);
+    } catch { toast.error("Failed to export tasks"); }
+  };
+
+  const handleExportAll = async () => {
+    try {
+      const res = await axios.get("/todos/export.ics", { responseType: "blob" });
+      downloadIcsBlob(res.data);
+    } catch { toast.error("Failed to export tasks"); }
+  };
+
+  const downloadIcsBlob = (data: BlobPart) => {
+    const blob = new Blob([data], { type: "text/calendar" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "taskflow.ics";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
   const handleEditTodo = (todo: Todo) => {
     setEditingTodo({ ...todo });
     setIsModalOpen(true);
@@ -439,14 +509,28 @@ export default function HomePage() {
               )}
 
               {activeView !== "calendar" && !nonTaskViews.includes(activeView) && !isSubjectNotesView && (
-                <div className={activeView === "reminders" ? "max-w-2xl" : ""}>
-                  <SearchFilter
-                    onSearch={setSearch}
-                    onFilterPriority={setPriorityFilter}
-                    onFilterCategory={setCategoryFilter}
-                    onSort={setSort}
-                    totalTodos={todos.length}
-                  />
+                <div className={`flex items-start gap-2 ${activeView === "reminders" ? "max-w-2xl" : ""}`}>
+                  <div className="flex-1 min-w-0">
+                    <SearchFilter
+                      onSearch={setSearch}
+                      onFilterPriority={setPriorityFilter}
+                      onFilterCategory={setCategoryFilter}
+                      onSort={setSort}
+                      totalTodos={todos.length}
+                    />
+                  </div>
+                  {showCalendarPreview && (
+                    <button
+                      onClick={toggleSelectMode}
+                      className={`shrink-0 rounded-lg px-3 py-2.5 text-sm font-semibold border transition ${
+                        selectMode
+                          ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                          : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+                      }`}
+                    >
+                      {selectMode ? "Done" : "Select"}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -474,6 +558,14 @@ export default function HomePage() {
             ) : activeView === "calendar" ? (
               <div className="w-full space-y-4">
                 <StatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleExportAll}
+                    className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition"
+                  >
+                    Export calendar (.ics)
+                  </button>
+                </div>
                 <CalendarPanel todos={todos} subjects={subjects} />
               </div>
             ) : activeView === "reminders" ? (
@@ -608,6 +700,17 @@ export default function HomePage() {
               <div className="w-full lg:grid lg:grid-cols-[minmax(360px,40%)_minmax(520px,60%)] lg:items-start lg:gap-4">
                 {filteredTodos.length > 0 ? (
                   <div className="space-y-1.5 w-full">
+                    {selectedIds.length > 0 && (
+                      <BulkActionToolbar
+                        count={selectedIds.length}
+                        subjects={subjects}
+                        onComplete={handleBulkComplete}
+                        onMove={handleBulkMove}
+                        onDelete={handleBulkDelete}
+                        onExport={handleBulkExport}
+                        onClear={clearSelection}
+                      />
+                    )}
                     {filteredTodos.map(todo => (
                       <TodoItem
                         key={todo._id}
@@ -618,6 +721,9 @@ export default function HomePage() {
                         onEdit={handleEditTodo}
                         onDelete={requestDeleteTodo}
                         onToggle={toggleComplete}
+                        selectable={selectMode}
+                        selected={selectedIds.includes(todo._id)}
+                        onSelectToggle={toggleSelectTodo}
                       />
                     ))}
                   </div>

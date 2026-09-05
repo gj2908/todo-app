@@ -8,6 +8,9 @@ interface TodoItemProps {
   onEdit: (todo: any) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, completed: boolean) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectToggle?: (id: string) => void;
 }
 
 const EditIcon = () => (
@@ -39,7 +42,7 @@ const categoryColors: Record<string, string> = {
   general:  "bg-zinc-700 text-zinc-400",
 };
 
-export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon, onEdit, onDelete, onToggle }: TodoItemProps) {
+export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon, onEdit, onDelete, onToggle, selectable, selected, onSelectToggle }: TodoItemProps) {
   const pc = priorityConfig[todo.priority] || priorityConfig.medium;
 
   const getDateInfo = (dateStr: string) => {
@@ -58,6 +61,16 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
         todo.completed ? "opacity-50" : ""
       }`}
     >
+      {selectable && (
+        <input
+          type="checkbox"
+          checked={!!selected}
+          onChange={() => onSelectToggle?.(todo._id)}
+          className="mt-1 shrink-0 w-3.5 h-3.5 rounded accent-amber-500"
+          aria-label="Select task"
+        />
+      )}
+
       {/* Checkbox */}
       <button
         onClick={() => onToggle(todo._id, !todo.completed)}

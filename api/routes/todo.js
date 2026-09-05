@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { addDays, addWeeks, addMonths, isAfter } = require("date-fns");
+const { createEvents } = require("ics");
 const { protect } = require("../middleware/auth");
 const Todo = require("../models/Todo");
 const { getAccessibleSubjects } = require("../utils/subjectAccess");
@@ -50,6 +51,105 @@ router.get("/trash", protect, async (req, res) => {
     res.json(todos);
   } catch (error) {
     res.status(500).json({ message: "Error fetching trash" });
+  }
+});
+
+// GET an .ics calendar file of the caller's accessible, dated todos (optionally scoped to ?ids=a,b,c)
+router.get("/export.ics", protect, async (req, res) => {
+  try {
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
+
+    const query = {
+      deletedAt: null,
+      dueDate: { $ne: null },
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
+    };
+    if (req.query.ids) {
+      query._id = { $in: String(req.query.ids).split(",").filter(Boolean) };
+    }
+
+    const todos = await Todo.find(query);
+
+    const { error, value } = createEvents(
+      todos.map((todo) => {
+        const due = new Date(todo.dueDate);
+        return {
+          uid: `${todo._id}@taskflow`,
+          title: todo.title,
+          description: todo.description || undefined,
+          start: [due.getUTCFullYear(), due.getUTCMonth() + 1, due.getUTCDate(), due.getUTCHours(), due.getUTCMinutes()],
+          startInputType: "utc",
+          duration: { minutes: 30 },
+        };
+      })
+    );
+    if (error) throw error;
+
+    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="taskflow.ics"');
+    res.send(value);
+  } catch (error) {
+    res.status(500).json({ message: "Error generating calendar export" });
+  }
+});
+
+// PATCH bulk-update todos the caller can write to
+router.patch("/bulk", protect, async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+    const update = req.body.update || {};
+    if (ids.length === 0) return res.status(400).json({ message: "No todos specified" });
+
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
+
+    const candidates = await Todo.find({
+      _id: { $in: ids },
+      deletedAt: null,
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
+    });
+
+    const writableIds = candidates
+      .filter((todo) => canWrite(roleForTodo(todo, req.user, accessibleSubjects)))
+      .map((todo) => todo._id);
+
+    if (writableIds.length > 0) {
+      await Todo.updateMany({ _id: { $in: writableIds } }, { ...update, updatedAt: new Date() });
+    }
+
+    res.json({ updated: writableIds.length, skipped: ids.length - writableIds.length });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating todos" });
+  }
+});
+
+// DELETE bulk soft-delete (moves to trash) todos the caller can write to
+router.delete("/bulk", protect, async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+    if (ids.length === 0) return res.status(400).json({ message: "No todos specified" });
+
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
+
+    const candidates = await Todo.find({
+      _id: { $in: ids },
+      deletedAt: null,
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
+    });
+
+    const writableIds = candidates
+      .filter((todo) => canWrite(roleForTodo(todo, req.user, accessibleSubjects)))
+      .map((todo) => todo._id);
+
+    if (writableIds.length > 0) {
+      await Todo.updateMany({ _id: { $in: writableIds } }, { deletedAt: new Date() });
+    }
+
+    res.json({ updated: writableIds.length, skipped: ids.length - writableIds.length });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting todos" });
   }
 });
 
