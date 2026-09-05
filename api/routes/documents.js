@@ -128,18 +128,6 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     const resourceType = isPdf ? "raw" : "image";
     const fileType = isPdf ? "pdf" : "image";
 
-    // Extract extension from original filename
-    const fileExtension = (req.file.originalname || "").split(".").pop()?.toLowerCase() || (isPdf ? "pdf" : "jpg");
-    
-    // Map MIME types to format codes
-    const mimeToFormat = {
-      "image/png": "png",
-      "image/jpeg": "jpg",
-      "image/jpg": "jpg",
-      "application/pdf": "pdf",
-    };
-    const format = mimeToFormat[req.file.mimetype] || fileExtension;
-
     const safeOriginalName = (req.file.originalname || "document")
       .replace(/[\\/]/g, "_")
       .trim();
@@ -158,11 +146,10 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     });
 
     const title = requestedTitle || safeOriginalName;
-    // Raw resources (PDFs) don't get a format extension in secure_url by default, so add one.
-    // Image resources already include the correct extension - appending again would double it.
-    const secureUrl = isPdf
-      ? `${uploaded.secure_url.replace(/\/upload\//g, `/upload/f_${format}/`)}.${format}`
-      : uploaded.secure_url;
+    // Cloudinary already returns the correct extension in secure_url: it's
+    // auto-detected for images, and baked into the public_id for raw PDFs
+    // because we pass format: "pdf" at upload time. Appending it again here
+    // used to double it up (e.g. .pdf.pdf / .png.png), breaking delivery.
 
     const document = await Document.create({
       user: req.user,
@@ -170,7 +157,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       originalName: safeOriginalName,
       fileType,
       resourceType,
-      url: secureUrl,
+      url: uploaded.secure_url,
       publicId: uploaded.public_id,
       bytes: uploaded.bytes || req.file.size,
     });
