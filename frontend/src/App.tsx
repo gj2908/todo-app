@@ -5,6 +5,7 @@ import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
 import HomePage from "./Pages/HomePage";
 import ProfilePage from "./Pages/ProfilePage";
 import DocumentViewerPage from "./Pages/DocumentViewerPage";
+import VerifyEmailPage from "./Pages/VerifyEmailPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -26,6 +27,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ForgotPasswordPage />} />
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
         <Route
           path="/home"
           element={<ProtectedRoute element={<HomePage />} path="/home" />}

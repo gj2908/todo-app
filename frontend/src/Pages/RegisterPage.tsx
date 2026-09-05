@@ -34,7 +34,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       await axios.post("/auth/register", { email, password });
-      toast.success("Account created! Please sign in.");
+      toast.success("Account created! Check your email to verify it, then sign in.");
       navigate("/login");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Registration failed");

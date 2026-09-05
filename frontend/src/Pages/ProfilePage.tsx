@@ -4,6 +4,7 @@ import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 import SessionsCard from "../components/SessionsCard";
+import TwoFactorCard from "../components/TwoFactorCard";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(true);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -22,6 +25,24 @@ export default function ProfilePage() {
       setUser(payload);
     } catch { navigate("/login"); }
   }, [navigate]);
+
+  useEffect(() => {
+    axios.get("/auth/profile")
+      .then((res) => setEmailVerified(!!res.data.emailVerified))
+      .catch(() => {});
+  }, []);
+
+  const handleResendVerification = async () => {
+    try {
+      setResending(true);
+      await axios.post("/auth/resend-verification");
+      toast.success("Verification email sent");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to send verification email");
+    } finally {
+      setResending(false);
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,8 +116,23 @@ export default function ProfilePage() {
 
             <div className="space-y-3">
               <div className="p-4 bg-zinc-800 rounded-xl border border-zinc-700">
-                <p className="text-xs font-medium text-zinc-500 mb-1">Email Address</p>
-                <p className="text-sm font-semibold text-zinc-200">{user.email}</p>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-medium text-zinc-500 mb-1">Email Address</p>
+                    <p className="text-sm font-semibold text-zinc-200">{user.email}</p>
+                  </div>
+                  {emailVerified ? (
+                    <span className="text-[11px] font-bold px-2 py-1 rounded bg-green-500/15 text-green-400 whitespace-nowrap">Verified</span>
+                  ) : (
+                    <button
+                      onClick={handleResendVerification}
+                      disabled={resending}
+                      className="text-[11px] font-bold px-2 py-1 rounded bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 transition whitespace-nowrap disabled:opacity-50"
+                    >
+                      {resending ? "Sending..." : "Not verified · Resend"}
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="p-4 bg-zinc-800 rounded-xl border border-zinc-700">
                 <p className="text-xs font-medium text-zinc-500 mb-1">User ID</p>
@@ -152,6 +188,8 @@ export default function ProfilePage() {
               </form>
             )}
           </div>
+
+          <TwoFactorCard />
 
           <SessionsCard />
 

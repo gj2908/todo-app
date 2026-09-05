@@ -177,18 +177,18 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
       <button
         key={id}
         onClick={() => onViewChange(id)}
-        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-semibold transition-all group ${
+        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all group ${
           isActive
             ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
             : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
         }`}
       >
-        <span className="flex items-center gap-2.5">
+        <span className="flex items-center gap-2">
           <Icon />
           {label}
         </span>
         {count > 0 && (
-          <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
             isActive ? "bg-amber-500/25 text-amber-400" : "bg-zinc-700 text-zinc-400"
           }`}>
             {count}
@@ -199,100 +199,103 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
   };
 
   return (
-    <div className="sidebar w-72 sm:w-64 lg:w-60 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0">
-      {/* Views */}
-      <div className="p-3 border-b border-zinc-800">
-        <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-2 mb-2">Views</p>
-        <nav className="space-y-0.5">
-          {viewItems.map(renderMenuItem)}
-        </nav>
-      </div>
-
-      {/* Tools */}
-      <div className="p-3 border-b border-zinc-800">
-        <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-2 mb-2">Tools</p>
-        <nav className="space-y-0.5">
-          {toolItems.map(renderMenuItem)}
-        </nav>
-      </div>
-
-      {/* Projects */}
-      <div className="flex-1 p-3 overflow-y-auto">
-        <div className="flex items-center justify-between px-2 mb-2">
-          <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase">Projects</p>
-          <button
-            onClick={() => setShowNewProject(!showNewProject)}
-            className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
-            title="New project"
-          >
-            <PlusIcon />
-          </button>
+    <div className="sidebar w-64 sm:w-60 lg:w-56 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0 overflow-hidden">
+      {/* Scrollable nav + projects */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {/* Views */}
+        <div className="p-2.5 pt-3">
+          <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>
+          <nav className="space-y-0.5">
+            {viewItems.map(renderMenuItem)}
+          </nav>
         </div>
 
-        {showNewProject && (
-          <div className="mb-3 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2">
-            <input
-              type="text"
-              placeholder="Project name..."
-              value={newProjectName}
-              onChange={e => setNewProjectName(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleCreateProject()}
-              autoFocus
-              className="w-full px-2.5 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-            />
-            <div className="flex gap-1.5">
-              <button
-                onClick={handleCreateProject}
-                disabled={loading}
-                className="flex-1 py-1 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded transition disabled:opacity-50"
-              >
-                Create
-              </button>
-              <button
-                onClick={() => { setShowNewProject(false); setNewProjectName(""); }}
-                className="flex-1 py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Tools */}
+        <div className="p-2.5 pt-1">
+          <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>
+          <nav className="space-y-0.5">
+            {toolItems.map(renderMenuItem)}
+          </nav>
+        </div>
 
-        <div className="space-y-0.5">
-          {projects.length === 0 && (
-            <p className="text-sm text-zinc-500 px-2 py-3 text-center font-medium">No projects yet</p>
-          )}
-          {projects.map(project => {
-            const isActive = activeView === `project_${project._id}`;
-            return (
-              <div
-                key={project._id}
-                onClick={() => onProjectSelect?.(project._id)}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer group transition-all ${
-                  isActive
-                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                }`}
-              >
-                <span className="flex items-center gap-2 text-base font-semibold min-w-0">
-                  <span className="text-amber-500 text-xs">◆</span>
-                  <span className="truncate">{project.name}</span>
-                </span>
+        {/* Projects */}
+        <div className="p-2.5 pt-1">
+          <div className="flex items-center justify-between px-2 mb-1.5">
+            <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase">Projects</p>
+            <button
+              onClick={() => setShowNewProject(!showNewProject)}
+              className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
+              title="New project"
+            >
+              <PlusIcon />
+            </button>
+          </div>
+
+          {showNewProject && (
+            <div className="mb-2 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2">
+              <input
+                type="text"
+                placeholder="Project name..."
+                value={newProjectName}
+                onChange={e => setNewProjectName(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleCreateProject()}
+                autoFocus
+                className="w-full px-2.5 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+              />
+              <div className="flex gap-1.5">
                 <button
-                  onClick={e => { e.stopPropagation(); setDeleteTarget(project); }}
-                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition ml-1 shrink-0"
+                  onClick={handleCreateProject}
+                  disabled={loading}
+                  className="flex-1 py-1 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded transition disabled:opacity-50"
                 >
-                  <TrashIcon />
+                  Create
+                </button>
+                <button
+                  onClick={() => { setShowNewProject(false); setNewProjectName(""); }}
+                  className="flex-1 py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded transition"
+                >
+                  Cancel
                 </button>
               </div>
-            );
-          })}
+            </div>
+          )}
+
+          <div className="space-y-0.5">
+            {projects.length === 0 && (
+              <p className="text-xs text-zinc-500 px-2 py-2.5 text-center font-medium">No projects yet</p>
+            )}
+            {projects.map(project => {
+              const isActive = activeView === `project_${project._id}`;
+              return (
+                <div
+                  key={project._id}
+                  onClick={() => onProjectSelect?.(project._id)}
+                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer group transition-all ${
+                    isActive
+                      ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold min-w-0">
+                    <span className="text-amber-500 text-xs">◆</span>
+                    <span className="truncate">{project.name}</span>
+                  </span>
+                  <button
+                    onClick={e => { e.stopPropagation(); setDeleteTarget(project); }}
+                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition ml-1 shrink-0"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-zinc-800">
-        <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
+      <div className="shrink-0 py-1.5 border-t border-zinc-800">
+        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
       </div>
 
       <ConfirmDialog

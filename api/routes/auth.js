@@ -4,6 +4,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const rateLimit = require("express-rate-limit");
+const crypto = require("crypto");
+const { authenticator } = require("otplib");
+const QRCode = require("qrcode");
 const User = require("../models/User");
 const Session = require("../models/Session");
 const { protect } = require("../middleware/auth");
@@ -30,16 +33,29 @@ const getResetTokenSecret = () => {
   );
 };
 
-const sendResetEmail = async (toEmail, resetLink) => {
-  const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, SMTP_FROM } =
-    process.env;
+const getAppBaseUrl = () =>
+  process.env.FRONTEND_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
-  // No email provider configured, caller should fall back to manual link.
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    return { sent: false, reason: "smtp-not-configured" };
+const sendVerificationEmailForUser = async (user) => {
+  const verifyToken = jwt.sign(
+    { id: user._id, email: user.email, type: "verify" },
+    getResetTokenSecret(),
+    { expiresIn: "24h" },
+  );
+  const verifyLink = `${getAppBaseUrl()}/verify-email/${verifyToken}`;
+  try {
+    await sendVerificationEmail(user.email, verifyLink);
+  } catch (error) {
+    console.error("Verification email send error:", error?.message || error);
   }
+};
 
-  const transporter = nodemailer.createTransport({
+const getTransporter = () => {
+  const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS } = process.env;
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
+
+  return nodemailer.createTransport({
     host: SMTP_HOST || "smtp.zoho.com",
     port: Number(SMTP_PORT || (SMTP_SECURE === "true" ? 465 : 587)),
     secure: SMTP_SECURE === "true" || SMTP_SECURE === "1",
@@ -51,11 +67,24 @@ const sendResetEmail = async (toEmail, resetLink) => {
     greetingTimeout: 10000,
     socketTimeout: 15000,
   });
+};
+
+const sendAppEmail = async ({ to, subject, html }) => {
+  const transporter = getTransporter();
+  if (!transporter) return { sent: false, reason: "smtp-not-configured" };
 
   await transporter.verify();
-
   await transporter.sendMail({
-    from: SMTP_FROM || SMTP_USER,
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject,
+    html,
+  });
+  return { sent: true };
+};
+
+const sendResetEmail = (toEmail, resetLink) =>
+  sendAppEmail({
     to: toEmail,
     subject: "Taskflow Password Reset",
     html: `
@@ -73,8 +102,24 @@ const sendResetEmail = async (toEmail, resetLink) => {
     `,
   });
 
-  return { sent: true };
-};
+const sendVerificationEmail = (toEmail, verifyLink) =>
+  sendAppEmail({
+    to: toEmail,
+    subject: "Verify your Taskflow email",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+        <h2>Confirm your email</h2>
+        <p>Welcome to Taskflow. Confirm this is your email address to finish setting up your account.</p>
+        <p>
+          <a href="${verifyLink}" style="display:inline-block;padding:10px 16px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:700;">
+            Verify Email
+          </a>
+        </p>
+        <p>If you did not create a Taskflow account, you can ignore this email.</p>
+        <p>This link expires in 24 hours.</p>
+      </div>
+    `,
+  });
 
 // Register
 router.post("/register", authLimiter, async (req, res) => {
@@ -94,6 +139,8 @@ router.post("/register", authLimiter, async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ email, password: hashed });
     await user.save();
+
+    sendVerificationEmailForUser(user).catch(() => {});
 
     const jti = await createSession(user._id, req);
     const token = jwt.sign(
@@ -122,6 +169,15 @@ router.post("/login", authLimiter, async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ message: "Invalid password" });
 
+    if (user.twoFactorEnabled) {
+      const tempToken = jwt.sign(
+        { id: user._id, type: "2fa-pending" },
+        process.env.JWT_SECRET,
+        { expiresIn: "5m" },
+      );
+      return res.json({ requires2FA: true, tempToken });
+    }
+
     const jti = await createSession(user._id, req);
     const token = jwt.sign(
       { id: user._id, email: user.email, jti },
@@ -137,6 +193,67 @@ router.post("/login", authLimiter, async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Login failed" });
+  }
+});
+
+// Complete login after a 2FA code (or backup code) is verified
+router.post("/2fa/verify-login", authLimiter, async (req, res) => {
+  try {
+    const { tempToken, code } = req.body || {};
+    if (!tempToken || !code) {
+      return res.status(400).json({ message: "Code is required" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+      if (decoded.type !== "2fa-pending") throw new Error("wrong token type");
+    } catch {
+      return res.status(401).json({ message: "Login session expired, please sign in again" });
+    }
+
+    const user = await User.findById(decoded.id).select("+twoFactorSecret +backupCodes");
+    if (!user || !user.twoFactorEnabled) {
+      return res.status(400).json({ message: "Two-factor authentication is not enabled" });
+    }
+
+    const cleanCode = String(code).trim().replace(/\s+/g, "");
+    let usedBackupCode = false;
+
+    const isValidTotp = authenticator.check(cleanCode, user.twoFactorSecret);
+    if (!isValidTotp) {
+      const codes = user.backupCodes || [];
+      let matchedIndex = -1;
+      for (let i = 0; i < codes.length; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        if (await bcrypt.compare(cleanCode, codes[i])) {
+          matchedIndex = i;
+          break;
+        }
+      }
+      if (matchedIndex === -1) {
+        return res.status(400).json({ message: "Invalid code" });
+      }
+      usedBackupCode = true;
+      user.backupCodes = codes.filter((_, i) => i !== matchedIndex);
+      await user.save();
+    }
+
+    const jti = await createSession(user._id, req);
+    const token = jwt.sign(
+      { id: user._id, email: user.email, jti },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+      usedBackupCode,
+    });
+  } catch (error) {
+    console.error("2FA verify-login error:", error);
+    res.status(500).json({ message: "Failed to verify code" });
   }
 });
 
@@ -218,6 +335,115 @@ router.post("/sessions/revoke-others", protect, async (req, res) => {
   } catch (error) {
     console.error("Revoke other sessions error:", error);
     res.status(500).json({ message: "Failed to sign out other devices" });
+  }
+});
+
+// Begin 2FA setup - generates a new secret and QR code (not enabled yet)
+router.post("/2fa/setup", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.twoFactorEnabled) {
+      return res.status(400).json({ message: "Two-factor authentication is already enabled" });
+    }
+
+    const secret = authenticator.generateSecret();
+    user.twoFactorSecret = secret;
+    await user.save();
+
+    const otpauthUri = authenticator.keyuri(user.email, "Taskflow", secret);
+    const qrCode = await QRCode.toDataURL(otpauthUri);
+
+    res.json({ secret, qrCode });
+  } catch (error) {
+    console.error("2FA setup error:", error);
+    res.status(500).json({ message: "Failed to start two-factor setup" });
+  }
+});
+
+// Confirm setup with a code from the authenticator app - turns 2FA on
+router.post("/2fa/enable", protect, async (req, res) => {
+  try {
+    const { code } = req.body || {};
+    const user = await User.findById(req.user).select("+twoFactorSecret");
+    if (!user?.twoFactorSecret) {
+      return res.status(400).json({ message: "Start setup first" });
+    }
+
+    const isValid = code && authenticator.check(String(code).trim(), user.twoFactorSecret);
+    if (!isValid) {
+      return res.status(400).json({ message: "Incorrect code, please try again" });
+    }
+
+    const backupCodes = Array.from({ length: 8 }, () =>
+      crypto.randomBytes(5).toString("hex")
+    );
+    user.backupCodes = await Promise.all(backupCodes.map((c) => bcrypt.hash(c, 10)));
+    user.twoFactorEnabled = true;
+    await user.save();
+
+    res.json({ message: "Two-factor authentication enabled", backupCodes });
+  } catch (error) {
+    console.error("2FA enable error:", error);
+    res.status(500).json({ message: "Failed to enable two-factor authentication" });
+  }
+});
+
+// Disable 2FA - requires the account password as confirmation
+router.post("/2fa/disable", protect, async (req, res) => {
+  try {
+    const { password } = req.body || {};
+    const user = await User.findById(req.user).select("+twoFactorSecret +backupCodes");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const match = password && (await bcrypt.compare(password, user.password));
+    if (!match) return res.status(400).json({ message: "Incorrect password" });
+
+    user.twoFactorEnabled = false;
+    user.twoFactorSecret = null;
+    user.backupCodes = undefined;
+    await user.save();
+
+    res.json({ message: "Two-factor authentication disabled" });
+  } catch (error) {
+    console.error("2FA disable error:", error);
+    res.status(500).json({ message: "Failed to disable two-factor authentication" });
+  }
+});
+
+// Verify email - validates the link sent at registration
+router.post("/verify-email/:token", async (req, res) => {
+  try {
+    let decoded;
+    try {
+      decoded = jwt.verify(req.params.token, getResetTokenSecret());
+      if (decoded.type !== "verify") throw new Error("wrong token type");
+    } catch {
+      return res.status(400).json({ message: "Verification link expired or invalid" });
+    }
+
+    await User.findByIdAndUpdate(decoded.id, { emailVerified: true });
+    res.json({ message: "Email verified" });
+  } catch (error) {
+    console.error("Verify email error:", error);
+    res.status(500).json({ message: "Failed to verify email" });
+  }
+});
+
+// Resend the verification email
+router.post("/resend-verification", protect, authLimiter, async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.emailVerified) {
+      return res.json({ message: "Email already verified" });
+    }
+
+    await sendVerificationEmailForUser(user);
+    res.json({ message: "Verification email sent" });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    res.status(500).json({ message: "Failed to send verification email" });
   }
 });
 

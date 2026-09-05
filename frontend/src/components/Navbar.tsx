@@ -79,7 +79,7 @@ export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menu
 
   return (
     <nav className="navbar-root border-b border-zinc-800 bg-zinc-950 text-zinc-100">
-      <div className="flex items-center justify-between px-3 sm:px-5 py-3 gap-2">
+      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 gap-2">
         {/* Logo */}
         <div className="flex items-center gap-2 sm:gap-3">
           {onMenuClick && (
