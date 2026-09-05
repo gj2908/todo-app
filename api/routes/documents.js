@@ -145,7 +145,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
       ...(isPdf && { format: "pdf" }),
     });
 
-    const title = requestedTitle || safeOriginalName;
+    const title = requestedTitle || safeOriginalName.replace(/\.[^/.]+$/, "") || safeOriginalName;
     // Cloudinary already returns the correct extension in secure_url: it's
     // auto-detected for images, and baked into the public_id for raw PDFs
     // because we pass format: "pdf" at upload time. Appending it again here

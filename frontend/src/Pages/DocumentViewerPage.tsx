@@ -1,6 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "../axiosConfig";
+
+type FullscreenDocument = Document & {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void>;
+};
+
+type FullscreenElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void>;
+};
 
 interface VaultDocument {
   _id: string;
@@ -27,6 +36,38 @@ export default function DocumentViewerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fsDoc = document as FullscreenDocument;
+      setIsFullscreen(Boolean(document.fullscreenElement || fsDoc.webkitFullscreenElement));
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    const fsDoc = document as FullscreenDocument;
+    const isCurrentlyFullscreen = Boolean(document.fullscreenElement || fsDoc.webkitFullscreenElement);
+
+    if (isCurrentlyFullscreen) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (fsDoc.webkitExitFullscreen) fsDoc.webkitExitFullscreen();
+      return;
+    }
+
+    const el = previewRef.current as FullscreenElement | null;
+    if (!el) return;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  };
 
   useEffect(() => {
     const loadDocument = async () => {
@@ -120,6 +161,12 @@ export default function DocumentViewerPage() {
               Back
             </Link>
             <button
+              onClick={toggleFullscreen}
+              className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
+            >
+              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            </button>
+            <button
               onClick={handleDownload}
               disabled={downloading}
               className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400 disabled:opacity-60"
@@ -129,9 +176,28 @@ export default function DocumentViewerPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-2 sm:p-3 min-h-[70vh]">
+        <div
+          ref={previewRef}
+          className={
+            isFullscreen
+              ? "relative bg-zinc-950 h-screen w-screen p-2 sm:p-3"
+              : "relative rounded-xl border border-zinc-800 bg-zinc-900 p-2 sm:p-3 min-h-[70vh]"
+          }
+        >
+          {isFullscreen && (
+            <button
+              onClick={toggleFullscreen}
+              className="absolute top-4 right-4 z-10 rounded-lg border border-zinc-700 bg-zinc-800/90 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
+            >
+              Exit Fullscreen
+            </button>
+          )}
           {doc.fileType === "pdf" ? (
-            <object data={doc.url} type="application/pdf" className="w-full h-[70vh] sm:h-[78vh] rounded-lg bg-zinc-950">
+            <object
+              data={doc.url}
+              type="application/pdf"
+              className={isFullscreen ? "w-full h-full bg-zinc-950" : "w-full h-[70vh] sm:h-[78vh] rounded-lg bg-zinc-950"}
+            >
               <div className="h-full flex items-center justify-center text-center p-4">
                 <div>
                   <p className="text-sm text-zinc-400">Preview is unavailable in this browser.</p>
@@ -145,7 +211,13 @@ export default function DocumentViewerPage() {
               </div>
             </object>
           ) : (
-            <div className="w-full h-[70vh] sm:h-[78vh] bg-zinc-950 rounded-lg overflow-auto flex items-center justify-center">
+            <div
+              className={
+                isFullscreen
+                  ? "w-full h-full bg-zinc-950 flex items-center justify-center"
+                  : "w-full h-[70vh] sm:h-[78vh] bg-zinc-950 rounded-lg overflow-auto flex items-center justify-center"
+              }
+            >
               <img
                 src={doc.url}
                 alt={doc.title}
