@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
@@ -18,7 +19,7 @@ import SubjectNotesPanel from "../components/SubjectNotesPanel";
 import DatesheetPanel from "../components/DatesheetPanel";
 import SyllabusPanel from "../components/SyllabusPanel";
 import { isToday, isPast } from "date-fns";
-import { getNotificationPermissionStatus, requestNotificationPermission, scheduleExactReminder, scheduleTaskReminder, sendNotification } from "../utils/notifications";
+import { getNotificationPermissionStatus, scheduleExactReminder, scheduleTaskReminder } from "../utils/notifications";
 
 interface Todo {
   _id: string;
@@ -454,31 +455,24 @@ export default function HomePage() {
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <h3 className="text-sm font-bold text-zinc-100">Browser notifications</h3>
+                          <h3 className="text-sm font-bold text-zinc-100">Remind me before due date</h3>
                           <p className="text-xs text-zinc-500 mt-1">
-                            {notificationReady ? "Enabled for this browser" : "Not enabled yet"}
+                            {notificationReady
+                              ? "Browser notifications are on for this device"
+                              : "Turn on browser notifications in Settings to see these"}
                           </p>
                         </div>
                         {!notificationReady && (
-                          <button
-                            onClick={async () => {
-                              const ok = await requestNotificationPermission();
-                              setNotificationReady(ok);
-                              if (ok) {
-                                sendNotification("Taskflow reminders enabled", {
-                                  body: "You will receive due-date reminders in this browser.",
-                                });
-                              }
-                            }}
-                            className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400"
+                          <Link
+                            to="/profile"
+                            className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition whitespace-nowrap"
                           >
-                            Enable
-                          </button>
+                            Go to Settings
+                          </Link>
                         )}
                       </div>
 
                       <div className="mt-4 pt-4 border-t border-zinc-800">
-                        <p className="text-sm font-medium text-zinc-500 mb-2">Remind me before due date</p>
                         <div className="flex flex-wrap gap-2">
                           {[5, 10, 15, 30, 60].map((m) => (
                             <button

@@ -10,7 +10,7 @@ const User = require("../models/User");
 const Session = require("../models/Session");
 const { protect } = require("../middleware/auth");
 const { createSession, getClientIp } = require("../utils/sessionUtils");
-const { getAppBaseUrl, sendResetEmail, sendVerificationEmail, sendChangeEmailVerification } = require("../utils/email");
+const { getAppBaseUrl, sendResetEmail, sendVerificationEmail } = require("../utils/email");
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -203,75 +203,6 @@ router.put("/change-password", protect, async (req, res) => {
   } catch (error) {
     console.error("Change password error:", error);
     res.status(500).json({ message: "Failed to change password" });
-  }
-});
-
-// Request an email change - sends a confirmation link to the NEW address;
-// the email doesn't actually change until that link is clicked
-router.post("/change-email", protect, authLimiter, async (req, res) => {
-  try {
-    const { newEmail, password } = req.body || {};
-    const cleanEmail = newEmail?.trim()?.toLowerCase();
-    if (!cleanEmail) return res.status(400).json({ message: "New email is required" });
-
-    const user = await User.findById(req.user);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const match = password && (await bcrypt.compare(password, user.password));
-    if (!match) return res.status(400).json({ message: "Incorrect password" });
-
-    if (cleanEmail === user.email) {
-      return res.status(400).json({ message: "That's already your current email" });
-    }
-
-    const existing = await User.findOne({ email: cleanEmail });
-    if (existing) return res.status(400).json({ message: "That email is already in use" });
-
-    const changeToken = jwt.sign(
-      { id: user._id, newEmail: cleanEmail, type: "change-email" },
-      getResetTokenSecret(),
-      { expiresIn: "1h" },
-    );
-    const verifyLink = `${getAppBaseUrl()}/verify-email-change/${changeToken}`;
-
-    const isProduction = process.env.NODE_ENV === "production";
-    try {
-      const result = await sendChangeEmailVerification(cleanEmail, verifyLink);
-      if (result.sent) return res.json({ message: "Confirmation link sent to your new email" });
-      if (isProduction) return res.status(500).json({ message: "Unable to send confirmation email right now" });
-      return res.json({ message: "Email service not configured. Using local fallback link.", verifyLink });
-    } catch (mailError) {
-      console.error("Change-email send error:", mailError?.message || mailError);
-      if (isProduction) return res.status(500).json({ message: "Unable to send confirmation email right now" });
-      return res.json({ message: "Email sending failed locally. Using fallback link.", verifyLink });
-    }
-  } catch (error) {
-    console.error("Change email error:", error);
-    res.status(500).json({ message: "Failed to request email change" });
-  }
-});
-
-// Confirm an email change from the link sent to the new address
-router.post("/verify-email-change/:token", async (req, res) => {
-  try {
-    let decoded;
-    try {
-      decoded = jwt.verify(req.params.token, getResetTokenSecret());
-      if (decoded.type !== "change-email") throw new Error("wrong token type");
-    } catch {
-      return res.status(400).json({ message: "Confirmation link expired or invalid" });
-    }
-
-    const existing = await User.findOne({ email: decoded.newEmail });
-    if (existing && String(existing._id) !== String(decoded.id)) {
-      return res.status(400).json({ message: "That email is already in use" });
-    }
-
-    await User.findByIdAndUpdate(decoded.id, { email: decoded.newEmail, emailVerified: true });
-    res.json({ message: "Email updated", newEmail: decoded.newEmail });
-  } catch (error) {
-    console.error("Verify email change error:", error);
-    res.status(500).json({ message: "Failed to confirm email change" });
   }
 });
 
