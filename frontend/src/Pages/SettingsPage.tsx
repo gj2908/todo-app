@@ -8,7 +8,7 @@ import NotificationsCard from "../components/NotificationsCard";
 import InstallPwaCard from "../components/InstallPwaCard";
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-1">{children}</p>
+  <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-1 pt-1">{children}</p>
 );
 
 export default function SettingsPage() {
@@ -39,32 +39,30 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       <Navbar />
 
-      <div className="flex-1 flex items-start justify-center px-4 py-8">
-        <div className="w-full max-w-lg space-y-6">
+      <div className="flex-1 flex items-start justify-center px-4 py-6">
+        <div className="w-full max-w-lg space-y-4">
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition"
+            className="flex items-center gap-2 text-lg font-bold text-zinc-100 hover:text-amber-400 transition"
           >
-            ← Back to profile
+            <span aria-hidden className="text-zinc-500">←</span> Settings
           </button>
 
-          <h1 className="text-xl font-bold text-zinc-100 px-1">Settings</h1>
-
-          <div className="space-y-3">
+          <div className="space-y-2">
             <SectionLabel>Security</SectionLabel>
             <TwoFactorCard />
             <SessionsCard />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <SectionLabel>Notifications</SectionLabel>
             <NotificationsCard />
             <InstallPwaCard />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <SectionLabel>Data</SectionLabel>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-zinc-200">Export your data</h3>

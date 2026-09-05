@@ -90,17 +90,15 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       <Navbar />
 
-      <div className="flex-1 flex items-start justify-center px-4 py-8">
-        <div className="w-full max-w-lg space-y-6">
-          <button
-            onClick={() => navigate("/home")}
-            className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition"
-          >
-            ← Back to workspace
-          </button>
-
-          <div className="flex items-center justify-between px-1">
-            <h1 className="text-xl font-bold text-zinc-100">Profile</h1>
+      <div className="flex-1 flex items-start justify-center px-4 py-6">
+        <div className="w-full max-w-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate("/home")}
+              className="flex items-center gap-2 text-lg font-bold text-zinc-100 hover:text-amber-400 transition"
+            >
+              <span aria-hidden className="text-zinc-500">←</span> Profile
+            </button>
             <button
               onClick={() => navigate("/settings")}
               className="flex items-center gap-1.5 text-sm font-semibold text-zinc-400 hover:text-amber-400 transition"
@@ -110,7 +108,7 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center text-2xl font-bold text-black shrink-0">
                 {email?.charAt(0).toUpperCase()}
@@ -137,7 +135,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="mt-5 pt-5 border-t border-zinc-800">
+            <div className="mt-4 pt-4 border-t border-zinc-800">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-zinc-200">Password</h3>

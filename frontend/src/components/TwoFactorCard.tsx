@@ -94,14 +94,14 @@ export default function TwoFactorCard() {
 
   if (loading) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
         <p className="text-sm text-zinc-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-zinc-200">Two-factor authentication</h3>
@@ -130,7 +130,7 @@ export default function TwoFactorCard() {
       </div>
 
       {showDisableForm && stage === "idle" && (
-        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-2">
+        <div className="mt-3 pt-3 border-t border-zinc-800 space-y-2">
           <label className="block text-sm font-medium text-zinc-400">Confirm your password to disable</label>
           <input
             type="password"
@@ -150,7 +150,7 @@ export default function TwoFactorCard() {
       )}
 
       {stage === "setup" && (
-        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-3">
+        <div className="mt-3 pt-3 border-t border-zinc-800 space-y-3">
           <p className="text-sm text-zinc-300">Scan this with your authenticator app (Google Authenticator, 1Password, Authy...):</p>
           {qrCode && <img src={qrCode} alt="Two-factor setup QR code" className="rounded-lg border border-zinc-800 w-40 h-40" />}
           <p className="text-xs text-zinc-500">Can't scan it? Enter this key manually:</p>
@@ -185,7 +185,7 @@ export default function TwoFactorCard() {
       )}
 
       {stage === "backup-codes" && (
-        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-3">
+        <div className="mt-3 pt-3 border-t border-zinc-800 space-y-3">
           <p className="text-sm font-semibold text-amber-400">Save these backup codes now</p>
           <p className="text-xs text-zinc-500">
             Each one lets you sign in once if you lose access to your authenticator app. They won't be shown again.

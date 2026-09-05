@@ -74,8 +74,8 @@ export default function SessionsCard() {
   const otherSessionCount = sessions.filter((s) => !s.current).length;
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-4 gap-3">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3 gap-3">
         <div>
           <h3 className="text-sm font-bold text-zinc-200">Active sessions</h3>
           <p className="text-xs text-zinc-500 mt-0.5">Devices currently signed in to your account</p>
