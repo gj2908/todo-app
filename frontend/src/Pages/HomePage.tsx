@@ -10,6 +10,10 @@ import CalendarPanel from "../components/CalendarPanel";
 import DocumentVault from "../components/DocumentVault";
 import PersonalReminderModal from "../components/PersonalReminderModal";
 import ConfirmDialog from "../components/ConfirmDialog";
+import NotesPanel from "../components/NotesPanel";
+import InsightsPanel from "../components/InsightsPanel";
+import TrashPanel from "../components/TrashPanel";
+import CommandPalette from "../components/CommandPalette";
 import { isToday, isPast } from "date-fns";
 import { getNotificationPermissionStatus, requestNotificationPermission, scheduleExactReminder, scheduleTaskReminder, sendNotification } from "../utils/notifications";
 
@@ -23,6 +27,8 @@ interface Todo {
   dueDate?: string;
   tags?: string[];
   project?: string;
+  subtasks?: { title: string; completed: boolean }[];
+  attachments?: { _id: string; title: string }[];
   createdAt: string;
 }
 
@@ -244,7 +250,7 @@ export default function HomePage() {
     try {
       await axios.delete(`/todos/${id}`);
       setTodos(todos.filter(t => t._id !== id));
-      toast.success("Task deleted");
+      toast.success("Task moved to trash");
     } catch { toast.error("Failed to delete task"); }
   };
 
@@ -310,10 +316,14 @@ export default function HomePage() {
     calendar:  { label: "Calendar",  desc: "Monthly deadlines and due tasks" },
     reminders: { label: "Reminders", desc: "Tasks due in the next 24 hours" },
     vault: { label: "Document Vault", desc: "Upload and manage images and PDFs" },
+    notes: { label: "Notes", desc: "Free-form notes and ideas" },
+    insights: { label: "Insights", desc: "Trends across your tasks" },
+    trash: { label: "Trash", desc: "Deleted tasks, kept until you remove them for good" },
   };
 
   const viewInfo = viewTitles[activeView] || { label: "Project", desc: "Project tasks" };
   const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || activeView.startsWith("project_");
+  const nonTaskViews = ["vault", "notes", "insights", "trash"];
 
   const stats = useMemo(() => {
     const overdueCount = todos.filter(t =>
@@ -397,7 +407,7 @@ export default function HomePage() {
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
               </div>
 
-              {activeView !== "calendar" && (
+              {activeView !== "calendar" && !nonTaskViews.includes(activeView) && (
                 <SearchFilter
                   onSearch={setSearch}
                   onFilterPriority={setPriorityFilter}
@@ -535,6 +545,12 @@ export default function HomePage() {
               </div>
             ) : activeView === "vault" ? (
               <DocumentVault />
+            ) : activeView === "notes" ? (
+              <NotesPanel />
+            ) : activeView === "insights" ? (
+              <InsightsPanel todos={todos} />
+            ) : activeView === "trash" ? (
+              <TrashPanel />
             ) : showCalendarPreview ? (
               <div className="w-full lg:grid lg:grid-cols-[minmax(360px,40%)_minmax(520px,60%)] lg:items-start lg:gap-4">
                 {filteredTodos.length > 0 ? (
@@ -640,7 +656,7 @@ export default function HomePage() {
       <ConfirmDialog
         isOpen={!!deleteTarget}
         title="Delete task"
-        message={deleteTarget ? `"${deleteTarget.title}" will be permanently deleted.` : ""}
+        message={deleteTarget ? `"${deleteTarget.title}" will move to Trash. You can restore it any time until you delete it for good.` : ""}
         confirmLabel="Delete"
         danger
         onConfirm={confirmDeleteTodo}
@@ -651,6 +667,13 @@ export default function HomePage() {
         isOpen={showPersonalReminderModal}
         onSave={handleSavePersonalReminder}
         onClose={() => setShowPersonalReminderModal(false)}
+      />
+
+      <CommandPalette
+        projects={projects}
+        onViewChange={handleViewChange}
+        onProjectSelect={handleProjectSelect}
+        onNewTask={handleAddNew}
       />
     </div>
   );

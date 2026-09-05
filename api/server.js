@@ -5,6 +5,10 @@ const cors = require("cors");
 const morgan = require("morgan");
 
 const app = express();
+// Vercel's edge network sits as exactly one reverse-proxy hop in front of
+// this function; trusting that one hop lets req.ip and X-Forwarded-For
+// reflect the real client IP (used for rate limiting and session location).
+app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
@@ -20,10 +24,14 @@ const authRoutes = require("./routes/auth");
 const todoRoutes = require("./routes/todo");
 const projectRoutes = require("./routes/project");
 const documentRoutes = require("./routes/documents");
+const noteRoutes = require("./routes/notes");
+const accountRoutes = require("./routes/account");
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/notes", noteRoutes);
+app.use("/api/account", accountRoutes);
 
 const PORT = process.env.PORT || 6002;
 

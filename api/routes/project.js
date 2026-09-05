@@ -1,23 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
+const { protect } = require("../middleware/auth");
 const Project = require("../models/Project");
 
-// Auth middleware
-const auth = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.id;
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
-
 // GET all projects
-router.get("/", auth, async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const projects = await Project.find({ user: req.user }).sort({ createdAt: -1 });
     res.json(projects);
@@ -27,7 +14,7 @@ router.get("/", auth, async (req, res) => {
 });
 
 // POST create project
-router.post("/", auth, async (req, res) => {
+router.post("/", protect, async (req, res) => {
   try {
     const { name, icon, color } = req.body;
     if (!name?.trim()) return res.status(400).json({ message: "Project name required" });
@@ -40,7 +27,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 // PUT update project - ownership check
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", protect, async (req, res) => {
   try {
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, user: req.user },
@@ -55,7 +42,7 @@ router.put("/:id", auth, async (req, res) => {
 });
 
 // DELETE project - ownership check
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
     const project = await Project.findOneAndDelete({ _id: req.params.id, user: req.user });
     if (!project) return res.status(404).json({ message: "Project not found" });

@@ -13,6 +13,14 @@ const todoSchema = new mongoose.Schema({
   category: { type: String, default: "general" },
   dueDate: Date,
   tags: [String],
+  subtasks: [
+    {
+      title: { type: String, required: true },
+      completed: { type: Boolean, default: false },
+    },
+  ],
+  attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }],
+  deletedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

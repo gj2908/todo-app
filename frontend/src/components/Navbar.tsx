@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from "../axiosConfig";
 
 interface NavbarProps {
   onClockClick?: () => void;
@@ -64,6 +65,7 @@ export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menu
   }, []);
 
   const handleLogout = () => {
+    axios.post("/auth/logout").catch(() => {});
     localStorage.removeItem("token");
     navigate("/login");
   };

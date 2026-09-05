@@ -70,6 +70,29 @@ const VaultIcon = () => (
   </svg>
 );
 
+const NoteIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M3 2.5h10v11H3v-11Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M5.5 6h5M5.5 8.5h5M5.5 11h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+
+const InsightsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2.5 13.5h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <rect x="4" y="8" width="2" height="4.5" rx="0.5" fill="currentColor" />
+    <rect x="7.5" y="5" width="2" height="7.5" rx="0.5" fill="currentColor" />
+    <rect x="11" y="2.5" width="2" height="10" rx="0.5" fill="currentColor" />
+  </svg>
+);
+
+const NavTrashIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2.5 4.5h11M6 4.5V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 4.5l.6 8.5a1.2 1.2 0 0 0 1.2 1.1h4.4a1.2 1.2 0 0 0 1.2-1.1l.6-8.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
     <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -141,7 +164,10 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
   ];
 
   const toolItems = [
+    { id: "notes", label: "Notes", Icon: NoteIcon, key: "notes" },
     { id: "vault", label: "Document Vault", Icon: VaultIcon, key: "vault" },
+    { id: "insights", label: "Insights", Icon: InsightsIcon, key: "insights" },
+    { id: "trash", label: "Trash", Icon: NavTrashIcon, key: "trash" },
   ];
 
   const renderMenuItem = ({ id, label, Icon, key }: (typeof viewItems)[number]) => {

@@ -36,6 +36,16 @@ const categoryOptions = [
   { value: "health",   label: "Health",   emoji: "❤️" },
 ];
 
+interface Subtask {
+  title: string;
+  completed: boolean;
+}
+
+interface AttachmentRef {
+  _id: string;
+  title: string;
+}
+
 const getBlankForm = (todo: any, defaultProject: string | null | undefined) => ({
   title:       todo?.title       || "",
   description: todo?.description || "",
@@ -53,10 +63,16 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [creatingProject, setCreatingProject] = useState(false);
+  const [subtasks, setSubtasks] = useState<Subtask[]>(todo?.subtasks || []);
+  const [newSubtask, setNewSubtask] = useState("");
+  const [attachments, setAttachments] = useState<AttachmentRef[]>(todo?.attachments || []);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
 
   // KEY FIX: Reset form whenever `todo` changes (fixes edit not populating)
   useEffect(() => {
     setFormData(getBlankForm(todo, defaultProject));
+    setSubtasks(todo?.subtasks || []);
+    setAttachments(todo?.attachments || []);
   }, [todo, defaultProject]);
 
   useEffect(() => {
@@ -94,6 +110,40 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
     finally { setCreatingProject(false); }
   };
 
+  const addSubtask = () => {
+    if (!newSubtask.trim()) return;
+    setSubtasks((prev) => [...prev, { title: newSubtask.trim(), completed: false }]);
+    setNewSubtask("");
+  };
+
+  const toggleSubtask = (index: number) => {
+    setSubtasks((prev) => prev.map((s, i) => (i === index ? { ...s, completed: !s.completed } : s)));
+  };
+
+  const removeSubtask = (index: number) => {
+    setSubtasks((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAttachmentUpload = async (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      setUploadingAttachment(true);
+      const res = await axios.post("/documents/upload", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setAttachments((prev) => [...prev, { _id: res.data._id, title: res.data.title }]);
+    } catch {
+      toast.error("Failed to upload attachment");
+    } finally {
+      setUploadingAttachment(false);
+    }
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a._id !== id));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) { toast.error("Title is required!"); return; }
@@ -103,6 +153,8 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
       const payload = {
         ...formData,
         tags: formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean),
+        subtasks,
+        attachments: attachments.map((a) => a._id),
       };
 
       if (todo?._id) {
@@ -315,6 +367,79 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               placeholder="e.g. urgent, review, frontend"
               className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
             />
+          </div>
+
+          {/* Subtasks */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Subtasks</label>
+            {subtasks.length > 0 && (
+              <div className="space-y-1.5 mb-2">
+                {subtasks.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2">
+                    <input
+                      type="checkbox"
+                      checked={s.completed}
+                      onChange={() => toggleSubtask(i)}
+                      className="w-4 h-4 accent-amber-500 shrink-0"
+                    />
+                    <span className={`flex-1 text-sm ${s.completed ? "line-through text-zinc-500" : "text-zinc-200"}`}>
+                      {s.title}
+                    </span>
+                    <button type="button" onClick={() => removeSubtask(i)} className="text-zinc-500 hover:text-red-400 transition shrink-0">
+                      <CloseIcon />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newSubtask}
+                onChange={(e) => setNewSubtask(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
+                placeholder="Add a subtask..."
+                className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+              />
+              <button
+                type="button"
+                onClick={addSubtask}
+                className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm font-semibold rounded-lg transition"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          {/* Attachments */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Attachments</label>
+            {attachments.length > 0 && (
+              <div className="space-y-1.5 mb-2">
+                {attachments.map((a) => (
+                  <div key={a._id} className="flex items-center justify-between gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2">
+                    <span className="text-sm text-zinc-200 truncate">{a.title}</span>
+                    <button type="button" onClick={() => removeAttachment(a._id)} className="text-zinc-500 hover:text-red-400 transition shrink-0">
+                      <CloseIcon />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label className="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-dashed border-zinc-700 text-zinc-400 text-sm font-semibold rounded-lg transition cursor-pointer">
+              {uploadingAttachment ? "Uploading..." : "Attach a file"}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={uploadingAttachment}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleAttachmentUpload(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
           </div>
         </form>
 

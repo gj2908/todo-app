@@ -135,6 +135,20 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
               #{tag}
             </span>
           ))}
+
+          {/* Subtask progress */}
+          {todo.subtasks?.length > 0 && (
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+              {todo.subtasks.filter((s: any) => s.completed).length}/{todo.subtasks.length} done
+            </span>
+          )}
+
+          {/* Attachment count */}
+          {todo.attachments?.length > 0 && (
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+              {todo.attachments.length} file{todo.attachments.length > 1 ? "s" : ""}
+            </span>
+          )}
         </div>
       </div>
     </div>

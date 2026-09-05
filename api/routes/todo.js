@@ -1,33 +1,32 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
+const { protect } = require("../middleware/auth");
 const Todo = require("../models/Todo");
 
-// Auth middleware
-const auth = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+// GET all todos for user (excludes trashed)
+router.get("/", protect, async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.id;
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
-
-// GET all todos for user
-router.get("/", auth, async (req, res) => {
-  try {
-    const todos = await Todo.find({ user: req.user }).sort({ createdAt: -1 });
+    const todos = await Todo.find({ user: req.user, deletedAt: null })
+      .sort({ createdAt: -1 })
+      .populate("attachments", "title url fileType");
     res.json(todos);
   } catch (error) {
     res.status(500).json({ message: "Error fetching todos" });
   }
 });
 
+// GET trashed todos
+router.get("/trash", protect, async (req, res) => {
+  try {
+    const todos = await Todo.find({ user: req.user, deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
+    res.json(todos);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching trash" });
+  }
+});
+
 // POST create todo
-router.post("/", auth, async (req, res) => {
+router.post("/", protect, async (req, res) => {
   try {
     const todo = new Todo({ ...req.body, user: req.user });
     await todo.save();
@@ -38,7 +37,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 // PUT update todo - ensures user owns it
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", protect, async (req, res) => {
   try {
     const todo = await Todo.findOneAndUpdate(
       { _id: req.params.id, user: req.user },
@@ -52,12 +51,42 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-// DELETE todo - ensures user owns it
-router.delete("/:id", auth, async (req, res) => {
+// POST restore a trashed todo
+router.post("/:id/restore", protect, async (req, res) => {
   try {
-    const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.user });
+    const todo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { deletedAt: null },
+      { new: true }
+    );
     if (!todo) return res.status(404).json({ message: "Todo not found" });
-    res.json({ message: "Todo deleted" });
+    res.json(todo);
+  } catch (error) {
+    res.status(500).json({ message: "Error restoring todo" });
+  }
+});
+
+// DELETE todo - moves to trash (ensures user owns it)
+router.delete("/:id", protect, async (req, res) => {
+  try {
+    const todo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { deletedAt: new Date() },
+      { new: true }
+    );
+    if (!todo) return res.status(404).json({ message: "Todo not found" });
+    res.json({ message: "Todo moved to trash" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting todo" });
+  }
+});
+
+// DELETE permanently - only from trash
+router.delete("/:id/permanent", protect, async (req, res) => {
+  try {
+    const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.user, deletedAt: { $ne: null } });
+    if (!todo) return res.status(404).json({ message: "Todo not found in trash" });
+    res.json({ message: "Todo permanently deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting todo" });
   }

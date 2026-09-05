@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
+import SessionsCard from "../components/SessionsCard";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function ProfilePage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,6 +37,26 @@ export default function ProfilePage() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to change password");
     } finally { setLoading(false); }
+  };
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const res = await axios.get("/account/export", { responseType: "blob" });
+      const blob = new Blob([res.data], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "taskflow-export.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Failed to export your data");
+    } finally {
+      setExporting(false);
+    }
   };
 
   if (!user) {
@@ -129,6 +151,25 @@ export default function ProfilePage() {
                 </button>
               </form>
             )}
+          </div>
+
+          <SessionsCard />
+
+          {/* Export card */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-zinc-200">Export your data</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Download every task, project, note, and document record as one JSON file</p>
+              </div>
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition disabled:opacity-50 whitespace-nowrap"
+              >
+                {exporting ? "Preparing..." : "Export data"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

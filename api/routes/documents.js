@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
+const { protect } = require("../middleware/auth");
 const multer = require("multer");
 const streamifier = require("streamifier");
 const { v2: cloudinary } = require("cloudinary");
@@ -14,18 +14,6 @@ const sanitizeBaseName = (value) =>
     .replace(/\s+/g, "-")
     .toLowerCase()
     .slice(0, 80);
-
-const auth = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.id;
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -66,7 +54,7 @@ const uploadBufferToCloudinary = (buffer, options) => {
   });
 };
 
-router.get("/", auth, async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const documents = await Document.find({ user: req.user }).sort({ createdAt: -1 });
     res.json(documents);
@@ -75,7 +63,7 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.get("/:id", auth, async (req, res) => {
+router.get("/:id", protect, async (req, res) => {
   try {
     const document = await Document.findOne({ _id: req.params.id, user: req.user });
     if (!document) {
@@ -87,7 +75,7 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-router.get("/:id/download", auth, async (req, res) => {
+router.get("/:id/download", protect, async (req, res) => {
   try {
     const document = await Document.findOne({ _id: req.params.id, user: req.user });
     if (!document) {
@@ -116,7 +104,7 @@ router.get("/:id/download", auth, async (req, res) => {
   }
 });
 
-router.post("/upload", auth, upload.single("file"), async (req, res) => {
+router.post("/upload", protect, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "File is required" });
@@ -169,7 +157,7 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
   }
 });
 
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", protect, async (req, res) => {
   try {
     const title = req.body?.title?.trim();
     if (!title) {
@@ -192,7 +180,7 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
     const document = await Document.findOne({ _id: req.params.id, user: req.user });
     if (!document) {
