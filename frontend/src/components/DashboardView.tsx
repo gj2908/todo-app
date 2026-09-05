@@ -4,6 +4,7 @@ import TodoItem from "./TodoItem";
 import CalendarPanel from "./CalendarPanel";
 import StatsStrip from "./StatsStrip";
 import InsightsPanel from "./InsightsPanel";
+import OnboardingChecklist from "./OnboardingChecklist";
 
 interface Subject {
   _id: string;
@@ -69,6 +70,8 @@ export default function DashboardView({
           + New Task
         </button>
       </div>
+
+      <OnboardingChecklist hasSubject={subjects.length > 0} hasTask={todos.length > 0} onAddTask={onAddTask} />
 
       <StatsStrip today={todoCounts.today} overdue={overdueCount} next24h={next24h} />
 
