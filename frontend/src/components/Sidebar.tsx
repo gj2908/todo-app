@@ -28,6 +28,18 @@ const InboxIcon = () => (
   </svg>
 );
 
+const TasksGroupIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const ChevronIcon = ({ open }: { open: boolean }) => (
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${open ? "rotate-90" : ""}`}>
+    <path d="M4 2.5l4 3.5-4 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const TodayIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -147,6 +159,7 @@ const CollapseIcon = ({ collapsed }: { collapsed: boolean }) => (
 );
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar:collapsed";
+const TASKS_OPEN_KEY = "sidebar:tasksOpen";
 
 export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onSubjectNotesOpen, todoCounts = {}, reminderCount = 0 }: SidebarProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -160,6 +173,14 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
       return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
     } catch {
       return false;
+    }
+  });
+  const [tasksOpen, setTasksOpen] = useState(() => {
+    try {
+      const stored = localStorage.getItem(TASKS_OPEN_KEY);
+      return stored === null ? true : stored === "true";
+    } catch {
+      return true;
     }
   });
 
@@ -181,6 +202,14 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
       // ignore storage failures (private browsing, etc.)
     }
   }, [collapsed]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TASKS_OPEN_KEY, String(tasksOpen));
+    } catch {
+      // ignore storage failures (private browsing, etc.)
+    }
+  }, [tasksOpen]);
 
   const handleCreateSubject = async () => {
     if (!newSubjectName.trim()) { toast.error("Subject name required!"); return; }
@@ -213,14 +242,25 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
     } catch { toast.error("Failed to delete subject"); }
   };
 
-  const viewItems = [
+  const taskItems = [
     { id: "inbox", label: "Inbox", Icon: InboxIcon, key: "inbox" },
     { id: "today", label: "Today", Icon: TodayIcon, key: "today" },
     { id: "upcoming", label: "Upcoming", Icon: UpcomingIcon, key: "upcoming" },
     { id: "completed", label: "Completed", Icon: CompletedIcon, key: "completed" },
+  ];
+
+  const viewItems = [
+    ...taskItems,
     { id: "calendar", label: "Calendar", Icon: CalendarIcon, key: "calendar" },
     { id: "reminders", label: "Reminders", Icon: ReminderIcon, key: "reminders" },
   ];
+
+  const otherViewItems = [
+    { id: "calendar", label: "Calendar", Icon: CalendarIcon, key: "calendar" },
+    { id: "reminders", label: "Reminders", Icon: ReminderIcon, key: "reminders" },
+  ];
+
+  const isTaskViewActive = taskItems.some((i) => i.id === activeView);
 
   const toolItems = [
     { id: "notes", label: "Notes", Icon: NoteIcon, key: "notes" },
@@ -231,7 +271,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
     { id: "trash", label: "Trash", Icon: NavTrashIcon, key: "trash" },
   ];
 
-  const renderMenuItem = ({ id, label, Icon, key }: (typeof viewItems)[number]) => {
+  const renderMenuItem = ({ id, label, Icon, key }: (typeof viewItems)[number], indent = false) => {
     const isActive = activeView === id;
     const count = key === "reminders" ? reminderCount : (todoCounts[key] ?? 0);
     return (
@@ -240,7 +280,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         onClick={() => onViewChange(id)}
         title={collapsed ? label : undefined}
         className={`w-full flex items-center rounded-lg text-sm font-semibold transition-all group ${
-          collapsed ? "justify-center px-2 py-2" : "justify-between px-2.5 py-1.5"
+          collapsed ? "justify-center px-2 py-2" : indent ? "justify-between pl-7 pr-2.5 py-1.5" : "justify-between px-2.5 py-1.5"
         } ${
           isActive
             ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
@@ -283,7 +323,32 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         <div className="p-2.5 pt-3">
           {!collapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>}
           <nav className="space-y-0.5">
-            {viewItems.map(renderMenuItem)}
+            {collapsed ? (
+              viewItems.map((item) => renderMenuItem(item))
+            ) : (
+              <>
+                <button
+                  onClick={() => setTasksOpen((v) => !v)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                    isTaskViewActive && !tasksOpen
+                      ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <TasksGroupIcon />
+                    Tasks
+                  </span>
+                  <ChevronIcon open={tasksOpen} />
+                </button>
+                {tasksOpen && (
+                  <div className="space-y-0.5 mt-0.5">
+                    {taskItems.map((item) => renderMenuItem(item, true))}
+                  </div>
+                )}
+                {otherViewItems.map((item) => renderMenuItem(item))}
+              </>
+            )}
           </nav>
         </div>
 
@@ -291,7 +356,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         <div className="p-2.5 pt-1">
           {!collapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>}
           <nav className="space-y-0.5">
-            {toolItems.map(renderMenuItem)}
+            {toolItems.map((item) => renderMenuItem(item))}
           </nav>
         </div>
 
@@ -356,7 +421,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                     }`}
                   >
                     <span className="flex items-center gap-2 text-sm font-semibold min-w-0">
-                      <span className="text-amber-500 text-xs">◆</span>
+                      <span className="text-xs" style={{ color: subject.color || "#f59e0b" }}>{subject.icon || "◆"}</span>
                       <span className="truncate">{subject.name}</span>
                       {!isOwner && (
                         <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 capitalize shrink-0">
@@ -419,7 +484,14 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         isOpen={!!manageTarget}
         subjectId={manageTarget?._id || null}
         subjectName={manageTarget?.name || ""}
+        subjectColor={manageTarget?.color}
+        subjectIcon={manageTarget?.icon}
         onClose={() => setManageTarget(null)}
+        onUpdated={(id, changes) => {
+          setSubjects((prev) => prev.map((s) => (s._id === id ? { ...s, ...changes } : s)));
+          setManageTarget((prev) => (prev && prev._id === id ? { ...prev, ...changes } : prev));
+          window.dispatchEvent(new Event("subjects:changed"));
+        }}
       />
     </div>
   );

@@ -334,6 +334,11 @@ export default function HomePage() {
     return subjects.find(s => s._id === subjectId)?.name || null;
   };
 
+  const getSubjectMeta = (subjectId: string | undefined) => {
+    if (!subjectId) return null;
+    return subjects.find(s => s._id === subjectId) || null;
+  };
+
   const filteredTodos = getFilteredTodos();
 
   const viewTitles: Record<string, { label: string; desc: string }> = {
@@ -446,13 +451,15 @@ export default function HomePage() {
               </div>
 
               {activeView !== "calendar" && !nonTaskViews.includes(activeView) && !isSubjectNotesView && (
-                <SearchFilter
-                  onSearch={setSearch}
-                  onFilterPriority={setPriorityFilter}
-                  onFilterCategory={setCategoryFilter}
-                  onSort={setSort}
-                  totalTodos={todos.length}
-                />
+                <div className={activeView === "reminders" ? "max-w-2xl" : ""}>
+                  <SearchFilter
+                    onSearch={setSearch}
+                    onFilterPriority={setPriorityFilter}
+                    onFilterCategory={setCategoryFilter}
+                    onSort={setSort}
+                    totalTodos={todos.length}
+                  />
+                </div>
               )}
             </div>
 
@@ -465,7 +472,7 @@ export default function HomePage() {
             ) : activeView === "calendar" ? (
               <div className="w-full space-y-4">
                 <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
-                <CalendarPanel todos={todos} />
+                <CalendarPanel todos={todos} subjects={subjects} />
               </div>
             ) : activeView === "reminders" ? (
               <div className="max-w-5xl space-y-4">
@@ -559,6 +566,8 @@ export default function HomePage() {
                               key={todo._id}
                               todo={todo}
                               subjectName={getSubjectName(todo.subject)}
+                              subjectColor={getSubjectMeta(todo.subject)?.color}
+                              subjectIcon={getSubjectMeta(todo.subject)?.icon}
                               onEdit={handleEditTodo}
                               onDelete={requestDeleteTodo}
                               onToggle={toggleComplete}
@@ -572,7 +581,7 @@ export default function HomePage() {
                   </div>
                   <div className="hidden lg:block sticky top-4 space-y-3">
                     <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
-                    <CalendarPanel todos={todos} compact />
+                    <CalendarPanel todos={todos} subjects={subjects} compact />
                   </div>
                 </div>
               </div>
@@ -602,6 +611,8 @@ export default function HomePage() {
                         key={todo._id}
                         todo={todo}
                         subjectName={getSubjectName(todo.subject)}
+                        subjectColor={getSubjectMeta(todo.subject)?.color}
+                        subjectIcon={getSubjectMeta(todo.subject)?.icon}
                         onEdit={handleEditTodo}
                         onDelete={requestDeleteTodo}
                         onToggle={toggleComplete}
@@ -639,7 +650,7 @@ export default function HomePage() {
 
                 <div className="hidden lg:block sticky top-3 space-y-3">
                   <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
-                  <CalendarPanel todos={todos} compact />
+                  <CalendarPanel todos={todos} subjects={subjects} compact />
                 </div>
               </div>
             ) : filteredTodos.length > 0 ? (
@@ -649,6 +660,8 @@ export default function HomePage() {
                     key={todo._id}
                     todo={todo}
                     subjectName={getSubjectName(todo.subject)}
+                    subjectColor={getSubjectMeta(todo.subject)?.color}
+                    subjectIcon={getSubjectMeta(todo.subject)?.icon}
                     onEdit={handleEditTodo}
                     onDelete={requestDeleteTodo}
                     onToggle={toggleComplete}

@@ -13,16 +13,53 @@ interface ManageSubjectModalProps {
   isOpen: boolean;
   subjectId: string | null;
   subjectName: string;
+  subjectColor?: string;
+  subjectIcon?: string;
   onClose: () => void;
+  onUpdated?: (id: string, changes: { color?: string; icon?: string }) => void;
 }
 
-export default function ManageSubjectModal({ isOpen, subjectId, subjectName, onClose }: ManageSubjectModalProps) {
+const COLOR_SWATCHES = [
+  "#f59e0b", "#ef4444", "#22c55e", "#3b82f6",
+  "#a855f7", "#ec4899", "#14b8a6", "#64748b",
+];
+
+const ICON_SWATCHES = ["◆", "📋", "💼", "🎯", "📚", "🏠", "🛒", "🔬", "🎨", "⭐"];
+
+export default function ManageSubjectModal({ isOpen, subjectId, subjectName, subjectColor, subjectIcon, onClose, onUpdated }: ManageSubjectModalProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"editor" | "viewer">("editor");
   const [inviting, setInviting] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<Member | null>(null);
+  const [savingAppearance, setSavingAppearance] = useState(false);
+
+  const handlePickColor = async (color: string) => {
+    if (!subjectId || color === subjectColor) return;
+    try {
+      setSavingAppearance(true);
+      await axios.put(`/subjects/${subjectId}`, { color });
+      onUpdated?.(subjectId, { color });
+    } catch {
+      toast.error("Failed to update color");
+    } finally {
+      setSavingAppearance(false);
+    }
+  };
+
+  const handlePickIcon = async (icon: string) => {
+    if (!subjectId || icon === subjectIcon) return;
+    try {
+      setSavingAppearance(true);
+      await axios.put(`/subjects/${subjectId}`, { icon });
+      onUpdated?.(subjectId, { icon });
+    } catch {
+      toast.error("Failed to update icon");
+    } finally {
+      setSavingAppearance(false);
+    }
+  };
 
   const fetchMembers = async () => {
     if (!subjectId) return;
@@ -79,10 +116,48 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, onC
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl">
-        <h3 className="text-base font-bold text-zinc-100">Share "{subjectName}"</h3>
-        <p className="text-sm text-zinc-500 mt-1">Invite by email - they need an existing Taskflow account.</p>
+        <h3 className="text-base font-bold text-zinc-100">Manage "{subjectName}"</h3>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4">
+          <p className="text-sm font-medium text-zinc-500 mb-2">Color</p>
+          <div className="flex flex-wrap gap-2">
+            {COLOR_SWATCHES.map((c) => (
+              <button
+                key={c}
+                onClick={() => handlePickColor(c)}
+                disabled={savingAppearance}
+                style={{ backgroundColor: c }}
+                className={`w-7 h-7 rounded-full transition ${subjectColor === c ? "ring-2 ring-offset-2 ring-offset-zinc-900 ring-zinc-100" : "hover:opacity-80"}`}
+                aria-label={`Set color ${c}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-sm font-medium text-zinc-500 mb-2">Icon</p>
+          <div className="flex flex-wrap gap-2">
+            {ICON_SWATCHES.map((i) => (
+              <button
+                key={i}
+                onClick={() => handlePickIcon(i)}
+                disabled={savingAppearance}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-base border transition ${
+                  subjectIcon === i ? "border-amber-500 bg-amber-500/10" : "border-zinc-700 bg-zinc-800 hover:border-zinc-600"
+                }`}
+              >
+                {i}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 pt-4 border-t border-zinc-800">
+          <p className="text-sm font-bold text-zinc-200">Share</p>
+          <p className="text-sm text-zinc-500 mt-1">Invite by email - they need an existing Taskflow account.</p>
+        </div>
+
+        <div className="mt-3 flex gap-2">
           <input
             type="email"
             value={email}

@@ -6,14 +6,23 @@ interface TodoLite {
   title: string;
   dueDate?: string;
   completed: boolean;
+  subject?: string;
+}
+
+interface SubjectMeta {
+  _id: string;
+  name: string;
+  color?: string;
+  icon?: string;
 }
 
 interface CalendarPanelProps {
   todos: TodoLite[];
+  subjects?: SubjectMeta[];
   compact?: boolean;
 }
 
-export default function CalendarPanel({ todos, compact = false }: CalendarPanelProps) {
+export default function CalendarPanel({ todos, subjects = [], compact = false }: CalendarPanelProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -21,6 +30,12 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const emptyDays = Array(getDay(monthStart)).fill(null);
+
+  const subjectMap = useMemo(() => {
+    const m = new Map<string, SubjectMeta>();
+    subjects.forEach((s) => m.set(s._id, s));
+    return m;
+  }, [subjects]);
 
   const dueMap = useMemo(() => {
     const m = new Map<string, TodoLite[]>();
@@ -39,11 +54,11 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
 
   return (
     <div className={compact ? "space-y-3 rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-3" : "space-y-4"}>
-      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className={compact ? "flex flex-col items-start gap-2" : "flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between"}>
         <h3 className={compact ? "text-lg font-extrabold text-zinc-100 tracking-tight" : "text-xl sm:text-2xl font-extrabold text-zinc-100"}>
           Monthly Deadlines
         </h3>
-        <div className={`flex items-center justify-between gap-1.5 w-full sm:w-auto ${compact ? "rounded-lg border border-zinc-800 bg-zinc-900 px-1 py-1" : ""}`}>
+        <div className={`flex items-center justify-between gap-1.5 w-full ${compact ? "rounded-lg border border-zinc-800 bg-zinc-900 px-1 py-1" : "sm:w-auto"}`}>
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className={`${compact ? "px-2 py-1 text-base font-semibold" : "px-2.5 py-1.5 text-lg font-semibold"} rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition`}
@@ -77,6 +92,7 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
           const dayKey = format(day, "yyyy-MM-dd");
           const dayTodos = dueMap.get(dayKey) || [];
           const firstTitle = dayTodos[0]?.title || "";
+          const firstSubject = dayTodos[0]?.subject ? subjectMap.get(dayTodos[0].subject) : undefined;
           const isSelected = isSameDay(day, selectedDate);
           const isToday = isSameDay(day, new Date());
 
@@ -93,8 +109,11 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
               <p className={`${compact ? "text-sm" : "text-base"} font-bold ${isToday ? "text-amber-400" : "text-zinc-300"}`}>{format(day, "d")}</p>
               {dayTodos.length > 0 && (
                 <>
-                  <p className={`${compact ? "text-sm mt-0.5" : "text-base mt-1"} font-semibold text-zinc-300 leading-tight truncate`} title={firstTitle}>
-                    {firstTitle}
+                  <p className={`${compact ? "text-sm mt-0.5" : "text-base mt-1"} font-semibold text-zinc-300 leading-tight truncate flex items-center gap-1`} title={firstTitle}>
+                    {firstSubject && (
+                      <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: firstSubject.color || "#f59e0b" }} />
+                    )}
+                    <span className="truncate">{firstTitle}</span>
                   </p>
                   {dayTodos.length > 1 && (
                     <p className={`${compact ? "text-sm" : "text-base"} text-zinc-500 leading-tight font-medium`}>+{dayTodos.length - 1} more</p>
@@ -112,11 +131,17 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
         </p>
         {selectedTodos.length > 0 ? (
           <div className={compact ? "space-y-1.5" : "space-y-2"}>
-            {selectedTodos.map((t) => (
-              <div key={t._id} className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
-                <p className={compact ? "text-base font-semibold text-zinc-200" : "text-lg font-semibold text-zinc-200"}>{t.title}</p>
-              </div>
-            ))}
+            {selectedTodos.map((t) => {
+              const meta = t.subject ? subjectMap.get(t.subject) : undefined;
+              return (
+                <div key={t._id} className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 flex items-center gap-2">
+                  {meta && (
+                    <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: meta.color || "#f59e0b" }} />
+                  )}
+                  <p className={compact ? "text-base font-semibold text-zinc-200" : "text-lg font-semibold text-zinc-200"}>{t.title}</p>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className={compact ? "text-base font-medium text-zinc-500" : "text-lg font-medium text-zinc-500"}>No due tasks for this day.</p>
