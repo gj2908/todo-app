@@ -4,6 +4,7 @@ import RegisterPage from "./Pages/RegisterPage";
 import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
 import HomePage from "./Pages/HomePage";
 import ProfilePage from "./Pages/ProfilePage";
+import SettingsPage from "./Pages/SettingsPage";
 import DocumentViewerPage from "./Pages/DocumentViewerPage";
 import VerifyEmailPage from "./Pages/VerifyEmailPage";
 import { ToastContainer } from "react-toastify";
@@ -36,6 +37,12 @@ function App() {
           path="/profile"
           element={
             <ProtectedRoute element={<ProfilePage />} path="/profile" />
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute element={<SettingsPage />} path="/settings" />
           }
         />
         <Route

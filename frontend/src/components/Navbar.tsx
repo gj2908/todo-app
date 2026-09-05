@@ -174,7 +174,16 @@ export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menu
                   }}
                   className="w-full px-4 py-2.5 text-left text-sm text-zinc-300 hover:text-amber-400 hover:bg-zinc-800 transition"
                 >
-                  Profile Settings
+                  Profile
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/settings");
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-zinc-300 hover:text-amber-400 hover:bg-zinc-800 transition"
+                >
+                  Settings
                 </button>
                 <button
                   onClick={handleLogout}

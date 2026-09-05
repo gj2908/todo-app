@@ -3,18 +3,17 @@ import { useState, useEffect } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
-import SessionsCard from "../components/SessionsCard";
-import TwoFactorCard from "../components/TwoFactorCard";
-import NotificationsCard from "../components/NotificationsCard";
-import InstallPwaCard from "../components/InstallPwaCard";
-
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-1">{children}</p>
-);
 
 const CheckIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
     <path d="M3 7l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M8 10.2a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4z" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M13 8.5a1.1 1.1 0 00.22 1.21l.04.04a1.33 1.33 0 11-1.88 1.88l-.04-.04a1.1 1.1 0 00-1.21-.22 1.1 1.1 0 00-.67 1.01v.11a1.33 1.33 0 11-2.66 0v-.06a1.1 1.1 0 00-.72-1.01 1.1 1.1 0 00-1.21.22l-.04.04a1.33 1.33 0 11-1.88-1.88l.04-.04a1.1 1.1 0 00.22-1.21 1.1 1.1 0 00-1.01-.67h-.11a1.33 1.33 0 110-2.66h.06a1.1 1.1 0 001.01-.72 1.1 1.1 0 00-.22-1.21l-.04-.04a1.33 1.33 0 111.88-1.88l.04.04a1.1 1.1 0 001.21.22h.05a1.1 1.1 0 00.67-1.01v-.11a1.33 1.33 0 112.66 0v.06a1.1 1.1 0 00.67 1.01h.05a1.1 1.1 0 001.21-.22l.04-.04a1.33 1.33 0 111.88 1.88l-.04.04a1.1 1.1 0 00-.22 1.21v.05a1.1 1.1 0 001.01.67h.11a1.33 1.33 0 110 2.66h-.06a1.1 1.1 0 00-1.01.67z" stroke="currentColor" strokeWidth="1.4" />
   </svg>
 );
 
@@ -30,8 +29,6 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
-
-  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -81,26 +78,6 @@ export default function ProfilePage() {
     } finally { setChangingPassword(false); }
   };
 
-  const handleExport = async () => {
-    try {
-      setExporting(true);
-      const res = await axios.get("/account/export", { responseType: "blob" });
-      const blob = new Blob([res.data], { type: "application/json" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "taskflow-export.json";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      toast.error("Failed to export your data");
-    } finally {
-      setExporting(false);
-    }
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
@@ -115,7 +92,6 @@ export default function ProfilePage() {
 
       <div className="flex-1 flex items-start justify-center px-4 py-8">
         <div className="w-full max-w-lg space-y-6">
-          {/* Back */}
           <button
             onClick={() => navigate("/home")}
             className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-300 transition"
@@ -123,7 +99,17 @@ export default function ProfilePage() {
             ← Back to workspace
           </button>
 
-          {/* Profile */}
+          <div className="flex items-center justify-between px-1">
+            <h1 className="text-xl font-bold text-zinc-100">Profile</h1>
+            <button
+              onClick={() => navigate("/settings")}
+              className="flex items-center gap-1.5 text-sm font-semibold text-zinc-400 hover:text-amber-400 transition"
+            >
+              <SettingsIcon />
+              Settings
+            </button>
+          </div>
+
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center text-2xl font-bold text-black shrink-0">
@@ -206,44 +192,6 @@ export default function ProfilePage() {
                   </button>
                 </form>
               )}
-            </div>
-          </div>
-
-          {/* Settings */}
-          <div>
-            <h2 className="text-xs font-bold text-zinc-600 tracking-widest uppercase px-1 mb-3">Settings</h2>
-
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <SectionLabel>Security</SectionLabel>
-                <TwoFactorCard />
-                <SessionsCard />
-              </div>
-
-              <div className="space-y-3">
-                <SectionLabel>Notifications</SectionLabel>
-                <NotificationsCard />
-                <InstallPwaCard />
-              </div>
-
-              <div className="space-y-3">
-                <SectionLabel>Data</SectionLabel>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <h3 className="text-sm font-bold text-zinc-200">Export your data</h3>
-                      <p className="text-xs text-zinc-500 mt-0.5">Download every task, subject, note, and document record as one JSON file</p>
-                    </div>
-                    <button
-                      onClick={handleExport}
-                      disabled={exporting}
-                      className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition disabled:opacity-50 whitespace-nowrap"
-                    >
-                      {exporting ? "Preparing..." : "Export data"}
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

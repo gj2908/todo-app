@@ -464,7 +464,7 @@ export default function HomePage() {
                         </div>
                         {!notificationReady && (
                           <Link
-                            to="/profile"
+                            to="/settings"
                             className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition whitespace-nowrap"
                           >
                             Go to Settings
