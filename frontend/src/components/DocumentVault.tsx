@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import { btn } from "../lib/ui";
 
 interface VaultDocument {
   _id: string;
@@ -125,8 +126,7 @@ export default function DocumentVault() {
   return (
     <div className="max-w-5xl space-y-4">
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <h3 className="text-lg font-bold text-zinc-100">Document Vault</h3>
-        <p className="text-sm text-zinc-500 mt-1">Upload and store images or PDFs securely in Cloudinary.</p>
+        <p className="text-sm text-zinc-500">Upload and store images or PDFs securely in Cloudinary.</p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs">
           <span className="rounded-md bg-zinc-800 px-2.5 py-1 text-zinc-300">Total: {counts.total}</span>
           <span className="rounded-md bg-zinc-800 px-2.5 py-1 text-zinc-300">Images: {counts.images}</span>
@@ -152,7 +152,7 @@ export default function DocumentVault() {
         <button
           type="submit"
           disabled={uploading}
-          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black hover:bg-amber-400 disabled:opacity-50"
+          className={`px-4 py-2 text-sm ${btn.primary}`}
         >
           {uploading ? "Uploading..." : "Upload to Vault"}
         </button>

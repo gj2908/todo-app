@@ -95,8 +95,8 @@ export default function SubjectNotesPanel({ subjectId, subjectName }: SubjectNot
   return (
     <div className="max-w-5xl space-y-4">
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <h3 className="text-lg font-bold text-zinc-100">{subjectName} — Notes</h3>
-        <p className="text-sm text-zinc-500 mt-1">Upload PDFs, images, or any file as notes for this subject.</p>
+        <h2 className="sr-only">{subjectName} notes</h2>
+        <p className="text-sm text-zinc-500">Upload PDFs, images, or any file as notes for this subject.</p>
       </div>
 
       <form onSubmit={handleUpload} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 space-y-3">

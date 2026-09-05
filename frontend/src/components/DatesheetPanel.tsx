@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
+import { btn } from "../lib/ui";
 
 interface DatesheetDocument {
   _id: string;
@@ -53,11 +54,8 @@ export default function DatesheetPanel() {
   return (
     <div className="max-w-5xl space-y-4">
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-bold text-zinc-100">Datesheet</h3>
-          <p className="text-sm text-zinc-500 mt-1">Your current exam schedule. Uploading a new one replaces it.</p>
-        </div>
-        <label className="shrink-0 flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded-lg transition cursor-pointer">
+        <p className="text-sm text-zinc-500">Your current exam schedule. Uploading a new one replaces it.</p>
+        <label className={`shrink-0 flex items-center justify-center gap-2 px-3 py-2 text-sm cursor-pointer ${btn.primary}`}>
           {uploading ? "Uploading..." : datesheet ? "Replace" : "Upload"}
           <input
             type="file"

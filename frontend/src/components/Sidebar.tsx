@@ -3,6 +3,7 @@ import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
 import ManageSubjectModal from "./ManageSubjectModal";
+import { btn } from "../lib/ui";
 
 interface Subject {
   _id: string;
@@ -116,15 +117,6 @@ const SyllabusIcon = () => (
     <path d="M3 3h7l3 3v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
     <path d="M10 3v3h3" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
     <path d="M4.5 9h5M4.5 11.5h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-  </svg>
-);
-
-const InsightsIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M2.5 13.5h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    <rect x="4" y="8" width="2" height="4.5" rx="0.5" fill="currentColor" />
-    <rect x="7.5" y="5" width="2" height="7.5" rx="0.5" fill="currentColor" />
-    <rect x="11" y="2.5" width="2" height="10" rx="0.5" fill="currentColor" />
   </svg>
 );
 
@@ -289,7 +281,6 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
     { id: "vault", label: "Document Vault", Icon: VaultIcon, key: "vault" },
     { id: "datesheet", label: "Datesheet", Icon: DatesheetIcon, key: "datesheet" },
     { id: "syllabus", label: "Syllabus", Icon: SyllabusIcon, key: "syllabus" },
-    { id: "insights", label: "Insights", Icon: InsightsIcon, key: "insights" },
     { id: "trash", label: "Trash", Icon: NavTrashIcon, key: "trash" },
   ];
 
@@ -418,13 +409,13 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                   <button
                     onClick={handleCreateSubject}
                     disabled={loading}
-                    className="flex-1 py-1 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded transition disabled:opacity-50"
+                    className={`flex-1 py-1 text-xs ${btn.primary}`}
                   >
                     Create
                   </button>
                   <button
                     onClick={() => { setShowNewSubject(false); setNewSubjectName(""); }}
-                    className="flex-1 py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded transition"
+                    className={`flex-1 py-1 text-xs ${btn.secondary}`}
                   >
                     Cancel
                   </button>

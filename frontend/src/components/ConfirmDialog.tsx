@@ -1,3 +1,5 @@
+import { btn } from "../lib/ui";
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -34,17 +36,13 @@ export default function ConfirmDialog({
         <div className="mt-5 flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700"
+            className={`flex-1 px-3 py-2 text-sm ${btn.secondary}`}
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition ${
-              danger
-                ? "bg-red-500 text-white hover:bg-red-400"
-                : "bg-amber-500 text-black hover:bg-amber-400"
-            }`}
+            className={`flex-1 px-3 py-2 text-sm ${danger ? btn.danger : btn.primary}`}
           >
             {confirmLabel}
           </button>

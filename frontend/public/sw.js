@@ -1,4 +1,4 @@
-const CACHE_NAME = "taskflow-cache-v1";
+const CACHE_NAME = "taskflow-cache-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -15,12 +15,34 @@ self.addEventListener("activate", (event) => {
 // offline (or on a flaky connection) - API calls always go to the network
 // since cached task data would go stale and this app has no write-sync
 // story for offline edits yet.
+// App-shell files that must never serve a stale copy (they carry the
+// theme-color/manifest and drive which JS bundle loads) - network-first,
+// falling back to cache only when offline.
+const SHELL_PATHS = ["/", "/index.html", "/manifest.json"];
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+
+  const isShellRequest = request.mode === "navigate" || SHELL_PATHS.includes(url.pathname);
+
+  if (isShellRequest) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match("/index.html")))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then((cached) => {

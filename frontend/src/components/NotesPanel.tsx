@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import { btn } from "../lib/ui";
 
 interface Note {
   _id: string;
@@ -120,7 +121,7 @@ export default function NotesPanel() {
         <div className="p-3 border-b border-zinc-800">
           <button
             onClick={handleNew}
-            className="w-full rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold py-2 transition"
+            className={`w-full py-2 text-sm ${btn.primary}`}
           >
             New note
           </button>
@@ -181,14 +182,14 @@ export default function NotesPanel() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold px-4 py-2 transition disabled:opacity-50"
+                className={`px-4 py-2 text-sm ${btn.primary}`}
               >
                 {saving ? "Saving..." : "Save note"}
               </button>
               {selected && (
                 <button
                   onClick={() => setDeleteTarget(selected)}
-                  className="rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold px-4 py-2 transition"
+                  className="rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold px-4 py-2 transition-all duration-200 active:scale-[0.97]"
                 >
                   Delete
                 </button>

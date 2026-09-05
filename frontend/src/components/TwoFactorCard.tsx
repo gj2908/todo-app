@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
+import { btn } from "../lib/ui";
 
 type Stage = "idle" | "setup" | "backup-codes";
 
@@ -113,7 +114,9 @@ export default function TwoFactorCard() {
           enabled ? (
             <button
               onClick={() => setShowDisableForm((v) => !v)}
-              className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition whitespace-nowrap"
+              className={`px-3 py-2 text-xs whitespace-nowrap ${
+                showDisableForm ? btn.secondary : "bg-zinc-800 hover:bg-red-500/10 text-red-400 font-semibold rounded-lg transition-all duration-200 active:scale-[0.97]"
+              }`}
             >
               {showDisableForm ? "Cancel" : "Disable"}
             </button>
@@ -121,7 +124,7 @@ export default function TwoFactorCard() {
             <button
               onClick={handleStartSetup}
               disabled={submitting}
-              className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400 transition disabled:opacity-50 whitespace-nowrap"
+              className={`px-3 py-2 text-xs whitespace-nowrap ${btn.primary}`}
             >
               {submitting ? "Starting..." : "Enable"}
             </button>
@@ -142,7 +145,7 @@ export default function TwoFactorCard() {
           <button
             onClick={handleDisable}
             disabled={submitting}
-            className="w-full py-2 rounded-lg bg-red-500 hover:bg-red-400 text-white text-sm font-bold transition disabled:opacity-50"
+            className={`w-full py-2 text-sm ${btn.danger}`}
           >
             {submitting ? "Disabling..." : "Disable two-factor authentication"}
           </button>
@@ -169,14 +172,14 @@ export default function TwoFactorCard() {
           <div className="flex gap-2">
             <button
               onClick={() => { setStage("idle"); setCode(""); }}
-              className="flex-1 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-semibold transition"
+              className={`flex-1 py-2 text-sm ${btn.secondary}`}
             >
               Cancel
             </button>
             <button
               onClick={handleConfirmSetup}
               disabled={submitting}
-              className="flex-1 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition disabled:opacity-50"
+              className={`flex-1 py-2 text-sm ${btn.primary}`}
             >
               {submitting ? "Confirming..." : "Confirm"}
             </button>
@@ -199,7 +202,7 @@ export default function TwoFactorCard() {
           </div>
           <button
             onClick={handleFinish}
-            className="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition"
+            className={`w-full py-2 text-sm ${btn.primary}`}
           >
             I've saved these codes
           </button>

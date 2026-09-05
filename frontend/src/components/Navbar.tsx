@@ -4,16 +4,9 @@ import axios from "../axiosConfig";
 
 interface NavbarProps {
   onClockClick?: () => void;
-  onNewTaskClick?: () => void;
   onMenuClick?: () => void;
   menuOpen?: boolean;
 }
-
-const PlusIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
 
 const MenuIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -27,7 +20,7 @@ const CloseIcon = () => (
   </svg>
 );
 
-export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menuOpen = false }: NavbarProps) {
+export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: NavbarProps) {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -131,17 +124,6 @@ export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menu
 
         {/* Right */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          {onNewTaskClick && (
-            <button
-              onClick={onNewTaskClick}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
-            >
-              <PlusIcon />
-              <span className="hidden sm:inline">New Task</span>
-              <span className="sm:hidden">Add</span>
-            </button>
-          )}
-
           <div className="relative">
             <button
               id="profile-button"

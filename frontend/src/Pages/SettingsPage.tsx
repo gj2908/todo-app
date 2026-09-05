@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "../axiosConfig";
 import Navbar from "../components/Navbar";
@@ -6,13 +5,14 @@ import SessionsCard from "../components/SessionsCard";
 import TwoFactorCard from "../components/TwoFactorCard";
 import NotificationsCard from "../components/NotificationsCard";
 import InstallPwaCard from "../components/InstallPwaCard";
+import PageHeader from "../components/PageHeader";
+import { btn } from "../lib/ui";
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-1 pt-1">{children}</p>
 );
 
 export default function SettingsPage() {
-  const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
@@ -41,12 +41,7 @@ export default function SettingsPage() {
 
       <div className="flex-1 flex items-start justify-center px-4 py-6">
         <div className="w-full max-w-lg space-y-4">
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 text-lg font-bold text-zinc-100 hover:text-amber-400 transition"
-          >
-            <span aria-hidden className="text-zinc-500">←</span> Settings
-          </button>
+          <PageHeader title="Settings" />
 
           <div className="space-y-2">
             <SectionLabel>Security</SectionLabel>
@@ -71,7 +66,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleExport}
                   disabled={exporting}
-                  className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition disabled:opacity-50 whitespace-nowrap"
+                  className={`px-3 py-2 text-xs whitespace-nowrap ${btn.secondary}`}
                 >
                   {exporting ? "Preparing..." : "Export data"}
                 </button>

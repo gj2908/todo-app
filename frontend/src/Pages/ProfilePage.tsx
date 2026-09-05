@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
+import PageHeader from "../components/PageHeader";
+import { btn, input } from "../lib/ui";
 
 const CheckIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -92,21 +94,18 @@ export default function ProfilePage() {
 
       <div className="flex-1 flex items-start justify-center px-4 py-6">
         <div className="w-full max-w-lg space-y-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate("/home")}
-              className="flex items-center gap-2 text-lg font-bold text-zinc-100 hover:text-amber-400 transition"
-            >
-              <span aria-hidden className="text-zinc-500">←</span> Profile
-            </button>
-            <button
-              onClick={() => navigate("/settings")}
-              className="flex items-center gap-1.5 text-sm font-semibold text-zinc-400 hover:text-amber-400 transition"
-            >
-              <SettingsIcon />
-              Settings
-            </button>
-          </div>
+          <PageHeader
+            title="Profile"
+            actions={
+              <button
+                onClick={() => navigate("/settings")}
+                className="flex items-center gap-1.5 text-sm font-semibold text-zinc-400 hover:text-amber-400 transition-colors duration-200"
+              >
+                <SettingsIcon />
+                Settings
+              </button>
+            }
+          />
 
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
             <div className="flex items-center gap-4">
@@ -143,7 +142,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={() => setShowPasswordForm(!showPasswordForm)}
-                  className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400 transition"
+                  className={`px-3 py-2 text-xs ${showPasswordForm ? btn.secondary : btn.primary}`}
                 >
                   {showPasswordForm ? "Cancel" : "Change Password"}
                 </button>
@@ -158,7 +157,7 @@ export default function ProfilePage() {
                       value={currentPassword}
                       onChange={e => setCurrentPassword(e.target.value)}
                       placeholder="Your current password"
-                      className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+                      className={`w-full px-3.5 py-2.5 text-sm ${input}`}
                     />
                   </div>
                   <div>
@@ -168,7 +167,7 @@ export default function ProfilePage() {
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
                       placeholder="Min. 6 characters"
-                      className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+                      className={`w-full px-3.5 py-2.5 text-sm ${input}`}
                     />
                   </div>
                   <div>
@@ -178,13 +177,13 @@ export default function ProfilePage() {
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="Re-enter new password"
-                      className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+                      className={`w-full px-3.5 py-2.5 text-sm ${input}`}
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={changingPassword}
-                    className="w-full py-2.5 rounded-lg font-bold text-sm text-black bg-amber-500 hover:bg-amber-400 transition disabled:opacity-50"
+                    className={`w-full py-2.5 text-sm ${btn.primary}`}
                   >
                     {changingPassword ? "Updating..." : "Update Password"}
                   </button>

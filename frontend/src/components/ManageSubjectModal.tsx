@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import { btn } from "../lib/ui";
 
 interface Member {
   userId: string;
@@ -177,7 +178,7 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
           <button
             onClick={handleInvite}
             disabled={inviting}
-            className="rounded-lg bg-amber-500 px-3 py-2 text-sm font-bold text-black hover:bg-amber-400 disabled:opacity-50 shrink-0"
+            className={`px-3 py-2 text-sm shrink-0 ${btn.primary}`}
           >
             {inviting ? "..." : "Invite"}
           </button>
@@ -208,7 +209,7 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
 
         <button
           onClick={onClose}
-          className="mt-5 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700"
+          className={`mt-5 w-full px-3 py-2 text-sm ${btn.secondary}`}
         >
           Done
         </button>
