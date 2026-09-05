@@ -39,18 +39,18 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
 
   return (
     <div className={compact ? "space-y-3 rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-3" : "space-y-4"}>
-      <div className={`flex items-center justify-between gap-2 ${compact ? "flex-col items-start sm:flex-row sm:items-center" : ""}`}>
-        <h3 className={compact ? "text-lg font-extrabold text-zinc-100 tracking-tight" : "text-2xl font-extrabold text-zinc-100"}>
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className={compact ? "text-lg font-extrabold text-zinc-100 tracking-tight" : "text-xl sm:text-2xl font-extrabold text-zinc-100"}>
           Monthly Deadlines
         </h3>
-        <div className={`flex items-center gap-1.5 ${compact ? "rounded-lg border border-zinc-800 bg-zinc-900 px-1 py-1" : ""}`}>
+        <div className={`flex items-center justify-between gap-1.5 w-full sm:w-auto ${compact ? "rounded-lg border border-zinc-800 bg-zinc-900 px-1 py-1" : ""}`}>
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className={`${compact ? "px-2 py-1 text-base font-semibold" : "px-2.5 py-1.5 text-lg font-semibold"} rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition`}
           >
             Prev
           </button>
-          <span className={`${compact ? "text-base min-w-[120px]" : "text-lg min-w-[140px]"} font-bold text-zinc-300 text-center`}>
+          <span className={`${compact ? "text-base min-w-[110px]" : "text-lg min-w-[110px] sm:min-w-[140px]"} font-bold text-zinc-300 text-center`}>
             {format(currentMonth, "MMMM yyyy")}
           </span>
           <button

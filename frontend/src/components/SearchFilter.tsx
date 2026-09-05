@@ -113,7 +113,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
         <div className="p-3 sm:p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl space-y-4">
           {/* Priority pills */}
           <div>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Priority</p>
+            <p className="text-sm font-medium text-zinc-500 mb-2">Priority</p>
             <div className="flex flex-wrap gap-2">
               {priorities.map(p => (
                 <button
@@ -141,7 +141,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
           {/* Category */}
           <div>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Category</p>
+            <p className="text-sm font-medium text-zinc-500 mb-2">Category</p>
             <div className="flex flex-wrap gap-2">
               {["work", "personal", "shopping", "health", "general"].map(cat => (
                 <button
@@ -161,7 +161,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
           {/* Sort */}
           <div>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Sort by</p>
+            <p className="text-sm font-medium text-zinc-500 mb-2">Sort by</p>
             <div className="flex flex-wrap gap-2">
               {sorts.map(s => (
                 <button

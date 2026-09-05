@@ -107,10 +107,10 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
       if (todo?._id) {
         await axios.put(`/todos/${todo._id}`, payload);
-        toast.success("✅ Task updated!");
+        toast.success("Task updated");
       } else {
         await axios.post("/todos", payload);
-        toast.success("✅ Task created!");
+        toast.success("Task created");
       }
       onSave(null);
       onClose();
@@ -155,7 +155,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {/* Title */}
           <div>
-            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
               Task Title *
             </label>
             <input
@@ -170,7 +170,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
               Description
             </label>
             <textarea
@@ -186,7 +186,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Priority */}
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
                 Priority
               </label>
               <div className="flex gap-1.5">
@@ -210,7 +210,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
             {/* Category */}
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
                 Category
               </label>
               <select
@@ -231,7 +231,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Due Date */}
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
                 Due Date
               </label>
               <input
@@ -244,7 +244,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
             {/* Project */}
             <div>
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
                 Project
               </label>
               {!showNewProjectForm ? (
@@ -304,9 +304,9 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
           {/* Tags */}
           <div>
-            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
               Tags
-              <span className="text-zinc-600 font-normal ml-1 normal-case">(comma separated)</span>
+              <span className="text-zinc-600 font-normal ml-1">(comma separated)</span>
             </label>
             <input
               type="text"

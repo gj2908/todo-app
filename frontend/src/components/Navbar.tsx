@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 interface NavbarProps {
-  onDateClick?: () => void;
-  onTimeClick?: () => void;
+  onClockClick?: () => void;
   onNewTaskClick?: () => void;
   onMenuClick?: () => void;
   menuOpen?: boolean;
@@ -27,7 +26,7 @@ const CloseIcon = () => (
   </svg>
 );
 
-export default function Navbar({ onDateClick, onTimeClick, onNewTaskClick, onMenuClick, menuOpen = false }: NavbarProps) {
+export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menuOpen = false }: NavbarProps) {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -108,21 +107,30 @@ export default function Navbar({ onDateClick, onTimeClick, onNewTaskClick, onMen
           </div>
         </div>
 
-        {/* Center - clock */}
-        <div className="hidden lg:flex flex-col items-center">
+        {/* Center - clock, opens the Calendar view */}
+        {onClockClick ? (
           <button
-            onClick={onTimeClick}
-            className="text-xl font-mono font-bold text-white tabular-nums tracking-widest hover:text-amber-400 transition"
+            onClick={onClockClick}
+            title="Open calendar"
+            className="hidden lg:flex flex-col items-center group"
           >
-            {formatTime(currentTime)}
+            <span className="text-xl font-mono font-bold text-white tabular-nums tracking-widest group-hover:text-amber-400 transition">
+              {formatTime(currentTime)}
+            </span>
+            <span className="text-xs text-zinc-400 tracking-wider uppercase group-hover:text-amber-400 transition">
+              {formatDate(currentTime)}
+            </span>
           </button>
-          <button
-            onClick={onDateClick}
-            className="text-xs text-zinc-400 tracking-wider uppercase hover:text-amber-400 transition"
-          >
-            {formatDate(currentTime)}
-          </button>
-        </div>
+        ) : (
+          <div className="hidden lg:flex flex-col items-center">
+            <span className="text-xl font-mono font-bold text-white tabular-nums tracking-widest">
+              {formatTime(currentTime)}
+            </span>
+            <span className="text-xs text-zinc-400 tracking-wider uppercase">
+              {formatDate(currentTime)}
+            </span>
+          </div>
+        )}
 
         {/* Right */}
         <div className="flex items-center gap-1.5 sm:gap-3">
@@ -154,7 +162,7 @@ export default function Navbar({ onDateClick, onTimeClick, onNewTaskClick, onMen
                 className="absolute right-0 top-full mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg overflow-hidden z-50"
               >
                 <div className="px-4 py-3 border-b border-zinc-800">
-                  <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Account</p>
+                  <p className="text-xs font-medium text-zinc-500">Signed in as</p>
                   <p className="text-sm font-semibold text-zinc-200 truncate mt-1">{userEmail}</p>
                 </div>
                 <button

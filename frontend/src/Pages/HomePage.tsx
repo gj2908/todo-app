@@ -6,11 +6,10 @@ import Sidebar from "../components/Sidebar";
 import TodoItem from "../components/TodoItem";
 import TodoModal from "../components/TodoModal";
 import SearchFilter from "../components/SearchFilter";
-import CalendarModal from "../components/CalendarModal";
 import CalendarPanel from "../components/CalendarPanel";
-import ReminderModal from "../components/ReminderModal";
 import DocumentVault from "../components/DocumentVault";
 import PersonalReminderModal from "../components/PersonalReminderModal";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { isToday, isPast } from "date-fns";
 import { getNotificationPermissionStatus, requestNotificationPermission, scheduleExactReminder, scheduleTaskReminder, sendNotification } from "../utils/notifications";
 
@@ -64,10 +63,8 @@ export default function HomePage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sort, setSort] = useState("dueDate");
   const [loading, setLoading] = useState(true);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [calendarDate, setCalendarDate] = useState(new Date());
-  const [showReminderModal, setShowReminderModal] = useState(false);
   const [showPersonalReminderModal, setShowPersonalReminderModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Todo | null>(null);
   const [personalReminders, setPersonalReminders] = useState<PersonalReminder[]>(() => {
     try {
       const saved = localStorage.getItem(PERSONAL_REMINDERS_KEY);
@@ -236,8 +233,14 @@ export default function HomePage() {
     } catch { toast.error("Failed to update task"); }
   };
 
-  const deleteTodo = async (id: string) => {
-    if (!window.confirm("Delete this task?")) return;
+  const requestDeleteTodo = (id: string) => {
+    setDeleteTarget(todos.find(t => t._id === id) || null);
+  };
+
+  const confirmDeleteTodo = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget._id;
+    setDeleteTarget(null);
     try {
       await axios.delete(`/todos/${id}`);
       setTodos(todos.filter(t => t._id !== id));
@@ -323,8 +326,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col h-[100dvh] bg-zinc-950 overflow-hidden">
       <Navbar
-        onDateClick={() => setShowCalendar(true)}
-        onTimeClick={() => setShowReminderModal(true)}
+        onClockClick={() => handleViewChange("calendar")}
         onNewTaskClick={handleAddNew}
         onMenuClick={() => setSidebarOpen((v) => !v)}
         menuOpen={sidebarOpen}
@@ -423,27 +425,49 @@ export default function HomePage() {
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-sm text-zinc-300">
-                    Notifications: {notificationReady ? "Enabled" : "Disabled"}
-                          </p>
+                          <h3 className="text-sm font-bold text-zinc-100">Browser notifications</h3>
                           <p className="text-xs text-zinc-500 mt-1">
-                            Reminder time: {reminderMinutes} minutes before due date
+                            {notificationReady ? "Enabled for this browser" : "Not enabled yet"}
                           </p>
                         </div>
-                        <button
-                          onClick={async () => {
-                            const ok = await requestNotificationPermission();
-                            setNotificationReady(ok);
-                            if (ok) {
-                              sendNotification("Taskflow reminders enabled", {
-                                body: "You will receive due-date reminders in this browser.",
-                              });
-                            }
-                          }}
-                          className="rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
-                        >
-                          Enable
-                        </button>
+                        {!notificationReady && (
+                          <button
+                            onClick={async () => {
+                              const ok = await requestNotificationPermission();
+                              setNotificationReady(ok);
+                              if (ok) {
+                                sendNotification("Taskflow reminders enabled", {
+                                  body: "You will receive due-date reminders in this browser.",
+                                });
+                              }
+                            }}
+                            className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400"
+                          >
+                            Enable
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-zinc-800">
+                        <p className="text-sm font-medium text-zinc-500 mb-2">Remind me before due date</p>
+                        <div className="flex flex-wrap gap-2">
+                          {[5, 10, 15, 30, 60].map((m) => (
+                            <button
+                              key={m}
+                              onClick={() => {
+                                setReminderMinutes(m);
+                                toast.success(`Reminder set to ${m} minutes before due time`);
+                              }}
+                              className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition ${
+                                reminderMinutes === m
+                                  ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                                  : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
+                              }`}
+                            >
+                              {m}m
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -494,7 +518,7 @@ export default function HomePage() {
                               todo={todo}
                               projectName={getProjectName(todo.project)}
                               onEdit={handleEditTodo}
-                              onDelete={deleteTodo}
+                              onDelete={requestDeleteTodo}
                               onToggle={toggleComplete}
                             />
                           ))}
@@ -521,7 +545,7 @@ export default function HomePage() {
                         todo={todo}
                         projectName={getProjectName(todo.project)}
                         onEdit={handleEditTodo}
-                        onDelete={deleteTodo}
+                        onDelete={requestDeleteTodo}
                         onToggle={toggleComplete}
                       />
                     ))}
@@ -567,7 +591,7 @@ export default function HomePage() {
                     todo={todo}
                     projectName={getProjectName(todo.project)}
                     onEdit={handleEditTodo}
-                    onDelete={deleteTodo}
+                    onDelete={requestDeleteTodo}
                     onToggle={toggleComplete}
                   />
                 ))}
@@ -613,21 +637,14 @@ export default function HomePage() {
         defaultProject={selectedProject}
       />
 
-      <CalendarModal
-        isOpen={showCalendar}
-        selectedDate={calendarDate}
-        onSelect={(date) => setCalendarDate(date)}
-        onClose={() => setShowCalendar(false)}
-      />
-
-      <ReminderModal
-        isOpen={showReminderModal}
-        defaultMinutes={reminderMinutes}
-        onSave={(minutes) => {
-          setReminderMinutes(minutes);
-          toast.success(`Reminder set to ${minutes} minutes before due time`);
-        }}
-        onClose={() => setShowReminderModal(false)}
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Delete task"
+        message={deleteTarget ? `"${deleteTarget.title}" will be permanently deleted.` : ""}
+        confirmLabel="Delete"
+        danger
+        onConfirm={confirmDeleteTodo}
+        onCancel={() => setDeleteTarget(null)}
       />
 
       <PersonalReminderModal

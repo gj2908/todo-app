@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface VaultDocument {
   _id: string;
@@ -28,6 +29,7 @@ export default function DocumentVault() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<VaultDocument | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -72,8 +74,10 @@ export default function DocumentVault() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this document?")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const id = deleteTarget._id;
+    setDeleteTarget(null);
     try {
       await axios.delete(`/documents/${id}`);
       setDocuments((prev) => prev.filter((d) => d._id !== id));
@@ -209,7 +213,7 @@ export default function DocumentVault() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(doc._id)}
+                    onClick={() => setDeleteTarget(doc)}
                     className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
                   >
                     Delete
@@ -220,6 +224,16 @@ export default function DocumentVault() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Delete document"
+        message={deleteTarget ? `"${deleteTarget.title}" will be permanently removed from your vault.` : ""}
+        confirmLabel="Delete"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

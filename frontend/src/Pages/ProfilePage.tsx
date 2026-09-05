@@ -73,11 +73,11 @@ export default function ProfilePage() {
 
             <div className="space-y-3">
               <div className="p-4 bg-zinc-800 rounded-xl border border-zinc-700">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Email Address</p>
+                <p className="text-xs font-medium text-zinc-500 mb-1">Email Address</p>
                 <p className="text-sm font-semibold text-zinc-200">{user.email}</p>
               </div>
               <div className="p-4 bg-zinc-800 rounded-xl border border-zinc-700">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">User ID</p>
+                <p className="text-xs font-medium text-zinc-500 mb-1">User ID</p>
                 <p className="text-xs font-mono text-zinc-400 break-all">{user.id}</p>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function ProfilePage() {
             {showPasswordForm && (
               <form onSubmit={handleChangePassword} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">New Password</label>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">New Password</label>
                   <input
                     type="password"
                     value={newPassword}
@@ -111,7 +111,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Confirm Password</label>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">Confirm Password</label>
                   <input
                     type="password"
                     value={confirmPassword}

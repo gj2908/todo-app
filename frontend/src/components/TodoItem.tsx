@@ -22,17 +22,17 @@ const DeleteIcon = () => (
 );
 
 const priorityConfig: Record<string, { dot: string; badge: string; border: string }> = {
-  high:   { dot: "bg-red-500",    badge: "bg-red-500/15 text-red-400 border-red-500/30",    border: "border-l-red-500" },
-  medium: { dot: "bg-amber-500",  badge: "bg-amber-500/15 text-amber-400 border-amber-500/30", border: "border-l-amber-500" },
-  low:    { dot: "bg-green-500",  badge: "bg-green-500/15 text-green-400 border-green-500/30", border: "border-l-green-500" },
+  high:   { dot: "bg-red-500",    badge: "bg-red-500/15 text-red-400",    border: "border-l-red-500" },
+  medium: { dot: "bg-amber-500",  badge: "bg-amber-500/15 text-amber-400", border: "border-l-amber-500" },
+  low:    { dot: "bg-green-500",  badge: "bg-green-500/15 text-green-400", border: "border-l-green-500" },
 };
 
 const categoryColors: Record<string, string> = {
-  work:     "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  personal: "bg-purple-500/15 text-purple-400 border-purple-500/25",
-  shopping: "bg-pink-500/15 text-pink-400 border-pink-500/25",
-  health:   "bg-teal-500/15 text-teal-400 border-teal-500/25",
-  general:  "bg-zinc-700 text-zinc-400 border-zinc-600",
+  work:     "bg-blue-500/15 text-blue-400",
+  personal: "bg-purple-500/15 text-purple-400",
+  shopping: "bg-pink-500/15 text-pink-400",
+  health:   "bg-teal-500/15 text-teal-400",
+  general:  "bg-zinc-700 text-zinc-400",
 };
 
 export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle }: TodoItemProps) {
@@ -40,10 +40,10 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
 
   const getDateInfo = (dateStr: string) => {
     const d = new Date(dateStr);
-    if (isPast(d) && !isToday(d)) return { label: "Overdue", cls: "text-red-400 bg-red-500/10 border-red-500/20" };
-    if (isToday(d)) return { label: "Today", cls: "text-amber-400 bg-amber-500/10 border-amber-500/20" };
-    if (isTomorrow(d)) return { label: "Tomorrow", cls: "text-blue-400 bg-blue-500/10 border-blue-500/20" };
-    return { label: format(d, "MMM d"), cls: "text-zinc-400 bg-zinc-800 border-zinc-700" };
+    if (isPast(d) && !isToday(d)) return { label: "Overdue", cls: "text-red-400 bg-red-500/10" };
+    if (isToday(d)) return { label: "Today", cls: "text-amber-400 bg-amber-500/10" };
+    if (isTomorrow(d)) return { label: "Tomorrow", cls: "text-blue-400 bg-blue-500/10" };
+    return { label: format(d, "MMM d"), cls: "text-zinc-400 bg-zinc-800" };
   };
 
   const dateInfo = todo.dueDate ? getDateInfo(todo.dueDate) : null;
@@ -104,34 +104,34 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
         <div className="flex flex-wrap items-center gap-1 mt-1">
           {/* Project name */}
           {projectName && (
-            <span className="text-xs font-semibold px-1.5 py-0.5 rounded border bg-amber-500/10 text-amber-400 border-amber-500/30">
-              ◆ {projectName}
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">
+              {projectName}
             </span>
           )}
 
           {/* Priority */}
-          <span className={`inline-flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${pc.badge}`}>
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded capitalize ${pc.badge}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${pc.dot}`} />
             {todo.priority}
           </span>
 
           {/* Category */}
           {todo.category && todo.category !== "general" && (
-            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded border uppercase tracking-wider ${categoryColors[todo.category] || categoryColors.general}`}>
+            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded capitalize ${categoryColors[todo.category] || categoryColors.general}`}>
               {todo.category}
             </span>
           )}
 
           {/* Due date */}
           {dateInfo && (
-            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded border ${dateInfo.cls}`}>
-              ⏰ {dateInfo.label}
+            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${dateInfo.cls}`}>
+              {dateInfo.label}
             </span>
           )}
 
           {/* Tags */}
           {todo.tags?.map((tag: string, idx: number) => (
-            <span key={idx} className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-400">
+            <span key={idx} className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
               #{tag}
             </span>
           ))}
