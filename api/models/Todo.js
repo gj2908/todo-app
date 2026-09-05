@@ -21,6 +21,14 @@ const todoSchema = new mongoose.Schema({
     },
   ],
   attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }],
+  comments: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      text: { type: String, required: true },
+      type: { type: String, enum: ["comment", "activity"], default: "comment" },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
   recurrence: {
     freq: { type: String, enum: ["daily", "weekly", "monthly"] },
     interval: { type: Number, default: 1 },

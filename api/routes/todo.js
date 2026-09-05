@@ -4,6 +4,7 @@ const { addDays, addWeeks, addMonths, isAfter } = require("date-fns");
 const { createEvents } = require("ics");
 const { protect } = require("../middleware/auth");
 const Todo = require("../models/Todo");
+const User = require("../models/User");
 const { getAccessibleSubjects, isSubjectMember } = require("../utils/subjectAccess");
 
 const computeNextDueDate = (fromDate, recurrence) => {
@@ -237,9 +238,80 @@ router.put("/:id", protect, async (req, res) => {
       }
     }
 
+    const activityEntries = [];
+    if (req.body.completed !== undefined && req.body.completed !== existing.completed) {
+      activityEntries.push(req.body.completed ? "marked this task complete" : "reopened this task");
+    }
+    if (req.body.assignee !== undefined && String(req.body.assignee || "") !== String(existing.assignee || "")) {
+      if (req.body.assignee) {
+        const assigneeUser = await User.findById(req.body.assignee).select("name email");
+        activityEntries.push(`reassigned this task to ${assigneeUser?.name || assigneeUser?.email || "someone"}`);
+      } else {
+        activityEntries.push("unassigned this task");
+      }
+    }
+    if (req.body.subject !== undefined && String(req.body.subject || "") !== String(existing.subject || "")) {
+      if (req.body.subject) {
+        const targetSubject = accessibleSubjects.find((s) => String(s._id) === String(req.body.subject));
+        activityEntries.push(`moved this task to ${targetSubject?.name || "another subject"}`);
+      } else {
+        activityEntries.push("removed this task from its subject");
+      }
+    }
+    if (activityEntries.length > 0) {
+      await Todo.updateOne(
+        { _id: req.params.id },
+        { $push: { comments: { $each: activityEntries.map((text) => ({ user: req.user, text, type: "activity" })) } } }
+      );
+    }
+
     res.json(todo);
   } catch (error) {
     res.status(500).json({ message: "Error updating todo" });
+  }
+});
+
+// GET a todo's comments/activity thread - any accessible role (owner/editor/viewer)
+router.get("/:id/comments", protect, async (req, res) => {
+  try {
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
+
+    const todo = await Todo.findOne({
+      _id: req.params.id,
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
+    }).populate("comments.user", "name email");
+    if (!todo) return res.status(404).json({ message: "Todo not found" });
+
+    res.json(todo.comments || []);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching comments" });
+  }
+});
+
+// POST a comment on a todo - any accessible role (owner/editor/viewer) may comment
+router.post("/:id/comments", protect, async (req, res) => {
+  try {
+    const text = req.body?.text?.trim();
+    if (!text) return res.status(400).json({ message: "Comment text is required" });
+
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
+
+    const todo = await Todo.findOne({
+      _id: req.params.id,
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
+    });
+    if (!todo) return res.status(404).json({ message: "Todo not found" });
+
+    const comment = { user: req.user, text, type: "comment", createdAt: new Date() };
+    todo.comments.push(comment);
+    await todo.save();
+
+    const author = await User.findById(req.user).select("name email");
+    res.json({ ...comment, user: author });
+  } catch (error) {
+    res.status(500).json({ message: "Error posting comment" });
   }
 });
 

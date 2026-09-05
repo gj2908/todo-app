@@ -96,6 +96,10 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const currentUser = getCurrentUser();
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [postingComment, setPostingComment] = useState(false);
 
   // KEY FIX: Reset form whenever `todo` changes (fixes edit not populating)
   useEffect(() => {
@@ -114,6 +118,29 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
       .then((res) => setMembers(res.data))
       .catch(() => setMembers([]));
   }, [formData.subject]);
+
+  useEffect(() => {
+    if (!isOpen || !todo?._id) { setComments([]); return; }
+    setLoadingComments(true);
+    axios.get(`/todos/${todo._id}/comments`)
+      .then((res) => setComments(res.data))
+      .catch(() => setComments([]))
+      .finally(() => setLoadingComments(false));
+  }, [isOpen, todo?._id]);
+
+  const handlePostComment = async () => {
+    if (!newComment.trim() || !todo?._id) return;
+    try {
+      setPostingComment(true);
+      const res = await axios.post(`/todos/${todo._id}/comments`, { text: newComment.trim() });
+      setComments((prev) => [...prev, res.data]);
+      setNewComment("");
+    } catch {
+      toast.error("Failed to post comment");
+    } finally {
+      setPostingComment(false);
+    }
+  };
 
   const fetchSubjects = async () => {
     try {
@@ -530,6 +557,51 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               />
             </label>
           </div>
+
+          {/* Comments & activity */}
+          {todo?._id && (
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">Activity</label>
+              <div className="space-y-2 max-h-48 overflow-y-auto mb-2">
+                {loadingComments ? (
+                  <p className="text-sm text-zinc-500">Loading...</p>
+                ) : comments.length === 0 ? (
+                  <p className="text-sm text-zinc-500">No comments yet.</p>
+                ) : (
+                  comments.map((c, i) => (
+                    <div key={i} className={c.type === "activity" ? "text-xs text-zinc-500 italic px-1" : "bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2"}>
+                      {c.type === "activity" ? (
+                        <span>{c.user?.name || c.user?.email || "Someone"} {c.text}</span>
+                      ) : (
+                        <>
+                          <p className="text-xs font-semibold text-amber-400">{c.user?.name || c.user?.email || "Someone"}</p>
+                          <p className="text-sm text-zinc-200 mt-0.5">{c.text}</p>
+                        </>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handlePostComment())}
+                  placeholder="Add a comment..."
+                  className="flex-1 min-w-0 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+                />
+                <button
+                  type="button"
+                  onClick={handlePostComment}
+                  disabled={postingComment || !newComment.trim()}
+                  className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded-lg transition disabled:opacity-50 shrink-0"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          )}
         </form>
 
         {/* Footer */}

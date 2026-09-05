@@ -187,6 +187,13 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
               {todo.attachments.length} file{todo.attachments.length > 1 ? "s" : ""}
             </span>
           )}
+
+          {/* Comment count */}
+          {todo.comments?.filter((c: any) => c.type === "comment").length > 0 && (
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+              💬 {todo.comments.filter((c: any) => c.type === "comment").length}
+            </span>
+          )}
         </div>
       </div>
     </div>
