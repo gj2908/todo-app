@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 import SessionsCard from "../components/SessionsCard";
 import TwoFactorCard from "../components/TwoFactorCard";
+import NotificationsCard from "../components/NotificationsCard";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -134,10 +135,6 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
-              <div className="p-4 bg-zinc-800 rounded-xl border border-zinc-700">
-                <p className="text-xs font-medium text-zinc-500 mb-1">User ID</p>
-                <p className="text-xs font-mono text-zinc-400 break-all">{user.id}</p>
-              </div>
             </div>
           </div>
 
@@ -190,6 +187,8 @@ export default function ProfilePage() {
           </div>
 
           <TwoFactorCard />
+
+          <NotificationsCard />
 
           <SessionsCard />
 

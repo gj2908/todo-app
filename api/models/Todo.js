@@ -20,6 +20,11 @@ const todoSchema = new mongoose.Schema({
     },
   ],
   attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Document" }],
+  recurrence: {
+    freq: { type: String, enum: ["daily", "weekly", "monthly"] },
+    interval: { type: Number, default: 1 },
+    until: Date,
+  },
   deletedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

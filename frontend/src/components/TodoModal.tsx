@@ -46,6 +46,13 @@ interface AttachmentRef {
   title: string;
 }
 
+const repeatOptions = [
+  { value: "",        label: "None" },
+  { value: "daily",   label: "Daily" },
+  { value: "weekly",  label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+];
+
 const getBlankForm = (todo: any, defaultProject: string | null | undefined) => ({
   title:       todo?.title       || "",
   description: todo?.description || "",
@@ -54,6 +61,8 @@ const getBlankForm = (todo: any, defaultProject: string | null | undefined) => (
   dueDate:     todo?.dueDate ? new Date(todo.dueDate).toISOString().split("T")[0] : "",
   tags:        todo?.tags?.join(", ") || "",
   project:     todo?.project || defaultProject || "",
+  recurFreq:     todo?.recurrence?.freq || "",
+  recurInterval: todo?.recurrence?.interval || 1,
 });
 
 const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, defaultProject }) => {
@@ -150,11 +159,13 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
     setSaving(true);
     try {
+      const { recurFreq, recurInterval, ...rest } = formData;
       const payload = {
-        ...formData,
+        ...rest,
         tags: formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean),
         subtasks,
         attachments: attachments.map((a) => a._id),
+        recurrence: recurFreq ? { freq: recurFreq, interval: Number(recurInterval) || 1 } : null,
       };
 
       if (todo?._id) {
@@ -352,6 +363,37 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Repeat */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Repeat</label>
+            <div className="flex gap-2">
+              <select
+                value={formData.recurFreq}
+                onChange={e => set("recurFreq", e.target.value)}
+                className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+              >
+                {repeatOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              {formData.recurFreq && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs text-zinc-500">every</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.recurInterval}
+                    onChange={e => set("recurInterval", e.target.value)}
+                    className="w-16 px-2 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm text-center focus:outline-none focus:border-amber-500 transition"
+                  />
+                </div>
+              )}
+            </div>
+            {formData.recurFreq && !formData.dueDate && (
+              <p className="text-xs text-amber-400 mt-1.5">Add a due date so the next occurrence has something to count from.</p>
+            )}
           </div>
 
           {/* Tags */}

@@ -5,6 +5,12 @@ const projectSchema = new mongoose.Schema({
   name: { type: String, required: true },
   color: { type: String, default: "#3498db" },
   icon: { type: String, default: "📋" },
+  members: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      role: { type: String, enum: ["editor", "viewer"], default: "editor" },
+    },
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

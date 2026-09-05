@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import ManageProjectModal from "./ManageProjectModal";
 
 interface Project {
   _id: string;
   name: string;
   icon: string;
   color: string;
+  role?: "owner" | "editor" | "viewer";
 }
 
 interface SidebarProps {
@@ -105,12 +107,22 @@ const TrashIcon = () => (
   </svg>
 );
 
+const ShareIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <circle cx="10" cy="3" r="1.6" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="3" cy="6.5" r="1.6" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="10" cy="10" r="1.6" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M4.4 5.6l4.2-1.8M4.4 7.4l4.2 1.8" stroke="currentColor" strokeWidth="1.2" />
+  </svg>
+);
+
 export default function Sidebar({ activeView, onViewChange, onProjectSelect, todoCounts = {}, reminderCount = 0 }: SidebarProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [manageTarget, setManageTarget] = useState<Project | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -266,6 +278,7 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
             )}
             {projects.map(project => {
               const isActive = activeView === `project_${project._id}`;
+              const isOwner = !project.role || project.role === "owner";
               return (
                 <div
                   key={project._id}
@@ -279,13 +292,31 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
                   <span className="flex items-center gap-2 text-sm font-semibold min-w-0">
                     <span className="text-amber-500 text-xs">◆</span>
                     <span className="truncate">{project.name}</span>
+                    {!isOwner && (
+                      <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 capitalize shrink-0">
+                        {project.role}
+                      </span>
+                    )}
                   </span>
-                  <button
-                    onClick={e => { e.stopPropagation(); setDeleteTarget(project); }}
-                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition ml-1 shrink-0"
-                  >
-                    <TrashIcon />
-                  </button>
+                  <span className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition shrink-0">
+                    {isOwner && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setManageTarget(project); }}
+                        className="text-zinc-500 hover:text-amber-400 transition"
+                        title="Share project"
+                      >
+                        <ShareIcon />
+                      </button>
+                    )}
+                    {isOwner && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setDeleteTarget(project); }}
+                        className="text-zinc-500 hover:text-red-400 transition"
+                      >
+                        <TrashIcon />
+                      </button>
+                    )}
+                  </span>
                 </div>
               );
             })}
@@ -306,6 +337,13 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
         danger
         onConfirm={handleDeleteProject}
         onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ManageProjectModal
+        isOpen={!!manageTarget}
+        projectId={manageTarget?._id || null}
+        projectName={manageTarget?.name || ""}
+        onClose={() => setManageTarget(null)}
       />
     </div>
   );

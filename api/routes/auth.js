@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 const { authenticator } = require("otplib");
@@ -11,6 +10,7 @@ const User = require("../models/User");
 const Session = require("../models/Session");
 const { protect } = require("../middleware/auth");
 const { createSession, getClientIp } = require("../utils/sessionUtils");
+const { getAppBaseUrl, sendResetEmail, sendVerificationEmail } = require("../utils/email");
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -33,10 +33,6 @@ const getResetTokenSecret = () => {
   );
 };
 
-const getAppBaseUrl = () =>
-  process.env.FRONTEND_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
 const sendVerificationEmailForUser = async (user) => {
   const verifyToken = jwt.sign(
     { id: user._id, email: user.email, type: "verify" },
@@ -50,76 +46,6 @@ const sendVerificationEmailForUser = async (user) => {
     console.error("Verification email send error:", error?.message || error);
   }
 };
-
-const getTransporter = () => {
-  const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
-
-  return nodemailer.createTransport({
-    host: SMTP_HOST || "smtp.zoho.com",
-    port: Number(SMTP_PORT || (SMTP_SECURE === "true" ? 465 : 587)),
-    secure: SMTP_SECURE === "true" || SMTP_SECURE === "1",
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-  });
-};
-
-const sendAppEmail = async ({ to, subject, html }) => {
-  const transporter = getTransporter();
-  if (!transporter) return { sent: false, reason: "smtp-not-configured" };
-
-  await transporter.verify();
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
-    to,
-    subject,
-    html,
-  });
-  return { sent: true };
-};
-
-const sendResetEmail = (toEmail, resetLink) =>
-  sendAppEmail({
-    to: toEmail,
-    subject: "Taskflow Password Reset",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
-        <h2>Reset your password</h2>
-        <p>We received a request to reset your Taskflow password.</p>
-        <p>
-          <a href="${resetLink}" style="display:inline-block;padding:10px 16px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:700;">
-            Reset Password
-          </a>
-        </p>
-        <p>If you did not request this, you can ignore this email.</p>
-        <p>This link expires in 1 hour.</p>
-      </div>
-    `,
-  });
-
-const sendVerificationEmail = (toEmail, verifyLink) =>
-  sendAppEmail({
-    to: toEmail,
-    subject: "Verify your Taskflow email",
-    html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
-        <h2>Confirm your email</h2>
-        <p>Welcome to Taskflow. Confirm this is your email address to finish setting up your account.</p>
-        <p>
-          <a href="${verifyLink}" style="display:inline-block;padding:10px 16px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:700;">
-            Verify Email
-          </a>
-        </p>
-        <p>If you did not create a Taskflow account, you can ignore this email.</p>
-        <p>This link expires in 24 hours.</p>
-      </div>
-    `,
-  });
 
 // Register
 router.post("/register", authLimiter, async (req, res) => {
@@ -466,10 +392,7 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    const appBaseUrl =
-      process.env.FRONTEND_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-    const resetLink = `${appBaseUrl}/reset-password/${resetToken}`;
+    const resetLink = `${getAppBaseUrl()}/reset-password/${resetToken}`;
     const isProduction = process.env.NODE_ENV === "production";
 
     try {

@@ -27,6 +27,8 @@ const priorityConfig: Record<string, { dot: string; badge: string; border: strin
   low:    { dot: "bg-green-500",  badge: "bg-green-500/15 text-green-400", border: "border-l-green-500" },
 };
 
+const recurrenceUnit: Record<string, string> = { daily: "day", weekly: "week", monthly: "month" };
+
 const categoryColors: Record<string, string> = {
   work:     "bg-blue-500/15 text-blue-400",
   personal: "bg-purple-500/15 text-purple-400",
@@ -126,6 +128,16 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
           {dateInfo && (
             <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${dateInfo.cls}`}>
               {dateInfo.label}
+            </span>
+          )}
+
+          {/* Recurrence */}
+          {todo.recurrence?.freq && (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400" title={`Repeats every ${todo.recurrence.interval > 1 ? todo.recurrence.interval + " " : ""}${todo.recurrence.freq}`}>
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1.5 5a3.5 3.5 0 0 1 6-2.5M8.5 2v2h-2M8.5 5a3.5 3.5 0 0 1-6 2.5M1.5 8V6h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {todo.recurrence.interval > 1 ? `Every ${todo.recurrence.interval} ${recurrenceUnit[todo.recurrence.freq] || todo.recurrence.freq}s` : todo.recurrence.freq}
             </span>
           )}
 

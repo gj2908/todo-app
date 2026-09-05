@@ -7,6 +7,20 @@ const userSchema = new mongoose.Schema({
   twoFactorSecret: { type: String, default: null, select: false },
   twoFactorEnabled: { type: Boolean, default: false },
   backupCodes: { type: [String], default: undefined, select: false },
+  notifyByEmail: { type: Boolean, default: false },
+  notifyByPush: { type: Boolean, default: false },
+  pushSubscriptions: {
+    type: [
+      {
+        endpoint: { type: String, required: true },
+        keys: {
+          p256dh: { type: String, required: true },
+          auth: { type: String, required: true },
+        },
+      },
+    ],
+    default: undefined,
+  },
   createdAt: { type: Date, default: Date.now },
   preferences: {
     darkMode: { type: Boolean, default: false },

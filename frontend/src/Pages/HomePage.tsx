@@ -29,6 +29,7 @@ interface Todo {
   project?: string;
   subtasks?: { title: string; completed: boolean }[];
   attachments?: { _id: string; title: string }[];
+  recurrence?: { freq: "daily" | "weekly" | "monthly"; interval: number; until?: string } | null;
   createdAt: string;
 }
 
