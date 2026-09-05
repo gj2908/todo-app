@@ -62,6 +62,23 @@ interface PersonalReminder {
 const PERSONAL_REMINDERS_KEY = "taskflow-personal-reminders";
 const SUBJECT_NOTES_PREFIX = "subject_notes_";
 
+const CalendarStatsStrip = ({ today, overdue, next24h }: { today: number; overdue: number; next24h: number }) => (
+  <div className="grid grid-cols-3 gap-2">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+      <p className="text-xs font-medium text-zinc-500">Today</p>
+      <p className="text-xl font-bold text-amber-400 mt-1">{today}</p>
+    </div>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+      <p className="text-xs font-medium text-zinc-500">Overdue</p>
+      <p className="text-xl font-bold text-red-400 mt-1">{overdue}</p>
+    </div>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+      <p className="text-xs font-medium text-zinc-500">Next 24h</p>
+      <p className="text-xl font-bold text-green-400 mt-1">{next24h}</p>
+    </div>
+  </div>
+);
+
 export default function HomePage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -342,6 +359,7 @@ export default function HomePage() {
     : viewTitles[activeView] || { label: "Subject", desc: "Subject tasks" };
   const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || (activeView.startsWith("subject_") && !isSubjectNotesView);
   const nonTaskViews = ["vault", "notes", "datesheet", "syllabus", "insights", "trash"];
+  const hasCalendarWidget = activeView === "calendar" || activeView === "reminders" || showCalendarPreview;
 
   const stats = useMemo(() => {
     const overdueCount = todos.filter(t =>
@@ -395,32 +413,32 @@ export default function HomePage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
           <div className="flex-1 overflow-y-auto">
             <div className="px-4 sm:px-6 pt-4 sm:pt-5">
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                  <span className="text-zinc-500">{todos.length} total</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                  <span className="text-zinc-500">{todoCounts.completed} done</span>
-                </div>
-                {stats.overdueCount > 0 && (
+              <div className={`flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold ${hasCalendarWidget ? "lg:hidden" : ""}`}>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-pulse" />
-                    <span className="text-red-400 font-semibold">{stats.overdueCount} overdue</span>
+                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                    <span className="text-zinc-500">{todos.length} total</span>
                   </div>
-                )}
-                {todos.length > 0 && (
-                  <div className="flex items-center gap-2 ml-0 sm:ml-auto w-full sm:w-auto">
-                    <div className="w-full sm:w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-amber-500 rounded-full transition-all duration-700"
-                        style={{ width: `${stats.rate}%` }}
-                      />
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                    <span className="text-zinc-500">{todoCounts.completed} done</span>
+                  </div>
+                  {stats.overdueCount > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-pulse" />
+                      <span className="text-red-400 font-semibold">{stats.overdueCount} overdue</span>
                     </div>
-                    <span className="text-zinc-500 tabular-nums text-base font-bold">{stats.rate}%</span>
-                  </div>
-                )}
+                  )}
+                  {todos.length > 0 && (
+                    <div className="flex items-center gap-2 ml-0 sm:ml-auto w-full sm:w-auto">
+                      <div className="w-full sm:w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                          style={{ width: `${stats.rate}%` }}
+                        />
+                      </div>
+                      <span className="text-zinc-500 tabular-nums text-base font-bold">{stats.rate}%</span>
+                    </div>
+                  )}
               </div>
 
               <div className="mt-3 mb-4">
@@ -445,7 +463,8 @@ export default function HomePage() {
                 <p className="text-zinc-600 text-sm">Loading...</p>
               </div>
             ) : activeView === "calendar" ? (
-              <div className="w-full">
+              <div className="w-full space-y-4">
+                <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
                 <CalendarPanel todos={todos} />
               </div>
             ) : activeView === "reminders" ? (
@@ -552,20 +571,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="hidden lg:block sticky top-4 space-y-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                        <p className="text-xs font-medium text-zinc-500">Today</p>
-                        <p className="text-xl font-bold text-amber-400 mt-1">{todoCounts.today}</p>
-                      </div>
-                      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                        <p className="text-xs font-medium text-zinc-500">Overdue</p>
-                        <p className="text-xl font-bold text-red-400 mt-1">{stats.overdueCount}</p>
-                      </div>
-                      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-                        <p className="text-xs font-medium text-zinc-500">Next 24h</p>
-                        <p className="text-xl font-bold text-green-400 mt-1">{filteredTodos.length}</p>
-                      </div>
-                    </div>
+                    <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
                     <CalendarPanel todos={todos} compact />
                   </div>
                 </div>
@@ -631,7 +637,8 @@ export default function HomePage() {
                   </div>
                 )}
 
-                <div className="hidden lg:block sticky top-3">
+                <div className="hidden lg:block sticky top-3 space-y-3">
+                  <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
                   <CalendarPanel todos={todos} compact />
                 </div>
               </div>
