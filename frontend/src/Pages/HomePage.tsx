@@ -69,7 +69,7 @@ const SUBJECT_NOTES_PREFIX = "subject_notes_";
 export default function HomePage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [activeView, setActiveView] = useState(() => localStorage.getItem("activeView") || "dashboard");
+  const [activeView, setActiveView] = useState("dashboard");
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -132,10 +132,6 @@ export default function HomePage() {
     window.addEventListener("subjects:changed", handleSubjectsChanged);
     return () => window.removeEventListener("subjects:changed", handleSubjectsChanged);
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("activeView", activeView);
-  }, [activeView]);
 
   useEffect(() => {
     localStorage.setItem("reminderMinutesBefore", String(reminderMinutes));
