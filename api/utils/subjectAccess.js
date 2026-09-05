@@ -20,4 +20,12 @@ const getAccessibleSubjectIds = async (userId) => {
   return subjects.map((s) => s._id);
 };
 
-module.exports = { getAccessibleSubjects, getAccessibleSubjectIds };
+// Whether userId is the owner or a member (any role) of a subject document
+// (as returned by Subject.findOne/find - has .user and .members).
+const isSubjectMember = (subject, userId) => {
+  if (!subject) return false;
+  if (String(subject.user) === String(userId)) return true;
+  return !!subject.members?.some((m) => String(m.user) === String(userId));
+};
+
+module.exports = { getAccessibleSubjects, getAccessibleSubjectIds, isSubjectMember };

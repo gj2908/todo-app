@@ -16,6 +16,23 @@ interface Subject {
   icon: string;
 }
 
+interface Member {
+  userId: string;
+  email: string;
+  role: "editor" | "viewer";
+}
+
+const getCurrentUser = () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return { id: payload.id, email: payload.email };
+  } catch {
+    return null;
+  }
+};
+
 const CloseIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -61,6 +78,7 @@ const getBlankForm = (todo: any, defaultSubject: string | null | undefined) => (
   dueDate:     todo?.dueDate ? new Date(todo.dueDate).toISOString().split("T")[0] : "",
   tags:        todo?.tags?.join(", ") || "",
   subject:     todo?.subject || defaultSubject || "",
+  assignee:    (typeof todo?.assignee === "object" ? todo?.assignee?._id : todo?.assignee) || "",
   recurFreq:     todo?.recurrence?.freq || "",
   recurInterval: todo?.recurrence?.interval || 1,
 });
@@ -76,6 +94,8 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
   const [newSubtask, setNewSubtask] = useState("");
   const [attachments, setAttachments] = useState<AttachmentRef[]>(todo?.attachments || []);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
+  const currentUser = getCurrentUser();
 
   // KEY FIX: Reset form whenever `todo` changes (fixes edit not populating)
   useEffect(() => {
@@ -87,6 +107,13 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
   useEffect(() => {
     if (isOpen) fetchSubjects();
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!formData.subject) { setMembers([]); return; }
+    axios.get(`/subjects/${formData.subject}/members`)
+      .then((res) => setMembers(res.data))
+      .catch(() => setMembers([]));
+  }, [formData.subject]);
 
   const fetchSubjects = async () => {
     try {
@@ -362,6 +389,26 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Assignee */}
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+                Assignee
+              </label>
+              <select
+                value={formData.assignee}
+                onChange={e => set("assignee", e.target.value)}
+                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+              >
+                <option value="">Unassigned</option>
+                {currentUser && <option value={currentUser.id}>Myself</option>}
+                {formData.subject && members
+                  .filter((m) => m.userId !== currentUser?.id)
+                  .map((m) => (
+                    <option key={m.userId} value={m.userId}>{m.email}</option>
+                  ))}
+              </select>
             </div>
           </div>
 

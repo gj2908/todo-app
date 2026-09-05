@@ -4,7 +4,7 @@ const { addDays, addWeeks, addMonths, isAfter } = require("date-fns");
 const { createEvents } = require("ics");
 const { protect } = require("../middleware/auth");
 const Todo = require("../models/Todo");
-const { getAccessibleSubjects } = require("../utils/subjectAccess");
+const { getAccessibleSubjects, isSubjectMember } = require("../utils/subjectAccess");
 
 const computeNextDueDate = (fromDate, recurrence) => {
   const interval = recurrence.interval || 1;
@@ -36,7 +36,8 @@ router.get("/", protect, async (req, res) => {
       $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
     })
       .sort({ createdAt: -1 })
-      .populate("attachments", "title url fileType");
+      .populate("attachments", "title url fileType")
+      .populate("assignee", "name email");
 
     res.json(todos);
   } catch (error) {
@@ -156,11 +157,19 @@ router.delete("/bulk", protect, async (req, res) => {
 // POST create todo
 router.post("/", protect, async (req, res) => {
   try {
+    let subject = null;
     if (req.body.subject) {
       const accessibleSubjects = await getAccessibleSubjects(req.user);
-      const subject = accessibleSubjects.find((s) => String(s._id) === String(req.body.subject));
+      subject = accessibleSubjects.find((s) => String(s._id) === String(req.body.subject));
       if (!subject || !canWrite(subject.role)) {
         return res.status(403).json({ message: "You don't have permission to add tasks to this subject" });
+      }
+    }
+
+    if (req.body.assignee) {
+      const eligible = subject ? isSubjectMember(subject, req.body.assignee) : String(req.body.assignee) === String(req.user);
+      if (!eligible) {
+        return res.status(400).json({ message: "Assignee must be a member of this subject" });
       }
     }
 
@@ -187,6 +196,19 @@ router.put("/:id", protect, async (req, res) => {
     const role = roleForTodo(existing, req.user, accessibleSubjects);
     if (!canWrite(role)) {
       return res.status(403).json({ message: "You only have view access to this task" });
+    }
+
+    if (req.body.assignee) {
+      const finalSubjectId = req.body.subject !== undefined ? req.body.subject : existing.subject;
+      const finalSubject = finalSubjectId
+        ? accessibleSubjects.find((s) => String(s._id) === String(finalSubjectId))
+        : null;
+      const eligible = finalSubject
+        ? isSubjectMember(finalSubject, req.body.assignee)
+        : String(req.body.assignee) === String(req.user);
+      if (!eligible) {
+        return res.status(400).json({ message: "Assignee must be a member of this subject" });
+      }
     }
 
     const todo = await Todo.findOneAndUpdate(

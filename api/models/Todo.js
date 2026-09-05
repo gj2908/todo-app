@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const todoSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   subject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject" },
+  assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   title: { type: String, required: true },
   description: String,
   completed: { type: Boolean, default: false },

@@ -11,6 +11,7 @@ interface TodoItemProps {
   selectable?: boolean;
   selected?: boolean;
   onSelectToggle?: (id: string) => void;
+  assigneeLabel?: string | null;
 }
 
 const EditIcon = () => (
@@ -42,7 +43,7 @@ const categoryColors: Record<string, string> = {
   general:  "bg-zinc-700 text-zinc-400",
 };
 
-export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon, onEdit, onDelete, onToggle, selectable, selected, onSelectToggle }: TodoItemProps) {
+export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon, onEdit, onDelete, onToggle, selectable, selected, onSelectToggle, assigneeLabel }: TodoItemProps) {
   const pc = priorityConfig[todo.priority] || priorityConfig.medium;
 
   const getDateInfo = (dateStr: string) => {
@@ -139,6 +140,13 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
           {todo.category && todo.category !== "general" && (
             <span className={`text-xs font-semibold px-1.5 py-0.5 rounded capitalize ${categoryColors[todo.category] || categoryColors.general}`}>
               {todo.category}
+            </span>
+          )}
+
+          {/* Assignee */}
+          {assigneeLabel && (
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-zinc-700 text-zinc-300">
+              @ {assigneeLabel}
             </span>
           )}
 

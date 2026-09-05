@@ -34,6 +34,7 @@ interface Todo {
   dueDate?: string;
   tags?: string[];
   subject?: string;
+  assignee?: { _id: string; name?: string; email: string } | string | null;
   subtasks?: { title: string; completed: boolean }[];
   attachments?: { _id: string; title: string }[];
   recurrence?: { freq: "daily" | "weekly" | "monthly"; interval: number; until?: string } | null;
@@ -394,6 +395,11 @@ export default function HomePage() {
     return subjects.find(s => s._id === subjectId) || null;
   };
 
+  const getAssigneeLabel = (assignee: Todo["assignee"]) => {
+    if (!assignee || typeof assignee === "string") return null;
+    return assignee.name || assignee.email || null;
+  };
+
   const filteredTodos = getFilteredTodos();
 
   const viewTitles: Record<string, { label: string; desc: string }> = {
@@ -662,6 +668,7 @@ export default function HomePage() {
                               subjectName={getSubjectName(todo.subject)}
                               subjectColor={getSubjectMeta(todo.subject)?.color}
                               subjectIcon={getSubjectMeta(todo.subject)?.icon}
+                              assigneeLabel={getAssigneeLabel(todo.assignee)}
                               onEdit={handleEditTodo}
                               onDelete={requestDeleteTodo}
                               onToggle={toggleComplete}
@@ -718,6 +725,7 @@ export default function HomePage() {
                         subjectName={getSubjectName(todo.subject)}
                         subjectColor={getSubjectMeta(todo.subject)?.color}
                         subjectIcon={getSubjectMeta(todo.subject)?.icon}
+                        assigneeLabel={getAssigneeLabel(todo.assignee)}
                         onEdit={handleEditTodo}
                         onDelete={requestDeleteTodo}
                         onToggle={toggleComplete}
@@ -770,6 +778,7 @@ export default function HomePage() {
                     subjectName={getSubjectName(todo.subject)}
                     subjectColor={getSubjectMeta(todo.subject)?.color}
                     subjectIcon={getSubjectMeta(todo.subject)?.icon}
+                    assigneeLabel={getAssigneeLabel(todo.assignee)}
                     onEdit={handleEditTodo}
                     onDelete={requestDeleteTodo}
                     onToggle={toggleComplete}
