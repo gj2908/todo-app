@@ -54,9 +54,24 @@ const uploadBufferToCloudinary = (buffer, options) => {
   });
 };
 
+const DOCUMENT_KINDS = ["general", "note", "datesheet", "syllabus"];
+
 router.get("/", protect, async (req, res) => {
   try {
-    const documents = await Document.find({ user: req.user }).sort({ createdAt: -1 });
+    const query = { user: req.user };
+    if (req.query.kind) {
+      if (!DOCUMENT_KINDS.includes(req.query.kind)) {
+        return res.status(400).json({ message: "Invalid kind filter" });
+      }
+      query.kind = req.query.kind;
+    }
+    if (req.query.subject !== undefined) {
+      query.subject = req.query.subject || null;
+    }
+
+    const documents = await Document.find(query).sort(
+      req.query.kind === "syllabus" ? { date: 1, createdAt: -1 } : { createdAt: -1 }
+    );
     res.json(documents);
   } catch (_error) {
     res.status(500).json({ message: "Error fetching documents" });
@@ -110,11 +125,30 @@ router.post("/upload", protect, upload.single("file"), async (req, res) => {
       return res.status(400).json({ message: "File is required" });
     }
 
+    const requestedKind = req.body?.kind || "general";
+    if (!DOCUMENT_KINDS.includes(requestedKind)) {
+      return res.status(400).json({ message: "Invalid document kind" });
+    }
+    const subject = requestedKind === "note" || requestedKind === "syllabus" ? req.body?.subject || null : null;
+    const date = requestedKind === "syllabus" && req.body?.date ? new Date(req.body.date) : null;
+
     configureCloudinary();
 
     const isPdf = req.file.mimetype === "application/pdf";
     const resourceType = isPdf ? "raw" : "image";
     const fileType = isPdf ? "pdf" : "image";
+
+    if (requestedKind === "datesheet") {
+      const existingDatesheets = await Document.find({ user: req.user, kind: "datesheet" });
+      for (const existing of existingDatesheets) {
+        try {
+          await cloudinary.uploader.destroy(existing.publicId, { resource_type: existing.resourceType });
+        } catch (err) {
+          console.error("Cloudinary delete warning:", err?.message || err);
+        }
+      }
+      await Document.deleteMany({ user: req.user, kind: "datesheet" });
+    }
 
     const safeOriginalName = (req.file.originalname || "document")
       .replace(/[\\/]/g, "_")
@@ -148,6 +182,9 @@ router.post("/upload", protect, upload.single("file"), async (req, res) => {
       url: uploaded.secure_url,
       publicId: uploaded.public_id,
       bytes: uploaded.bytes || req.file.size,
+      kind: requestedKind,
+      subject,
+      date,
     });
 
     res.json(document);

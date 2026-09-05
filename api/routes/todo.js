@@ -3,7 +3,7 @@ const router = express.Router();
 const { addDays, addWeeks, addMonths, isAfter } = require("date-fns");
 const { protect } = require("../middleware/auth");
 const Todo = require("../models/Todo");
-const { getAccessibleProjects } = require("../utils/projectAccess");
+const { getAccessibleSubjects } = require("../utils/subjectAccess");
 
 const computeNextDueDate = (fromDate, recurrence) => {
   const interval = recurrence.interval || 1;
@@ -14,25 +14,25 @@ const computeNextDueDate = (fromDate, recurrence) => {
 };
 
 // role the current user has on a todo: "owner" if they created it,
-// otherwise their role on the todo's project (or null if neither)
-const roleForTodo = (todo, userId, accessibleProjects) => {
+// otherwise their role on the todo's subject (or null if neither)
+const roleForTodo = (todo, userId, accessibleSubjects) => {
   if (String(todo.user) === String(userId)) return "owner";
-  if (!todo.project) return null;
-  const project = accessibleProjects.find((p) => String(p._id) === String(todo.project));
-  return project?.role || null;
+  if (!todo.subject) return null;
+  const subject = accessibleSubjects.find((s) => String(s._id) === String(todo.subject));
+  return subject?.role || null;
 };
 
 const canWrite = (role) => role === "owner" || role === "editor";
 
-// GET all todos the user owns or has access to via a shared project (excludes trashed)
+// GET all todos the user owns or has access to via a shared subject (excludes trashed)
 router.get("/", protect, async (req, res) => {
   try {
-    const accessibleProjects = await getAccessibleProjects(req.user);
-    const projectIds = accessibleProjects.map((p) => p._id);
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
 
     const todos = await Todo.find({
       deletedAt: null,
-      $or: [{ user: req.user }, { project: { $in: projectIds } }],
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
     })
       .sort({ createdAt: -1 })
       .populate("attachments", "title url fileType");
@@ -43,7 +43,7 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-// GET trashed todos - personal only, regardless of project sharing
+// GET trashed todos - personal only, regardless of subject sharing
 router.get("/trash", protect, async (req, res) => {
   try {
     const todos = await Todo.find({ user: req.user, deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
@@ -56,11 +56,11 @@ router.get("/trash", protect, async (req, res) => {
 // POST create todo
 router.post("/", protect, async (req, res) => {
   try {
-    if (req.body.project) {
-      const accessibleProjects = await getAccessibleProjects(req.user);
-      const project = accessibleProjects.find((p) => String(p._id) === String(req.body.project));
-      if (!project || !canWrite(project.role)) {
-        return res.status(403).json({ message: "You don't have permission to add tasks to this project" });
+    if (req.body.subject) {
+      const accessibleSubjects = await getAccessibleSubjects(req.user);
+      const subject = accessibleSubjects.find((s) => String(s._id) === String(req.body.subject));
+      if (!subject || !canWrite(subject.role)) {
+        return res.status(403).json({ message: "You don't have permission to add tasks to this subject" });
       }
     }
 
@@ -72,19 +72,19 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-// PUT update todo - owner or project editor
+// PUT update todo - owner or subject editor
 router.put("/:id", protect, async (req, res) => {
   try {
-    const accessibleProjects = await getAccessibleProjects(req.user);
-    const projectIds = accessibleProjects.map((p) => p._id);
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
 
     const existing = await Todo.findOne({
       _id: req.params.id,
-      $or: [{ user: req.user }, { project: { $in: projectIds } }],
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
     });
     if (!existing) return res.status(404).json({ message: "Todo not found" });
 
-    const role = roleForTodo(existing, req.user, accessibleProjects);
+    const role = roleForTodo(existing, req.user, accessibleSubjects);
     if (!canWrite(role)) {
       return res.status(403).json({ message: "You only have view access to this task" });
     }
@@ -102,7 +102,7 @@ router.put("/:id", protect, async (req, res) => {
       if (nextDueDate && withinRange) {
         await Todo.create({
           user: todo.user,
-          project: todo.project,
+          subject: todo.subject,
           title: todo.title,
           description: todo.description,
           priority: todo.priority,
@@ -136,19 +136,19 @@ router.post("/:id/restore", protect, async (req, res) => {
   }
 });
 
-// DELETE todo - moves to trash (owner or project editor)
+// DELETE todo - moves to trash (owner or subject editor)
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const accessibleProjects = await getAccessibleProjects(req.user);
-    const projectIds = accessibleProjects.map((p) => p._id);
+    const accessibleSubjects = await getAccessibleSubjects(req.user);
+    const subjectIds = accessibleSubjects.map((s) => s._id);
 
     const existing = await Todo.findOne({
       _id: req.params.id,
-      $or: [{ user: req.user }, { project: { $in: projectIds } }],
+      $or: [{ user: req.user }, { subject: { $in: subjectIds } }],
     });
     if (!existing) return res.status(404).json({ message: "Todo not found" });
 
-    const role = roleForTodo(existing, req.user, accessibleProjects);
+    const role = roleForTodo(existing, req.user, accessibleSubjects);
     if (!canWrite(role)) {
       return res.status(403).json({ message: "You only have view access to this task" });
     }

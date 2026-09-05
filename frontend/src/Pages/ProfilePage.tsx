@@ -197,7 +197,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-zinc-200">Export your data</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Download every task, project, note, and document record as one JSON file</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Download every task, subject, note, and document record as one JSON file</p>
               </div>
               <button
                 onClick={handleExport}

@@ -14,6 +14,9 @@ import NotesPanel from "../components/NotesPanel";
 import InsightsPanel from "../components/InsightsPanel";
 import TrashPanel from "../components/TrashPanel";
 import CommandPalette from "../components/CommandPalette";
+import SubjectNotesPanel from "../components/SubjectNotesPanel";
+import DatesheetPanel from "../components/DatesheetPanel";
+import SyllabusPanel from "../components/SyllabusPanel";
 import { isToday, isPast } from "date-fns";
 import { getNotificationPermissionStatus, requestNotificationPermission, scheduleExactReminder, scheduleTaskReminder, sendNotification } from "../utils/notifications";
 
@@ -26,7 +29,7 @@ interface Todo {
   category: string;
   dueDate?: string;
   tags?: string[];
-  project?: string;
+  subject?: string;
   subtasks?: { title: string; completed: boolean }[];
   attachments?: { _id: string; title: string }[];
   recurrence?: { freq: "daily" | "weekly" | "monthly"; interval: number; until?: string } | null;
@@ -41,7 +44,7 @@ const PlusIcon = () => (
 
 const createReminderId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-interface Project {
+interface Subject {
   _id: string;
   name: string;
   icon: string;
@@ -56,12 +59,13 @@ interface PersonalReminder {
 }
 
 const PERSONAL_REMINDERS_KEY = "taskflow-personal-reminders";
+const SUBJECT_NOTES_PREFIX = "subject_notes_";
 
 export default function HomePage() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [activeView, setActiveView] = useState(() => localStorage.getItem("activeView") || "inbox");
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
@@ -99,27 +103,27 @@ export default function HomePage() {
     }
   };
 
-  const fetchProjects = async () => {
+  const fetchSubjects = async () => {
     try {
-      const res = await axios.get("/projects");
-      setProjects(res.data);
+      const res = await axios.get("/subjects");
+      setSubjects(res.data);
     } catch {
-      console.error("Failed to fetch projects");
+      console.error("Failed to fetch subjects");
     }
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchTodos();
-    fetchProjects();
+    fetchSubjects();
   }, []);
 
   useEffect(() => {
-    const handleProjectsChanged = () => {
-      fetchProjects();
+    const handleSubjectsChanged = () => {
+      fetchSubjects();
     };
 
-    window.addEventListener("projects:changed", handleProjectsChanged);
-    return () => window.removeEventListener("projects:changed", handleProjectsChanged);
+    window.addEventListener("subjects:changed", handleSubjectsChanged);
+    return () => window.removeEventListener("subjects:changed", handleSubjectsChanged);
   }, []);
 
   useEffect(() => {
@@ -189,9 +193,9 @@ export default function HomePage() {
   const getFilteredTodos = () => {
     let filtered = [...todos];
 
-    if (activeView.startsWith("project_")) {
-      const projectId = activeView.replace("project_", "");
-      filtered = filtered.filter(t => t.project === projectId);
+    if (activeView.startsWith("subject_") && !activeView.startsWith(SUBJECT_NOTES_PREFIX)) {
+      const subjectId = activeView.replace("subject_", "");
+      filtered = filtered.filter(t => t.subject === subjectId);
     } else if (activeView === "today") {
       filtered = filtered.filter(t => t.dueDate && isToday(new Date(t.dueDate)) && !t.completed);
     } else if (activeView === "upcoming") {
@@ -289,22 +293,27 @@ export default function HomePage() {
 
   const handleViewChange = (view: string) => {
     setActiveView(view);
-    setSelectedProject(null);
+    setSelectedSubject(null);
     setSearch("");
     setPriorityFilter("");
     setCategoryFilter("");
     setSidebarOpen(false);
   };
 
-  const handleProjectSelect = (projectId: string) => {
-    setActiveView(`project_${projectId}`);
-    setSelectedProject(projectId);
+  const handleSubjectSelect = (subjectId: string) => {
+    setActiveView(`subject_${subjectId}`);
+    setSelectedSubject(subjectId);
     setSidebarOpen(false);
   };
 
-  const getProjectName = (projectId: string | undefined) => {
-    if (!projectId) return null;
-    return projects.find(p => p._id === projectId)?.name || null;
+  const handleSubjectNotesOpen = (subjectId: string) => {
+    setActiveView(`${SUBJECT_NOTES_PREFIX}${subjectId}`);
+    setSidebarOpen(false);
+  };
+
+  const getSubjectName = (subjectId: string | undefined) => {
+    if (!subjectId) return null;
+    return subjects.find(s => s._id === subjectId)?.name || null;
   };
 
   const filteredTodos = getFilteredTodos();
@@ -318,13 +327,20 @@ export default function HomePage() {
     reminders: { label: "Reminders", desc: "Tasks due in the next 24 hours" },
     vault: { label: "Document Vault", desc: "Upload and manage images and PDFs" },
     notes: { label: "Notes", desc: "Free-form notes and ideas" },
+    datesheet: { label: "Datesheet", desc: "Your current exam schedule" },
+    syllabus: { label: "Syllabus", desc: "Date-wise syllabus, per subject or combined" },
     insights: { label: "Insights", desc: "Trends across your tasks" },
     trash: { label: "Trash", desc: "Deleted tasks, kept until you remove them for good" },
   };
 
-  const viewInfo = viewTitles[activeView] || { label: "Project", desc: "Project tasks" };
-  const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || activeView.startsWith("project_");
-  const nonTaskViews = ["vault", "notes", "insights", "trash"];
+  const isSubjectNotesView = activeView.startsWith(SUBJECT_NOTES_PREFIX);
+  const activeSubjectNotesId = isSubjectNotesView ? activeView.replace(SUBJECT_NOTES_PREFIX, "") : null;
+
+  const viewInfo = isSubjectNotesView
+    ? { label: `${getSubjectName(activeSubjectNotesId || undefined) || "Subject"} Notes`, desc: "Notes for this subject" }
+    : viewTitles[activeView] || { label: "Subject", desc: "Subject tasks" };
+  const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || (activeView.startsWith("subject_") && !isSubjectNotesView);
+  const nonTaskViews = ["vault", "notes", "datesheet", "syllabus", "insights", "trash"];
 
   const stats = useMemo(() => {
     const overdueCount = todos.filter(t =>
@@ -348,7 +364,8 @@ export default function HomePage() {
           <Sidebar
             activeView={activeView}
             onViewChange={handleViewChange}
-            onProjectSelect={handleProjectSelect}
+            onSubjectSelect={handleSubjectSelect}
+            onSubjectNotesOpen={handleSubjectNotesOpen}
             todoCounts={todoCounts}
             reminderCount={reminderTodos.length}
           />
@@ -366,7 +383,8 @@ export default function HomePage() {
             <Sidebar
               activeView={activeView}
               onViewChange={handleViewChange}
-              onProjectSelect={handleProjectSelect}
+              onSubjectSelect={handleSubjectSelect}
+              onSubjectNotesOpen={handleSubjectNotesOpen}
               todoCounts={todoCounts}
               reminderCount={reminderTodos.length}
             />
@@ -408,7 +426,7 @@ export default function HomePage() {
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
               </div>
 
-              {activeView !== "calendar" && !nonTaskViews.includes(activeView) && (
+              {activeView !== "calendar" && !nonTaskViews.includes(activeView) && !isSubjectNotesView && (
                 <SearchFilter
                   onSearch={setSearch}
                   onFilterPriority={setPriorityFilter}
@@ -527,7 +545,7 @@ export default function HomePage() {
                             <TodoItem
                               key={todo._id}
                               todo={todo}
-                              projectName={getProjectName(todo.project)}
+                              subjectName={getSubjectName(todo.subject)}
                               onEdit={handleEditTodo}
                               onDelete={requestDeleteTodo}
                               onToggle={toggleComplete}
@@ -548,6 +566,15 @@ export default function HomePage() {
               <DocumentVault />
             ) : activeView === "notes" ? (
               <NotesPanel />
+            ) : activeView === "datesheet" ? (
+              <DatesheetPanel />
+            ) : activeView === "syllabus" ? (
+              <SyllabusPanel />
+            ) : isSubjectNotesView && activeSubjectNotesId ? (
+              <SubjectNotesPanel
+                subjectId={activeSubjectNotesId}
+                subjectName={getSubjectName(activeSubjectNotesId) || "Subject"}
+              />
             ) : activeView === "insights" ? (
               <InsightsPanel todos={todos} />
             ) : activeView === "trash" ? (
@@ -560,7 +587,7 @@ export default function HomePage() {
                       <TodoItem
                         key={todo._id}
                         todo={todo}
-                        projectName={getProjectName(todo.project)}
+                        subjectName={getSubjectName(todo.subject)}
                         onEdit={handleEditTodo}
                         onDelete={requestDeleteTodo}
                         onToggle={toggleComplete}
@@ -606,7 +633,7 @@ export default function HomePage() {
                   <TodoItem
                     key={todo._id}
                     todo={todo}
-                    projectName={getProjectName(todo.project)}
+                    subjectName={getSubjectName(todo.subject)}
                     onEdit={handleEditTodo}
                     onDelete={requestDeleteTodo}
                     onToggle={toggleComplete}
@@ -651,7 +678,7 @@ export default function HomePage() {
         todo={editingTodo}
         onClose={() => { setIsModalOpen(false); setEditingTodo(null); }}
         onSave={handleSaveTodo}
-        defaultProject={selectedProject}
+        defaultSubject={selectedSubject}
       />
 
       <ConfirmDialog
@@ -671,9 +698,9 @@ export default function HomePage() {
       />
 
       <CommandPalette
-        projects={projects}
+        subjects={subjects}
         onViewChange={handleViewChange}
-        onProjectSelect={handleProjectSelect}
+        onSubjectSelect={handleSubjectSelect}
         onNewTask={handleAddNew}
       />
     </div>

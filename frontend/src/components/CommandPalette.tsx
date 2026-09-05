@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 
-interface Project {
+interface Subject {
   _id: string;
   name: string;
 }
 
 interface CommandPaletteProps {
-  projects: Project[];
+  subjects: Subject[];
   onViewChange: (view: string) => void;
-  onProjectSelect: (projectId: string) => void;
+  onSubjectSelect: (subjectId: string) => void;
   onNewTask: () => void;
 }
 
@@ -19,7 +19,7 @@ interface Command {
   action: () => void;
 }
 
-export default function CommandPalette({ projects, onViewChange, onProjectSelect, onNewTask }: CommandPaletteProps) {
+export default function CommandPalette({ subjects, onViewChange, onSubjectSelect, onNewTask }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -61,23 +61,25 @@ export default function CommandPalette({ projects, onViewChange, onProjectSelect
     const toolCommands: Command[] = [
       { id: "vault", label: "Go to Document Vault", group: "Tools", action: run(() => onViewChange("vault")) },
       { id: "notes", label: "Go to Notes", group: "Tools", action: run(() => onViewChange("notes")) },
+      { id: "datesheet", label: "Go to Datesheet", group: "Tools", action: run(() => onViewChange("datesheet")) },
+      { id: "syllabus", label: "Go to Syllabus", group: "Tools", action: run(() => onViewChange("syllabus")) },
       { id: "insights", label: "Go to Insights", group: "Tools", action: run(() => onViewChange("insights")) },
       { id: "trash", label: "Go to Trash", group: "Tools", action: run(() => onViewChange("trash")) },
     ];
 
-    const projectCommands: Command[] = projects.map((p) => ({
-      id: `project_${p._id}`,
-      label: `Go to project: ${p.name}`,
-      group: "Projects",
-      action: run(() => onProjectSelect(p._id)),
+    const subjectCommands: Command[] = subjects.map((s) => ({
+      id: `subject_${s._id}`,
+      label: `Go to subject: ${s.name}`,
+      group: "Subjects",
+      action: run(() => onSubjectSelect(s._id)),
     }));
 
     const actionCommands: Command[] = [
       { id: "new-task", label: "New task", group: "Actions", action: run(onNewTask) },
     ];
 
-    return [...actionCommands, ...viewCommands, ...toolCommands, ...projectCommands];
-  }, [projects, onViewChange, onProjectSelect, onNewTask]);
+    return [...actionCommands, ...viewCommands, ...toolCommands, ...subjectCommands];
+  }, [subjects, onViewChange, onSubjectSelect, onNewTask]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
@@ -113,7 +115,7 @@ export default function CommandPalette({ projects, onViewChange, onProjectSelect
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Jump to a view, project, or action..."
+          placeholder="Jump to a view, subject, or action..."
           className="w-full px-5 py-4 bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none border-b border-zinc-800"
         />
         <div className="max-h-80 overflow-y-auto py-2">

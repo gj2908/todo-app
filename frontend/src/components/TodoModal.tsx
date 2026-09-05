@@ -7,10 +7,10 @@ interface TodoModalProps {
   todo: any | null;
   onClose: () => void;
   onSave: (todo: any) => void;
-  defaultProject?: string | null;
+  defaultSubject?: string | null;
 }
 
-interface Project {
+interface Subject {
   _id: string;
   name: string;
   icon: string;
@@ -53,25 +53,25 @@ const repeatOptions = [
   { value: "monthly", label: "Monthly" },
 ];
 
-const getBlankForm = (todo: any, defaultProject: string | null | undefined) => ({
+const getBlankForm = (todo: any, defaultSubject: string | null | undefined) => ({
   title:       todo?.title       || "",
   description: todo?.description || "",
   priority:    todo?.priority    || "medium",
   category:    todo?.category    || "general",
   dueDate:     todo?.dueDate ? new Date(todo.dueDate).toISOString().split("T")[0] : "",
   tags:        todo?.tags?.join(", ") || "",
-  project:     todo?.project || defaultProject || "",
+  subject:     todo?.subject || defaultSubject || "",
   recurFreq:     todo?.recurrence?.freq || "",
   recurInterval: todo?.recurrence?.interval || 1,
 });
 
-const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, defaultProject }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [formData, setFormData] = useState(() => getBlankForm(todo, defaultProject));
+const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, defaultSubject }) => {
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [formData, setFormData] = useState(() => getBlankForm(todo, defaultSubject));
   const [saving, setSaving] = useState(false);
-  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
-  const [creatingProject, setCreatingProject] = useState(false);
+  const [showNewSubjectForm, setShowNewSubjectForm] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [creatingSubject, setCreatingSubject] = useState(false);
   const [subtasks, setSubtasks] = useState<Subtask[]>(todo?.subtasks || []);
   const [newSubtask, setNewSubtask] = useState("");
   const [attachments, setAttachments] = useState<AttachmentRef[]>(todo?.attachments || []);
@@ -79,44 +79,44 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
   // KEY FIX: Reset form whenever `todo` changes (fixes edit not populating)
   useEffect(() => {
-    setFormData(getBlankForm(todo, defaultProject));
+    setFormData(getBlankForm(todo, defaultSubject));
     setSubtasks(todo?.subtasks || []);
     setAttachments(todo?.attachments || []);
-  }, [todo, defaultProject]);
+  }, [todo, defaultSubject]);
 
   useEffect(() => {
-    if (isOpen) fetchProjects();
+    if (isOpen) fetchSubjects();
   }, [isOpen]);
 
-  const fetchProjects = async () => {
+  const fetchSubjects = async () => {
     try {
-      const res = await axios.get("/projects");
-      setProjects(res.data);
+      const res = await axios.get("/subjects");
+      setSubjects(res.data);
     } catch {
-      console.error("Failed to fetch projects");
+      console.error("Failed to fetch subjects");
     }
   };
 
   const set = (field: string, value: string) =>
     setFormData(prev => ({ ...prev, [field]: value }));
 
-  const handleCreateProject = async () => {
-    if (!newProjectName.trim()) { toast.error("Project name required!"); return; }
-    setCreatingProject(true);
+  const handleCreateSubject = async () => {
+    if (!newSubjectName.trim()) { toast.error("Subject name required!"); return; }
+    setCreatingSubject(true);
     try {
-      const res = await axios.post("/projects", {
-        name: newProjectName.trim(),
+      const res = await axios.post("/subjects", {
+        name: newSubjectName.trim(),
         icon: "◆",
         color: "#f59e0b",
       });
-      setProjects([res.data, ...projects]);
-      window.dispatchEvent(new Event("projects:changed"));
-      set("project", res.data._id);
-      setNewProjectName("");
-      setShowNewProjectForm(false);
-      toast.success("Project created!");
-    } catch { toast.error("Failed to create project"); }
-    finally { setCreatingProject(false); }
+      setSubjects([res.data, ...subjects]);
+      window.dispatchEvent(new Event("subjects:changed"));
+      set("subject", res.data._id);
+      setNewSubjectName("");
+      setShowNewSubjectForm(false);
+      toast.success("Subject created!");
+    } catch { toast.error("Failed to create subject"); }
+    finally { setCreatingSubject(false); }
   };
 
   const addSubtask = () => {
@@ -290,7 +290,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
             </div>
           </div>
 
-          {/* Due Date + Project row */}
+          {/* Due Date + Subject row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Due Date */}
             <div>
@@ -305,30 +305,30 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               />
             </div>
 
-            {/* Project */}
+            {/* Subject */}
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-1.5">
-                Project
+                Subject
               </label>
-              {!showNewProjectForm ? (
+              {!showNewSubjectForm ? (
                 <div className="flex gap-2">
                   <select
-                    value={formData.project}
-                    onChange={e => set("project", e.target.value)}
+                    value={formData.subject}
+                    onChange={e => set("subject", e.target.value)}
                     className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
                   >
-                    <option value="">No Project</option>
-                    {projects.map(p => (
-                      <option key={p._id} value={p._id}>
-                        ◆ {p.name}
+                    <option value="">No Subject</option>
+                    {subjects.map(s => (
+                      <option key={s._id} value={s._id}>
+                        ◆ {s.name}
                       </option>
                     ))}
                   </select>
                   <button
                     type="button"
-                    onClick={() => setShowNewProjectForm(true)}
+                    onClick={() => setShowNewSubjectForm(true)}
                     className="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded-lg transition"
-                    title="Create new project"
+                    title="Create new subject"
                   >
                     +
                   </button>
@@ -337,24 +337,24 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                 <div className="space-y-2">
                   <input
                     type="text"
-                    value={newProjectName}
-                    onChange={e => setNewProjectName(e.target.value)}
-                    placeholder="Project name..."
+                    value={newSubjectName}
+                    onChange={e => setNewSubjectName(e.target.value)}
+                    placeholder="Subject name..."
                     autoFocus
                     className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={handleCreateProject}
-                      disabled={creatingProject}
+                      onClick={handleCreateSubject}
+                      disabled={creatingSubject}
                       className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg transition disabled:opacity-50"
                     >
-                      {creatingProject ? "Creating..." : "Create"}
+                      {creatingSubject ? "Creating..." : "Create"}
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setShowNewProjectForm(false); setNewProjectName(""); }}
+                      onClick={() => { setShowNewSubjectForm(false); setNewSubjectName(""); }}
                       className="flex-1 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded-lg transition"
                     >
                       Cancel

@@ -24,7 +24,7 @@ router.post("/", protect, async (req, res) => {
       title,
       body: req.body?.body || "",
       tags: Array.isArray(req.body?.tags) ? req.body.tags : [],
-      project: req.body?.project || null,
+      subject: req.body?.subject || null,
     });
     res.json(note);
   } catch (error) {
@@ -35,12 +35,12 @@ router.post("/", protect, async (req, res) => {
 // PUT update note - ensures user owns it
 router.put("/:id", protect, async (req, res) => {
   try {
-    const { title, body, tags, project, pinned } = req.body || {};
+    const { title, body, tags, subject, pinned } = req.body || {};
     const update = { updatedAt: new Date() };
     if (title !== undefined) update.title = title.trim();
     if (body !== undefined) update.body = body;
     if (tags !== undefined) update.tags = tags;
-    if (project !== undefined) update.project = project || null;
+    if (subject !== undefined) update.subject = subject || null;
     if (pinned !== undefined) update.pinned = pinned;
 
     const note = await Note.findOneAndUpdate(

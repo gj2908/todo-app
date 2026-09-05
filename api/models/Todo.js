@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const todoSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  project: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
+  subject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject" },
   title: { type: String, required: true },
   description: String,
   completed: { type: Boolean, default: false },

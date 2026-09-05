@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const projectSchema = new mongoose.Schema({
+const subjectSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   color: { type: String, default: "#3498db" },
@@ -15,4 +15,6 @@ const projectSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Project", projectSchema);
+// Keeps reading/writing the existing "projects" collection so no data
+// migration is needed for this model when renaming Project -> Subject.
+module.exports = mongoose.model("Subject", subjectSchema, "projects");

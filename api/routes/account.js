@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/auth");
 const Todo = require("../models/Todo");
-const Project = require("../models/Project");
+const Subject = require("../models/Subject");
 const Note = require("../models/Note");
 const Document = require("../models/Document");
 const User = require("../models/User");
@@ -68,10 +68,10 @@ router.put("/notification-preferences", protect, async (req, res) => {
 // Export everything the user owns as one JSON file
 router.get("/export", protect, async (req, res) => {
   try {
-    const [user, todos, projects, notes, documents] = await Promise.all([
+    const [user, todos, subjects, notes, documents] = await Promise.all([
       User.findById(req.user).select("-password"),
       Todo.find({ user: req.user }),
-      Project.find({ user: req.user }),
+      Subject.find({ user: req.user }),
       Note.find({ user: req.user }),
       Document.find({ user: req.user }).select("-publicId"),
     ]);
@@ -80,7 +80,7 @@ router.get("/export", protect, async (req, res) => {
       exportedAt: new Date().toISOString(),
       account: user,
       todos,
-      projects,
+      subjects,
       notes,
       documents,
     };

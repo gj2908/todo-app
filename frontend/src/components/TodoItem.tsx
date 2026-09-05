@@ -2,7 +2,7 @@ import { format, isPast, isToday, isTomorrow } from "date-fns";
 
 interface TodoItemProps {
   todo: any;
-  projectName?: string | null;
+  subjectName?: string | null;
   onEdit: (todo: any) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string, completed: boolean) => void;
@@ -37,7 +37,7 @@ const categoryColors: Record<string, string> = {
   general:  "bg-zinc-700 text-zinc-400",
 };
 
-export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle }: TodoItemProps) {
+export default function TodoItem({ todo, subjectName, onEdit, onDelete, onToggle }: TodoItemProps) {
   const pc = priorityConfig[todo.priority] || priorityConfig.medium;
 
   const getDateInfo = (dateStr: string) => {
@@ -104,10 +104,10 @@ export default function TodoItem({ todo, projectName, onEdit, onDelete, onToggle
 
         {/* Tags row */}
         <div className="flex flex-wrap items-center gap-1 mt-1">
-          {/* Project name */}
-          {projectName && (
+          {/* Subject name */}
+          {subjectName && (
             <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">
-              {projectName}
+              {subjectName}
             </span>
           )}
 

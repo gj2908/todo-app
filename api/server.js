@@ -22,14 +22,14 @@ mongoose
 // Routes
 const authRoutes = require("./routes/auth");
 const todoRoutes = require("./routes/todo");
-const projectRoutes = require("./routes/project");
+const subjectRoutes = require("./routes/subject");
 const documentRoutes = require("./routes/documents");
 const noteRoutes = require("./routes/notes");
 const accountRoutes = require("./routes/account");
 const cronRoutes = require("./routes/cron");
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
-app.use("/api/projects", projectRoutes);
+app.use("/api/subjects", subjectRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/account", accountRoutes);

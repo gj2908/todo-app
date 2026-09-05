@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
-import ManageProjectModal from "./ManageProjectModal";
+import ManageSubjectModal from "./ManageSubjectModal";
 
-interface Project {
+interface Subject {
   _id: string;
   name: string;
   icon: string;
@@ -15,7 +15,8 @@ interface Project {
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
-  onProjectSelect?: (projectId: string) => void;
+  onSubjectSelect?: (subjectId: string) => void;
+  onSubjectNotesOpen?: (subjectId: string) => void;
   todoCounts?: { [key: string]: number };
   reminderCount?: number;
 }
@@ -79,6 +80,22 @@ const NoteIcon = () => (
   </svg>
 );
 
+const DatesheetIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M4.5 9.5h2M8 9.5h2M4.5 12h2M8 12h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+  </svg>
+);
+
+const SyllabusIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M3 3h7l3 3v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M10 3v3h3" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M4.5 9h5M4.5 11.5h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+  </svg>
+);
+
 const InsightsIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <path d="M2.5 13.5h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
@@ -116,54 +133,84 @@ const ShareIcon = () => (
   </svg>
 );
 
-export default function Sidebar({ activeView, onViewChange, onProjectSelect, todoCounts = {}, reminderCount = 0 }: SidebarProps) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [showNewProject, setShowNewProject] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
-  const [manageTarget, setManageTarget] = useState<Project | null>(null);
+const SubjectNotesSmallIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <path d="M2.5 2h8v9h-8V2Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+    <path d="M4.5 5h4M4.5 7h4M4.5 9h2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
 
-  const fetchProjects = async () => {
+const CollapseIcon = ({ collapsed }: { collapsed: boolean }) => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ transform: collapsed ? "rotate(180deg)" : "none" }}>
+    <path d="M9 3L5 7l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const SIDEBAR_COLLAPSED_KEY = "sidebar:collapsed";
+
+export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onSubjectNotesOpen, todoCounts = {}, reminderCount = 0 }: SidebarProps) {
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [showNewSubject, setShowNewSubject] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Subject | null>(null);
+  const [manageTarget, setManageTarget] = useState<Subject | null>(null);
+  const [collapsed, setCollapsed] = useState(() => {
     try {
-      const res = await axios.get("/projects");
-      setProjects(res.data);
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
     } catch {
-      console.error("Failed to fetch projects");
+      return false;
+    }
+  });
+
+  const fetchSubjects = async () => {
+    try {
+      const res = await axios.get("/subjects");
+      setSubjects(res.data);
+    } catch {
+      console.error("Failed to fetch subjects");
     }
   };
 
-  useEffect(() => { fetchProjects(); }, []);
+  useEffect(() => { fetchSubjects(); }, []);
 
-  const handleCreateProject = async () => {
-    if (!newProjectName.trim()) { toast.error("Project name required!"); return; }
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+    } catch {
+      // ignore storage failures (private browsing, etc.)
+    }
+  }, [collapsed]);
+
+  const handleCreateSubject = async () => {
+    if (!newSubjectName.trim()) { toast.error("Subject name required!"); return; }
     setLoading(true);
     try {
-      const res = await axios.post("/projects", {
-        name: newProjectName.trim(),
+      const res = await axios.post("/subjects", {
+        name: newSubjectName.trim(),
         icon: "◆",
         color: "#f59e0b",
       });
-      setProjects([res.data, ...projects]);
-      window.dispatchEvent(new Event("projects:changed"));
-      setNewProjectName("");
-      setShowNewProject(false);
-      toast.success("Project created!");
-    } catch { toast.error("Failed to create project"); }
+      setSubjects([res.data, ...subjects]);
+      window.dispatchEvent(new Event("subjects:changed"));
+      setNewSubjectName("");
+      setShowNewSubject(false);
+      toast.success("Subject created!");
+    } catch { toast.error("Failed to create subject"); }
     finally { setLoading(false); }
   };
 
-  const handleDeleteProject = async () => {
+  const handleDeleteSubject = async () => {
     if (!deleteTarget) return;
     const id = deleteTarget._id;
     setDeleteTarget(null);
     try {
-      await axios.delete(`/projects/${id}`);
-      setProjects(projects.filter(p => p._id !== id));
-      window.dispatchEvent(new Event("projects:changed"));
-      if (activeView === `project_${id}`) onViewChange("inbox");
-      toast.success("Project deleted!");
-    } catch { toast.error("Failed to delete project"); }
+      await axios.delete(`/subjects/${id}`);
+      setSubjects(subjects.filter(s => s._id !== id));
+      window.dispatchEvent(new Event("subjects:changed"));
+      if (activeView === `subject_${id}`) onViewChange("inbox");
+      toast.success("Subject deleted!");
+    } catch { toast.error("Failed to delete subject"); }
   };
 
   const viewItems = [
@@ -178,6 +225,8 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
   const toolItems = [
     { id: "notes", label: "Notes", Icon: NoteIcon, key: "notes" },
     { id: "vault", label: "Document Vault", Icon: VaultIcon, key: "vault" },
+    { id: "datesheet", label: "Datesheet", Icon: DatesheetIcon, key: "datesheet" },
+    { id: "syllabus", label: "Syllabus", Icon: SyllabusIcon, key: "syllabus" },
     { id: "insights", label: "Insights", Icon: InsightsIcon, key: "insights" },
     { id: "trash", label: "Trash", Icon: NavTrashIcon, key: "trash" },
   ];
@@ -189,7 +238,10 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
       <button
         key={id}
         onClick={() => onViewChange(id)}
-        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all group ${
+        title={collapsed ? label : undefined}
+        className={`w-full flex items-center rounded-lg text-sm font-semibold transition-all group ${
+          collapsed ? "justify-center px-2 py-2" : "justify-between px-2.5 py-1.5"
+        } ${
           isActive
             ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
             : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
@@ -197,9 +249,9 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
       >
         <span className="flex items-center gap-2">
           <Icon />
-          {label}
+          {!collapsed && label}
         </span>
-        {count > 0 && (
+        {!collapsed && count > 0 && (
           <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
             isActive ? "bg-amber-500/25 text-amber-400" : "bg-zinc-700 text-zinc-400"
           }`}>
@@ -211,12 +263,25 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
   };
 
   return (
-    <div className="sidebar w-64 sm:w-60 lg:w-56 bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0 overflow-hidden">
-      {/* Scrollable nav + projects */}
+    <div className={`sidebar bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0 overflow-hidden transition-all duration-150 ${
+      collapsed ? "w-14" : "w-64 sm:w-60 lg:w-56"
+    }`}>
+      {/* Collapse toggle */}
+      <div className={`shrink-0 flex items-center py-2 px-2 border-b border-zinc-800 ${collapsed ? "justify-center" : "justify-end"}`}>
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition"
+        >
+          <CollapseIcon collapsed={collapsed} />
+        </button>
+      </div>
+
+      {/* Scrollable nav + subjects */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Views */}
         <div className="p-2.5 pt-3">
-          <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>
+          {!collapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>}
           <nav className="space-y-0.5">
             {viewItems.map(renderMenuItem)}
           </nav>
@@ -224,125 +289,136 @@ export default function Sidebar({ activeView, onViewChange, onProjectSelect, tod
 
         {/* Tools */}
         <div className="p-2.5 pt-1">
-          <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>
+          {!collapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>}
           <nav className="space-y-0.5">
             {toolItems.map(renderMenuItem)}
           </nav>
         </div>
 
-        {/* Projects */}
-        <div className="p-2.5 pt-1">
-          <div className="flex items-center justify-between px-2 mb-1.5">
-            <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase">Projects</p>
-            <button
-              onClick={() => setShowNewProject(!showNewProject)}
-              className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
-              title="New project"
-            >
-              <PlusIcon />
-            </button>
-          </div>
-
-          {showNewProject && (
-            <div className="mb-2 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2">
-              <input
-                type="text"
-                placeholder="Project name..."
-                value={newProjectName}
-                onChange={e => setNewProjectName(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleCreateProject()}
-                autoFocus
-                className="w-full px-2.5 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-              />
-              <div className="flex gap-1.5">
-                <button
-                  onClick={handleCreateProject}
-                  disabled={loading}
-                  className="flex-1 py-1 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded transition disabled:opacity-50"
-                >
-                  Create
-                </button>
-                <button
-                  onClick={() => { setShowNewProject(false); setNewProjectName(""); }}
-                  className="flex-1 py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded transition"
-                >
-                  Cancel
-                </button>
-              </div>
+        {/* Subjects */}
+        {!collapsed && (
+          <div className="p-2.5 pt-1">
+            <div className="flex items-center justify-between px-2 mb-1.5">
+              <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase">Subjects</p>
+              <button
+                onClick={() => setShowNewSubject(!showNewSubject)}
+                className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
+                title="New subject"
+              >
+                <PlusIcon />
+              </button>
             </div>
-          )}
 
-          <div className="space-y-0.5">
-            {projects.length === 0 && (
-              <p className="text-xs text-zinc-500 px-2 py-2.5 text-center font-medium">No projects yet</p>
-            )}
-            {projects.map(project => {
-              const isActive = activeView === `project_${project._id}`;
-              const isOwner = !project.role || project.role === "owner";
-              return (
-                <div
-                  key={project._id}
-                  onClick={() => onProjectSelect?.(project._id)}
-                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer group transition-all ${
-                    isActive
-                      ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                  }`}
-                >
-                  <span className="flex items-center gap-2 text-sm font-semibold min-w-0">
-                    <span className="text-amber-500 text-xs">◆</span>
-                    <span className="truncate">{project.name}</span>
-                    {!isOwner && (
-                      <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 capitalize shrink-0">
-                        {project.role}
-                      </span>
-                    )}
-                  </span>
-                  <span className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition shrink-0">
-                    {isOwner && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setManageTarget(project); }}
-                        className="text-zinc-500 hover:text-amber-400 transition"
-                        title="Share project"
-                      >
-                        <ShareIcon />
-                      </button>
-                    )}
-                    {isOwner && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setDeleteTarget(project); }}
-                        className="text-zinc-500 hover:text-red-400 transition"
-                      >
-                        <TrashIcon />
-                      </button>
-                    )}
-                  </span>
+            {showNewSubject && (
+              <div className="mb-2 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2">
+                <input
+                  type="text"
+                  placeholder="Subject name..."
+                  value={newSubjectName}
+                  onChange={e => setNewSubjectName(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleCreateSubject()}
+                  autoFocus
+                  className="w-full px-2.5 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                />
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={handleCreateSubject}
+                    disabled={loading}
+                    className="flex-1 py-1 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded transition disabled:opacity-50"
+                  >
+                    Create
+                  </button>
+                  <button
+                    onClick={() => { setShowNewSubject(false); setNewSubjectName(""); }}
+                    className="flex-1 py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded transition"
+                  >
+                    Cancel
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            <div className="space-y-0.5">
+              {subjects.length === 0 && (
+                <p className="text-xs text-zinc-500 px-2 py-2.5 text-center font-medium">No subjects yet</p>
+              )}
+              {subjects.map(subject => {
+                const isActive = activeView === `subject_${subject._id}`;
+                const isOwner = !subject.role || subject.role === "owner";
+                return (
+                  <div
+                    key={subject._id}
+                    onClick={() => onSubjectSelect?.(subject._id)}
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer group transition-all ${
+                      isActive
+                        ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 text-sm font-semibold min-w-0">
+                      <span className="text-amber-500 text-xs">◆</span>
+                      <span className="truncate">{subject.name}</span>
+                      {!isOwner && (
+                        <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 capitalize shrink-0">
+                          {subject.role}
+                        </span>
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition shrink-0">
+                      <button
+                        onClick={e => { e.stopPropagation(); onSubjectNotesOpen?.(subject._id); }}
+                        className="text-zinc-500 hover:text-amber-400 transition"
+                        title="Subject notes"
+                      >
+                        <SubjectNotesSmallIcon />
+                      </button>
+                      {isOwner && (
+                        <button
+                          onClick={e => { e.stopPropagation(); setManageTarget(subject); }}
+                          className="text-zinc-500 hover:text-amber-400 transition"
+                          title="Share subject"
+                        >
+                          <ShareIcon />
+                        </button>
+                      )}
+                      {isOwner && (
+                        <button
+                          onClick={e => { e.stopPropagation(); setDeleteTarget(subject); }}
+                          className="text-zinc-500 hover:text-red-400 transition"
+                        >
+                          <TrashIcon />
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 py-1.5 border-t border-zinc-800">
-        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
-      </div>
+      {!collapsed && (
+        <div className="shrink-0 py-1.5 border-t border-zinc-800">
+          <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        title="Delete project"
-        message={deleteTarget ? `"${deleteTarget.name}" will be deleted. Tasks inside it will stay in your workspace but lose their project.` : ""}
+        title="Delete subject"
+        message={deleteTarget ? `"${deleteTarget.name}" will be deleted. Tasks inside it will stay in your workspace but lose their subject.` : ""}
         confirmLabel="Delete"
         danger
-        onConfirm={handleDeleteProject}
+        onConfirm={handleDeleteSubject}
         onCancel={() => setDeleteTarget(null)}
       />
 
-      <ManageProjectModal
+      <ManageSubjectModal
         isOpen={!!manageTarget}
-        projectId={manageTarget?._id || null}
-        projectName={manageTarget?.name || ""}
+        subjectId={manageTarget?._id || null}
+        subjectName={manageTarget?.name || ""}
         onClose={() => setManageTarget(null)}
       />
     </div>

@@ -9,14 +9,14 @@ interface Member {
   role: "editor" | "viewer";
 }
 
-interface ManageProjectModalProps {
+interface ManageSubjectModalProps {
   isOpen: boolean;
-  projectId: string | null;
-  projectName: string;
+  subjectId: string | null;
+  subjectName: string;
   onClose: () => void;
 }
 
-export default function ManageProjectModal({ isOpen, projectId, projectName, onClose }: ManageProjectModalProps) {
+export default function ManageSubjectModal({ isOpen, subjectId, subjectName, onClose }: ManageSubjectModalProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -25,10 +25,10 @@ export default function ManageProjectModal({ isOpen, projectId, projectName, onC
   const [removeTarget, setRemoveTarget] = useState<Member | null>(null);
 
   const fetchMembers = async () => {
-    if (!projectId) return;
+    if (!subjectId) return;
     try {
       setLoading(true);
-      const res = await axios.get(`/projects/${projectId}/members`);
+      const res = await axios.get(`/subjects/${subjectId}/members`);
       setMembers(res.data);
     } catch {
       toast.error("Failed to load members");
@@ -40,13 +40,13 @@ export default function ManageProjectModal({ isOpen, projectId, projectName, onC
   useEffect(() => {
     if (isOpen) fetchMembers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, projectId]);
+  }, [isOpen, subjectId]);
 
   const handleInvite = async () => {
     if (!email.trim()) { toast.error("Enter an email address"); return; }
     try {
       setInviting(true);
-      const res = await axios.post(`/projects/${projectId}/invite`, { email: email.trim(), role });
+      const res = await axios.post(`/subjects/${subjectId}/invite`, { email: email.trim(), role });
       setMembers((prev) => [...prev, { userId: res.data.userId, email: res.data.email, role: res.data.role }]);
       setEmail("");
       toast.success("Member added");
@@ -58,11 +58,11 @@ export default function ManageProjectModal({ isOpen, projectId, projectName, onC
   };
 
   const handleRemove = async () => {
-    if (!removeTarget || !projectId) return;
+    if (!removeTarget || !subjectId) return;
     const target = removeTarget;
     setRemoveTarget(null);
     try {
-      await axios.delete(`/projects/${projectId}/members/${target.userId}`);
+      await axios.delete(`/subjects/${subjectId}/members/${target.userId}`);
       setMembers((prev) => prev.filter((m) => m.userId !== target.userId));
       toast.success("Member removed");
     } catch {
@@ -79,7 +79,7 @@ export default function ManageProjectModal({ isOpen, projectId, projectName, onC
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl">
-        <h3 className="text-base font-bold text-zinc-100">Share "{projectName}"</h3>
+        <h3 className="text-base font-bold text-zinc-100">Share "{subjectName}"</h3>
         <p className="text-sm text-zinc-500 mt-1">Invite by email - they need an existing Taskflow account.</p>
 
         <div className="mt-4 flex gap-2">
@@ -142,7 +142,7 @@ export default function ManageProjectModal({ isOpen, projectId, projectName, onC
       <ConfirmDialog
         isOpen={!!removeTarget}
         title="Remove member"
-        message={removeTarget ? `${removeTarget.email} will lose access to this project.` : ""}
+        message={removeTarget ? `${removeTarget.email} will lose access to this subject.` : ""}
         confirmLabel="Remove"
         danger
         onConfirm={handleRemove}

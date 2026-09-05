@@ -34,7 +34,7 @@ export default function DocumentVault() {
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/documents");
+      const res = await axios.get("/documents", { params: { kind: "general" } });
       setDocuments(res.data);
     } catch {
       toast.error("Failed to load vault documents");
