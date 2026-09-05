@@ -92,6 +92,26 @@ const sendDigestEmail = (toEmail, { dueToday, overdue, appUrl }) => {
   });
 };
 
+const sendWeeklyRecapEmail = (toEmail, { completedThisWeek, dueNextWeek, appUrl }) => {
+  const renderList = (items) =>
+    items.map((t) => `<li>${t.title}${t.dueDate ? ` — ${new Date(t.dueDate).toLocaleDateString()}` : ""}</li>`).join("");
+
+  return sendAppEmail({
+    to: toEmail,
+    subject: `Taskflow weekly recap: ${completedThisWeek.length} completed, ${dueNextWeek.length} due next week`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+        <h2>Your week in Taskflow</h2>
+        <p><strong>Completed this week (${completedThisWeek.length})</strong></p>
+        ${completedThisWeek.length ? `<ul>${renderList(completedThisWeek)}</ul>` : "<p>Nothing marked complete this week.</p>"}
+        <p><strong>Due in the coming week (${dueNextWeek.length})</strong></p>
+        ${dueNextWeek.length ? `<ul>${renderList(dueNextWeek)}</ul>` : "<p>Nothing on the calendar yet.</p>"}
+        <p><a href="${appUrl}/home" style="display:inline-block;padding:10px 16px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:700;">Open Taskflow</a></p>
+      </div>
+    `,
+  });
+};
+
 module.exports = {
   getAppBaseUrl,
   getTransporter,
@@ -99,4 +119,5 @@ module.exports = {
   sendResetEmail,
   sendVerificationEmail,
   sendDigestEmail,
+  sendWeeklyRecapEmail,
 };

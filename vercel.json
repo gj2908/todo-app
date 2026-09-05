@@ -37,6 +37,10 @@
     {
       "path": "/api/cron/daily-digest",
       "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-recap",
+      "schedule": "0 18 * * 0"
     }
   ]
 }
