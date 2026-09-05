@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import axios from "../axiosConfig";
 
 interface Subject {
   _id: string;
@@ -10,6 +11,7 @@ interface CommandPaletteProps {
   onViewChange: (view: string) => void;
   onSubjectSelect: (subjectId: string) => void;
   onNewTask: () => void;
+  onOpenTodo: (todo: any) => void;
 }
 
 interface Command {
@@ -17,12 +19,17 @@ interface Command {
   label: string;
   group: string;
   action: () => void;
+  matchText?: string;
 }
 
-export default function CommandPalette({ subjects, onViewChange, onSubjectSelect, onNewTask }: CommandPaletteProps) {
+export default function CommandPalette({ subjects, onViewChange, onSubjectSelect, onNewTask, onOpenTodo }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [todos, setTodos] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,8 +47,20 @@ export default function CommandPalette({ subjects, onViewChange, onSubjectSelect
     if (open) {
       setQuery("");
       setActiveIndex(0);
+      if (!contentLoaded) {
+        setContentLoaded(true);
+        Promise.all([
+          axios.get("/todos").catch(() => ({ data: [] })),
+          axios.get("/notes").catch(() => ({ data: [] })),
+          axios.get("/documents").catch(() => ({ data: [] })),
+        ]).then(([todosRes, notesRes, documentsRes]) => {
+          setTodos(todosRes.data);
+          setNotes(notesRes.data);
+          setDocuments(documentsRes.data);
+        });
+      }
     }
-  }, [open]);
+  }, [open, contentLoaded]);
 
   const commands: Command[] = useMemo(() => {
     const run = (fn: () => void) => () => {
@@ -63,7 +82,6 @@ export default function CommandPalette({ subjects, onViewChange, onSubjectSelect
       { id: "notes", label: "Go to Notes", group: "Tools", action: run(() => onViewChange("notes")) },
       { id: "datesheet", label: "Go to Datesheet", group: "Tools", action: run(() => onViewChange("datesheet")) },
       { id: "syllabus", label: "Go to Syllabus", group: "Tools", action: run(() => onViewChange("syllabus")) },
-      { id: "insights", label: "Go to Insights", group: "Tools", action: run(() => onViewChange("insights")) },
       { id: "trash", label: "Go to Trash", group: "Tools", action: run(() => onViewChange("trash")) },
     ];
 
@@ -81,11 +99,47 @@ export default function CommandPalette({ subjects, onViewChange, onSubjectSelect
     return [...actionCommands, ...viewCommands, ...toolCommands, ...subjectCommands];
   }, [subjects, onViewChange, onSubjectSelect, onNewTask]);
 
+  const contentCommands: Command[] = useMemo(() => {
+    const run = (fn: () => void) => () => {
+      fn();
+      setOpen(false);
+    };
+
+    const todoCommands: Command[] = todos.map((t) => ({
+      id: `todo_${t._id}`,
+      label: t.title,
+      group: "Tasks",
+      action: run(() => onOpenTodo(t)),
+      matchText: [t.title, ...(t.tags || [])].join(" ").toLowerCase(),
+    }));
+
+    const noteCommands: Command[] = notes.map((n) => ({
+      id: `note_${n._id}`,
+      label: n.title,
+      group: "Notes",
+      action: run(() => onViewChange("notes")),
+      matchText: [n.title, ...(n.tags || [])].join(" ").toLowerCase(),
+    }));
+
+    const documentCommands: Command[] = documents.map((d) => ({
+      id: `document_${d._id}`,
+      label: d.title,
+      group: "Documents",
+      action: run(() => onViewChange("vault")),
+      matchText: [d.title, ...(d.tags || [])].join(" ").toLowerCase(),
+    }));
+
+    return [...todoCommands, ...noteCommands, ...documentCommands];
+  }, [todos, notes, documents, onOpenTodo, onViewChange]);
+
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
     const q = query.toLowerCase();
-    return commands.filter((c) => c.label.toLowerCase().includes(q));
-  }, [commands, query]);
+    return [
+      ...commands.filter((c) => c.label.toLowerCase().includes(q)),
+      ...contentCommands.filter((c) => c.matchText?.includes(q)),
+    ];
+  }, [commands, contentCommands, query]);
 
   useEffect(() => {
     setActiveIndex(0);

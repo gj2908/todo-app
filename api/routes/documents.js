@@ -131,6 +131,10 @@ router.post("/upload", protect, upload.single("file"), async (req, res) => {
     }
     const subject = requestedKind === "note" || requestedKind === "syllabus" ? req.body?.subject || null : null;
     const date = requestedKind === "syllabus" && req.body?.date ? new Date(req.body.date) : null;
+    // multipart fields always arrive as strings, unlike the JSON PUT route below
+    const tags = typeof req.body?.tags === "string"
+      ? req.body.tags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
 
     configureCloudinary();
 
@@ -185,6 +189,7 @@ router.post("/upload", protect, upload.single("file"), async (req, res) => {
       kind: requestedKind,
       subject,
       date,
+      tags,
     });
 
     res.json(document);
@@ -201,9 +206,12 @@ router.put("/:id", protect, async (req, res) => {
       return res.status(400).json({ message: "Title is required" });
     }
 
+    const update = { title };
+    if (req.body.tags !== undefined) update.tags = req.body.tags;
+
     const document = await Document.findOneAndUpdate(
       { _id: req.params.id, user: req.user },
-      { title },
+      update,
       { new: true }
     );
 

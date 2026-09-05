@@ -15,7 +15,6 @@ import DocumentVault from "../components/DocumentVault";
 import PersonalReminderModal from "../components/PersonalReminderModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import NotesPanel from "../components/NotesPanel";
-import InsightsPanel from "../components/InsightsPanel";
 import TrashPanel from "../components/TrashPanel";
 import CommandPalette from "../components/CommandPalette";
 import SubjectNotesPanel from "../components/SubjectNotesPanel";
@@ -410,7 +409,6 @@ export default function HomePage() {
     notes: { label: "Notes", desc: "Free-form notes and ideas" },
     datesheet: { label: "Datesheet", desc: "Your current exam schedule" },
     syllabus: { label: "Syllabus", desc: "Date-wise syllabus, per subject or combined" },
-    insights: { label: "Insights", desc: "Trends across your tasks" },
     trash: { label: "Trash", desc: "Deleted tasks, kept until you remove them for good" },
   };
 
@@ -421,7 +419,7 @@ export default function HomePage() {
     ? { label: `${getSubjectName(activeSubjectNotesId || undefined) || "Subject"} Notes`, desc: "Notes for this subject" }
     : viewTitles[activeView] || { label: "Subject", desc: "Subject tasks" };
   const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || (activeView.startsWith("subject_") && !isSubjectNotesView);
-  const nonTaskViews = ["dashboard", "vault", "notes", "datesheet", "syllabus", "insights", "trash"];
+  const nonTaskViews = ["dashboard", "vault", "notes", "datesheet", "syllabus", "trash"];
   const hasCalendarWidget = activeView === "calendar" || activeView === "reminders" || showCalendarPreview;
 
   const stats = useMemo(() => {
@@ -436,7 +434,6 @@ export default function HomePage() {
     <div className="flex flex-col h-[100dvh] bg-zinc-950 overflow-hidden">
       <Navbar
         onClockClick={() => handleViewChange("calendar")}
-        onNewTaskClick={handleAddNew}
         onMenuClick={() => setSidebarOpen((v) => !v)}
         menuOpen={sidebarOpen}
       />
@@ -538,7 +535,7 @@ export default function HomePage() {
               )}
             </div>
 
-            <div className="p-4 sm:p-6 pt-4">
+            <div key={activeView} className="p-4 sm:p-6 pt-4 animate-fadeSlideDown">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
@@ -696,8 +693,6 @@ export default function HomePage() {
                 subjectId={activeSubjectNotesId}
                 subjectName={getSubjectName(activeSubjectNotesId) || "Subject"}
               />
-            ) : activeView === "insights" ? (
-              <InsightsPanel todos={todos} />
             ) : activeView === "trash" ? (
               <TrashPanel />
             ) : showCalendarPreview ? (
@@ -844,6 +839,7 @@ export default function HomePage() {
         onViewChange={handleViewChange}
         onSubjectSelect={handleSubjectSelect}
         onNewTask={handleAddNew}
+        onOpenTodo={handleEditTodo}
       />
     </div>
   );

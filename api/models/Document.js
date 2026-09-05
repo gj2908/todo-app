@@ -13,6 +13,7 @@ const documentSchema = new mongoose.Schema({
   kind: { type: String, enum: ["general", "note", "datesheet", "syllabus"], default: "general" },
   subject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject", default: null },
   date: { type: Date, default: null },
+  tags: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
