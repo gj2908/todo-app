@@ -8,6 +8,20 @@ const getClientIp = (req) => {
   return req.socket?.remoteAddress || req.ip || "";
 };
 
+// Vercel's edge network resolves geolocation from the actual client connection
+// and sets these headers on every request - far more reliable than looking up
+// whatever IP we can parse out of X-Forwarded-For against a third-party API
+// (which kept resolving mobile/carrier IPs to the wrong city/country).
+const lookupGeoFromHeaders = (req) => {
+  const city = req.headers["x-vercel-ip-city"];
+  const country = req.headers["x-vercel-ip-country"];
+  if (!city && !country) return null;
+  return {
+    city: city ? decodeURIComponent(city) : "",
+    country: country || "",
+  };
+};
+
 const lookupGeo = async (ip) => {
   if (!ip || ip === "::1" || ip.startsWith("127.") || ip.startsWith("::ffff:127.")) {
     return { city: "", country: "" };
@@ -44,7 +58,7 @@ const createSession = async (userId, req) => {
   const tokenId = crypto.randomUUID();
   const ip = getClientIp(req);
   const { browser, os } = parseUserAgent(req.headers["user-agent"]);
-  const { city, country } = await lookupGeo(ip);
+  const { city, country } = lookupGeoFromHeaders(req) || (await lookupGeo(ip));
 
   await Session.create({
     user: userId,
