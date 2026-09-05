@@ -158,8 +158,11 @@ router.post("/upload", auth, upload.single("file"), async (req, res) => {
     });
 
     const title = requestedTitle || safeOriginalName;
-    // Add format transformation and extension to URL for all file types
-    const secureUrl = `${uploaded.secure_url.replace(/\/upload\//g, `/upload/f_${format}/`)}.${format}`;
+    // Raw resources (PDFs) don't get a format extension in secure_url by default, so add one.
+    // Image resources already include the correct extension - appending again would double it.
+    const secureUrl = isPdf
+      ? `${uploaded.secure_url.replace(/\/upload\//g, `/upload/f_${format}/`)}.${format}`
+      : uploaded.secure_url;
 
     const document = await Document.create({
       user: req.user,
