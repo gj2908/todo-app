@@ -62,9 +62,9 @@ export default function CalendarPanel({ todos, compact = false }: CalendarPanelP
         </div>
       </div>
 
-      <div className={`grid grid-cols-7 ${compact ? "gap-1" : "gap-2"} text-center text-sm font-bold uppercase tracking-wider text-zinc-500`}>
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-          <div key={d} className={compact ? "py-1" : "py-2"}>{d}</div>
+      <div className={`grid grid-cols-7 ${compact ? "gap-1" : "gap-2"} text-center font-bold uppercase text-zinc-500 ${compact ? "text-xs" : "text-sm tracking-wider"}`}>
+        {(compact ? ["S", "M", "T", "W", "T", "F", "S"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]).map((d, i) => (
+          <div key={i} className={compact ? "py-1" : "py-2"}>{d}</div>
         ))}
       </div>
 

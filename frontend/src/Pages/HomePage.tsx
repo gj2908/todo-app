@@ -450,7 +450,7 @@ export default function HomePage() {
               </div>
             ) : activeView === "reminders" ? (
               <div className="max-w-5xl space-y-4">
-                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
                   <div className="space-y-3">
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
                       <div className="flex items-center justify-between gap-3">
@@ -551,7 +551,21 @@ export default function HomePage() {
                       )}
                     </div>
                   </div>
-                  <div className="hidden lg:block sticky top-4">
+                  <div className="hidden lg:block sticky top-4 space-y-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                        <p className="text-xs font-medium text-zinc-500">Today</p>
+                        <p className="text-xl font-bold text-amber-400 mt-1">{todoCounts.today}</p>
+                      </div>
+                      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                        <p className="text-xs font-medium text-zinc-500">Overdue</p>
+                        <p className="text-xl font-bold text-red-400 mt-1">{stats.overdueCount}</p>
+                      </div>
+                      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                        <p className="text-xs font-medium text-zinc-500">Next 24h</p>
+                        <p className="text-xl font-bold text-green-400 mt-1">{filteredTodos.length}</p>
+                      </div>
+                    </div>
                     <CalendarPanel todos={todos} compact />
                   </div>
                 </div>

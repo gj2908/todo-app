@@ -108,74 +108,105 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
         </button>
       </div>
 
-      {/* Filters panel */}
+      {/* Filters dialog */}
       {showFilters && (
-        <div className="p-3 sm:p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl space-y-4">
-          {/* Priority pills */}
-          <div>
-            <p className="text-sm font-medium text-zinc-500 mb-2">Priority</p>
-            <div className="flex flex-wrap gap-2">
-              {priorities.map(p => (
-                <button
-                  key={p.value}
-                  onClick={() => handlePriority(p.value)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${
-                    activePriority === p.value
-                      ? p.color
-                      : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-              {activePriority && (
-                <button
-                  onClick={() => handlePriority("")}
-                  className="px-2 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-300 transition"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-2 sm:p-4"
+          onClick={e => { if (e.target === e.currentTarget) setShowFilters(false); }}
+        >
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
-          {/* Category */}
-          <div>
-            <p className="text-sm font-medium text-zinc-500 mb-2">Category</p>
-            <div className="flex flex-wrap gap-2">
-              {["work", "personal", "shopping", "health", "general"].map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => handleCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all capitalize ${
-                    activeCategory === cat
-                      ? "bg-zinc-600 text-zinc-100 border-zinc-500"
-                      : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+          <div className="relative w-full max-w-lg max-h-[92vh] bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-zinc-800">
+              <div>
+                <h2 className="text-base font-bold text-zinc-100">Filters</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">Narrow down and sort your tasks</p>
+              </div>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="p-2 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition"
+              >
+                ✕
+              </button>
             </div>
-          </div>
 
-          {/* Sort */}
-          <div>
-            <p className="text-sm font-medium text-zinc-500 mb-2">Sort by</p>
-            <div className="flex flex-wrap gap-2">
-              {sorts.map(s => (
-                <button
-                  key={s.value}
-                  onClick={() => handleSort(s.value)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
-                    activeSort === s.value
-                      ? "bg-zinc-600 text-zinc-100 border-zinc-500"
-                      : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
+              {/* Priority pills */}
+              <div>
+                <p className="text-sm font-medium text-zinc-500 mb-2">Priority</p>
+                <div className="flex flex-wrap gap-2">
+                  {priorities.map(p => (
+                    <button
+                      key={p.value}
+                      onClick={() => handlePriority(p.value)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${
+                        activePriority === p.value
+                          ? p.color
+                          : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                  {activePriority && (
+                    <button
+                      onClick={() => handlePriority("")}
+                      className="px-2 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-300 transition"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Category */}
+              <div>
+                <p className="text-sm font-medium text-zinc-500 mb-2">Category</p>
+                <div className="flex flex-wrap gap-2">
+                  {["work", "personal", "shopping", "health", "general"].map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => handleCategory(cat)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all capitalize ${
+                        activeCategory === cat
+                          ? "bg-zinc-600 text-zinc-100 border-zinc-500"
+                          : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <p className="text-sm font-medium text-zinc-500 mb-2">Sort by</p>
+                <div className="flex flex-wrap gap-2">
+                  {sorts.map(s => (
+                    <button
+                      key={s.value}
+                      onClick={() => handleSort(s.value)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
+                        activeSort === s.value
+                          ? "bg-zinc-600 text-zinc-100 border-zinc-500"
+                          : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-t border-zinc-800">
+              <button
+                onClick={() => setShowFilters(false)}
+                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
