@@ -68,13 +68,8 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-10">
-          <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/40">
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-              <rect x="3" y="3" width="6" height="6" rx="1" fill="white" />
-              <rect x="11" y="3" width="6" height="6" rx="1" fill="white" opacity="0.6" />
-              <rect x="3" y="11" width="6" height="6" rx="1" fill="white" opacity="0.6" />
-              <rect x="11" y="11" width="6" height="6" rx="1" fill="white" />
-            </svg>
+          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-blue-500/40">
+            <img src="/favicon_io/android-chrome-192x192.png" alt="Taskflow" className="w-full h-full object-cover" />
           </div>
           <span className="text-2xl font-bold text-white tracking-tight">
             Taskflow<span className="text-amber-500">.</span>

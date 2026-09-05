@@ -95,13 +95,8 @@ export default function Navbar({ onClockClick, onNewTaskClick, onMenuClick, menu
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => navigate("/home")}
           >
-          <div className="logo-mark w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="3" y="3" width="6" height="6" rx="1" fill="white" />
-              <rect x="11" y="3" width="6" height="6" rx="1" fill="white" opacity="0.6" />
-              <rect x="3" y="11" width="6" height="6" rx="1" fill="white" opacity="0.6" />
-              <rect x="11" y="11" width="6" height="6" rx="1" fill="white" />
-            </svg>
+          <div className="logo-mark w-9 h-9 rounded-lg overflow-hidden shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
+            <img src="/favicon_io/android-chrome-192x192.png" alt="Taskflow" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-base sm:text-lg tracking-tight text-white">
             Taskflow<span className="text-amber-500">.</span>
