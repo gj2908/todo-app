@@ -2,24 +2,29 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "../axiosConfig";
 
-export default function VerifyEmailPage() {
+interface VerifyEmailPageProps {
+  mode?: "verify" | "change";
+}
+
+export default function VerifyEmailPage({ mode = "verify" }: VerifyEmailPageProps) {
   const { token } = useParams<{ token: string }>();
   const [status, setStatus] = useState<"checking" | "success" | "error">("checking");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const endpoint = mode === "change" ? "verify-email-change" : "verify-email";
     const verify = async () => {
       try {
-        const res = await axios.post(`/auth/verify-email/${token}`);
-        setMessage(res.data.message || "Email verified");
+        const res = await axios.post(`/auth/${endpoint}/${token}`);
+        setMessage(res.data.message || (mode === "change" ? "Email updated" : "Email verified"));
         setStatus("success");
       } catch (err: any) {
-        setMessage(err.response?.data?.message || "Verification link expired or invalid");
+        setMessage(err.response?.data?.message || "Link expired or invalid");
         setStatus("error");
       }
     };
     verify();
-  }, [token]);
+  }, [token, mode]);
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
@@ -37,8 +42,10 @@ export default function VerifyEmailPage() {
                 <path d="M5 11l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h1 className="text-lg font-bold text-zinc-100 mb-1">Email verified</h1>
-            <p className="text-sm text-zinc-500 mb-6">Your email address is confirmed.</p>
+            <h1 className="text-lg font-bold text-zinc-100 mb-1">{mode === "change" ? "Email updated" : "Email verified"}</h1>
+            <p className="text-sm text-zinc-500 mb-6">
+              {mode === "change" ? "Your account email has been changed." : "Your email address is confirmed."}
+            </p>
           </>
         )}
         {status === "error" && (

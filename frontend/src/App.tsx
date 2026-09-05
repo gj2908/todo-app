@@ -28,6 +28,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ForgotPasswordPage />} />
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+        <Route path="/verify-email-change/:token" element={<VerifyEmailPage mode="change" />} />
         <Route
           path="/home"
           element={<ProtectedRoute element={<HomePage />} path="/home" />}

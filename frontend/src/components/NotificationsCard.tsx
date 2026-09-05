@@ -9,12 +9,17 @@ const urlBase64ToUint8Array = (base64String: string) => {
   return Uint8Array.from(Array.from(rawData).map((c) => c.charCodeAt(0)));
 };
 
+type PermissionState = "granted" | "denied" | "default" | "unsupported";
+
 export default function NotificationsCard() {
   const [notifyByEmail, setNotifyByEmail] = useState(false);
   const [notifyByPush, setNotifyByPush] = useState(false);
   const [pushSupported, setPushSupported] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [permission, setPermission] = useState<PermissionState>(
+    "Notification" in window ? (Notification.permission as PermissionState) : "unsupported"
+  );
 
   useEffect(() => {
     setPushSupported("serviceWorker" in navigator && "PushManager" in window);
@@ -26,6 +31,14 @@ export default function NotificationsCard() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const handleRequestPermission = async () => {
+    if (!("Notification" in window)) return;
+    const result = await Notification.requestPermission();
+    setPermission(result as PermissionState);
+    if (result === "granted") toast.success("Notifications turned on");
+    else if (result === "denied") toast.error("Notifications blocked - allow them from your browser's site settings");
+  };
 
   const savePreferences = async (next: { notifyByEmail?: boolean; notifyByPush?: boolean }) => {
     try {
@@ -46,8 +59,9 @@ export default function NotificationsCard() {
 
   const subscribeToPush = async () => {
     try {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
+      const result = await Notification.requestPermission();
+      setPermission(result as PermissionState);
+      if (result !== "granted") {
         toast.error("Notification permission was not granted");
         return false;
       }
@@ -111,6 +125,27 @@ export default function NotificationsCard() {
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+      <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-zinc-800">
+        <div>
+          <h3 className="text-sm font-bold text-zinc-200">Browser notifications</h3>
+          <p className="text-xs text-zinc-500 mt-0.5">Required for push and the per-task due-date reminder to show up</p>
+        </div>
+        {permission === "granted" ? (
+          <span className="text-[11px] font-bold px-2 py-1 rounded bg-green-500/15 text-green-400 whitespace-nowrap">On</span>
+        ) : permission === "denied" ? (
+          <span className="text-[11px] font-bold px-2 py-1 rounded bg-red-500/15 text-red-400 whitespace-nowrap" title="Blocked in browser settings">Blocked</span>
+        ) : permission === "unsupported" ? (
+          <span className="text-[11px] font-bold px-2 py-1 rounded bg-zinc-700 text-zinc-400 whitespace-nowrap">Unsupported</span>
+        ) : (
+          <button
+            onClick={handleRequestPermission}
+            className="text-[11px] font-bold px-2 py-1 rounded bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 transition whitespace-nowrap"
+          >
+            Off · Enable
+          </button>
+        )}
+      </div>
+
       <h3 className="text-sm font-bold text-zinc-200">Daily digest</h3>
       <p className="text-xs text-zinc-500 mt-0.5">
         One summary each morning of what's due today and overdue - separate from the per-task reminder in the Reminders view.

@@ -74,6 +74,25 @@ const sendVerificationEmail = (toEmail, verifyLink) =>
     `,
   });
 
+const sendChangeEmailVerification = (newEmail, verifyLink) =>
+  sendAppEmail({
+    to: newEmail,
+    subject: "Confirm your new Taskflow email",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+        <h2>Confirm your new email address</h2>
+        <p>Someone requested to change the email on a Taskflow account to this address. Confirm it's you to finish the change.</p>
+        <p>
+          <a href="${verifyLink}" style="display:inline-block;padding:10px 16px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:700;">
+            Confirm New Email
+          </a>
+        </p>
+        <p>If you didn't request this, you can ignore this email - your account email won't change.</p>
+        <p>This link expires in 1 hour.</p>
+      </div>
+    `,
+  });
+
 const sendDigestEmail = (toEmail, { dueToday, overdue, appUrl }) => {
   const renderList = (items) =>
     items.map((t) => `<li>${t.title}${t.dueDate ? ` — ${new Date(t.dueDate).toLocaleDateString()}` : ""}</li>`).join("");
@@ -92,4 +111,12 @@ const sendDigestEmail = (toEmail, { dueToday, overdue, appUrl }) => {
   });
 };
 
-module.exports = { getAppBaseUrl, getTransporter, sendAppEmail, sendResetEmail, sendVerificationEmail, sendDigestEmail };
+module.exports = {
+  getAppBaseUrl,
+  getTransporter,
+  sendAppEmail,
+  sendResetEmail,
+  sendVerificationEmail,
+  sendChangeEmailVerification,
+  sendDigestEmail,
+};
