@@ -10,6 +10,15 @@ module.exports = {
         purple: "#a855f7",
         pink: "#ec4899",
       },
+      keyframes: {
+        fadeSlideDown: {
+          "0%": { opacity: "0", transform: "translateY(-4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        fadeSlideDown: "fadeSlideDown 0.18s ease-out",
+      },
     },
   },
   plugins: [],

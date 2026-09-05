@@ -462,10 +462,10 @@ export default function HomePage() {
           aria-hidden={!sidebarOpen}
         >
           <div
-            className={`absolute inset-0 bg-black/55 transition-opacity ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 bg-black/55 transition-opacity duration-300 ease-out ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
             onClick={() => setSidebarOpen(false)}
           />
-          <div className={`absolute left-0 top-0 h-full transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className={`absolute left-0 top-0 h-full shadow-2xl shadow-black/50 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
             <Sidebar
               activeView={activeView}
               onViewChange={handleViewChange}
@@ -473,6 +473,7 @@ export default function HomePage() {
               onSubjectNotesOpen={handleSubjectNotesOpen}
               todoCounts={todoCounts}
               reminderCount={reminderTodos.length}
+              forceExpanded
             />
           </div>
         </div>

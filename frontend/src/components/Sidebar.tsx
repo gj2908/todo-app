@@ -19,6 +19,8 @@ interface SidebarProps {
   onSubjectNotesOpen?: (subjectId: string) => void;
   todoCounts?: { [key: string]: number };
   reminderCount?: number;
+  /** Mobile drawer instance: always render fully expanded and hide the collapse toggle. */
+  forceExpanded?: boolean;
 }
 
 const DashboardIcon = () => (
@@ -162,7 +164,13 @@ const SubjectNotesSmallIcon = () => (
 );
 
 const CollapseIcon = ({ collapsed }: { collapsed: boolean }) => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ transform: collapsed ? "rotate(180deg)" : "none" }}>
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
+    className={`transition-transform duration-300 ease-out ${collapsed ? "rotate-180" : ""}`}
+  >
     <path d="M9 3L5 7l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
@@ -170,7 +178,7 @@ const CollapseIcon = ({ collapsed }: { collapsed: boolean }) => (
 const SIDEBAR_COLLAPSED_KEY = "sidebar:collapsed";
 const TASKS_OPEN_KEY = "sidebar:tasksOpen";
 
-export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onSubjectNotesOpen, todoCounts = {}, reminderCount = 0 }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onSubjectNotesOpen, todoCounts = {}, reminderCount = 0, forceExpanded = false }: SidebarProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [showNewSubject, setShowNewSubject] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState("");
@@ -273,6 +281,8 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
   ];
 
   const isTaskViewActive = taskItems.some((i) => i.id === activeView);
+  // The mobile drawer always renders fully expanded; only the desktop rail collapses.
+  const isCollapsed = forceExpanded ? false : collapsed;
 
   const toolItems = [
     { id: "notes", label: "Notes", Icon: NoteIcon, key: "notes" },
@@ -290,21 +300,25 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
       <button
         key={id}
         onClick={() => onViewChange(id)}
-        title={collapsed ? label : undefined}
-        className={`w-full flex items-center rounded-lg text-sm font-semibold transition-all group ${
-          collapsed ? "justify-center px-2 py-2" : indent ? "justify-between pl-7 pr-2.5 py-1.5" : "justify-between px-2.5 py-1.5"
+        title={isCollapsed ? label : undefined}
+        className={`w-full flex items-center rounded-lg text-sm font-semibold transition-all duration-200 ease-out active:scale-[0.97] group ${
+          isCollapsed ? "justify-center px-2 py-2" : indent ? "justify-between pl-7 pr-2.5 py-1.5" : "justify-between px-2.5 py-1.5"
         } ${
           isActive
             ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
             : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
         }`}
       >
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 min-w-0">
           <Icon />
-          {!collapsed && label}
+          <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ease-out ${
+            isCollapsed ? "max-w-0 opacity-0" : "max-w-[10rem] opacity-100"
+          }`}>
+            {label}
+          </span>
         </span>
-        {!collapsed && count > 0 && (
-          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
+        {!isCollapsed && count > 0 && (
+          <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded transition-opacity duration-200 ${
             isActive ? "bg-amber-500/25 text-amber-400" : "bg-zinc-700 text-zinc-400"
           }`}>
             {count}
@@ -315,34 +329,36 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
   };
 
   return (
-    <div className={`sidebar bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0 overflow-hidden transition-all duration-150 ${
-      collapsed ? "w-14" : "w-64 sm:w-60 lg:w-56"
+    <div className={`sidebar bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-out ${
+      isCollapsed ? "w-14" : "w-64 sm:w-60 lg:w-56"
     }`}>
-      {/* Collapse toggle */}
-      <div className={`shrink-0 flex items-center py-2 px-2 border-b border-zinc-800 ${collapsed ? "justify-center" : "justify-end"}`}>
-        <button
-          onClick={() => setCollapsed((v) => !v)}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition"
-        >
-          <CollapseIcon collapsed={collapsed} />
-        </button>
-      </div>
+      {/* Collapse toggle (desktop rail only) */}
+      {!forceExpanded && (
+        <div className={`shrink-0 flex items-center py-2 px-2 border-b border-zinc-800 ${isCollapsed ? "justify-center" : "justify-end"}`}>
+          <button
+            onClick={() => setCollapsed((v) => !v)}
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 active:scale-90 transition-all duration-150"
+          >
+            <CollapseIcon collapsed={isCollapsed} />
+          </button>
+        </div>
+      )}
 
       {/* Scrollable nav + subjects */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Views */}
         <div className="p-2.5 pt-3">
-          {!collapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>}
+          {!isCollapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>}
           <nav className="space-y-0.5">
-            {collapsed ? (
+            {isCollapsed ? (
               viewItems.map((item) => renderMenuItem(item))
             ) : (
               <>
                 {renderMenuItem(dashboardItem)}
                 <button
                   onClick={() => setTasksOpen((v) => !v)}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] ${
                     isTaskViewActive && !tasksOpen
                       ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
                       : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
@@ -355,7 +371,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                   <ChevronIcon open={tasksOpen} />
                 </button>
                 {tasksOpen && (
-                  <div className="space-y-0.5 mt-0.5">
+                  <div className="space-y-0.5 mt-0.5 animate-fadeSlideDown">
                     {taskItems.map((item) => renderMenuItem(item, true))}
                   </div>
                 )}
@@ -367,20 +383,20 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
 
         {/* Tools */}
         <div className="p-2.5 pt-1">
-          {!collapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>}
+          {!isCollapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>}
           <nav className="space-y-0.5">
             {toolItems.map((item) => renderMenuItem(item))}
           </nav>
         </div>
 
         {/* Subjects */}
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="p-2.5 pt-1">
             <div className="flex items-center justify-between px-2 mb-1.5">
               <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase">Subjects</p>
               <button
                 onClick={() => setShowNewSubject(!showNewSubject)}
-                className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
+                className="text-zinc-500 hover:text-amber-400 hover:bg-zinc-800 rounded-md active:scale-90 transition-all duration-150 p-1"
                 title="New subject"
               >
                 <PlusIcon />
@@ -388,7 +404,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
             </div>
 
             {showNewSubject && (
-              <div className="mb-2 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2">
+              <div className="mb-2 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2 animate-fadeSlideDown">
                 <input
                   type="text"
                   placeholder="Subject name..."
@@ -427,7 +443,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                   <div
                     key={subject._id}
                     onClick={() => onSubjectSelect?.(subject._id)}
-                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer group transition-all ${
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer group transition-all duration-150 active:scale-[0.99] ${
                       isActive
                         ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
                         : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
@@ -442,10 +458,10 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                         </span>
                       )}
                     </span>
-                    <span className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition shrink-0">
+                    <span className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0">
                       <button
                         onClick={e => { e.stopPropagation(); onSubjectNotesOpen?.(subject._id); }}
-                        className="text-zinc-500 hover:text-amber-400 transition"
+                        className="p-1.5 rounded-md text-zinc-500 hover:text-amber-400 hover:bg-zinc-700/60 active:scale-90 transition-all duration-150"
                         title="Subject notes"
                       >
                         <SubjectNotesSmallIcon />
@@ -453,7 +469,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                       {isOwner && (
                         <button
                           onClick={e => { e.stopPropagation(); setManageTarget(subject); }}
-                          className="text-zinc-500 hover:text-amber-400 transition"
+                          className="p-1.5 rounded-md text-zinc-500 hover:text-amber-400 hover:bg-zinc-700/60 active:scale-90 transition-all duration-150"
                           title="Share subject"
                         >
                           <ShareIcon />
@@ -462,7 +478,8 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                       {isOwner && (
                         <button
                           onClick={e => { e.stopPropagation(); setDeleteTarget(subject); }}
-                          className="text-zinc-500 hover:text-red-400 transition"
+                          className="p-1.5 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-150"
+                          title="Delete subject"
                         >
                           <TrashIcon />
                         </button>
@@ -477,7 +494,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
       </div>
 
       {/* Footer */}
-      {!collapsed && (
+      {!isCollapsed && (
         <div className="shrink-0 py-1.5 border-t border-zinc-800">
           <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
         </div>
