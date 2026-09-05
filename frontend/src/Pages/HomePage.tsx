@@ -8,6 +8,8 @@ import TodoItem from "../components/TodoItem";
 import TodoModal from "../components/TodoModal";
 import SearchFilter from "../components/SearchFilter";
 import CalendarPanel from "../components/CalendarPanel";
+import StatsStrip from "../components/StatsStrip";
+import DashboardView from "../components/DashboardView";
 import DocumentVault from "../components/DocumentVault";
 import PersonalReminderModal from "../components/PersonalReminderModal";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -62,27 +64,10 @@ interface PersonalReminder {
 const PERSONAL_REMINDERS_KEY = "taskflow-personal-reminders";
 const SUBJECT_NOTES_PREFIX = "subject_notes_";
 
-const CalendarStatsStrip = ({ today, overdue, next24h }: { today: number; overdue: number; next24h: number }) => (
-  <div className="grid grid-cols-3 gap-2">
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-      <p className="text-xs font-medium text-zinc-500">Today</p>
-      <p className="text-xl font-bold text-amber-400 mt-1">{today}</p>
-    </div>
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-      <p className="text-xs font-medium text-zinc-500">Overdue</p>
-      <p className="text-xl font-bold text-red-400 mt-1">{overdue}</p>
-    </div>
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
-      <p className="text-xs font-medium text-zinc-500">Next 24h</p>
-      <p className="text-xl font-bold text-green-400 mt-1">{next24h}</p>
-    </div>
-  </div>
-);
-
 export default function HomePage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [activeView, setActiveView] = useState(() => localStorage.getItem("activeView") || "inbox");
+  const [activeView, setActiveView] = useState(() => localStorage.getItem("activeView") || "dashboard");
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -342,6 +327,7 @@ export default function HomePage() {
   const filteredTodos = getFilteredTodos();
 
   const viewTitles: Record<string, { label: string; desc: string }> = {
+    dashboard: { label: "Dashboard", desc: "Your day at a glance" },
     inbox:     { label: "Inbox",     desc: "All active tasks" },
     today:     { label: "Today",     desc: "Tasks due today" },
     upcoming:  { label: "Upcoming",  desc: "Future tasks" },
@@ -363,7 +349,7 @@ export default function HomePage() {
     ? { label: `${getSubjectName(activeSubjectNotesId || undefined) || "Subject"} Notes`, desc: "Notes for this subject" }
     : viewTitles[activeView] || { label: "Subject", desc: "Subject tasks" };
   const showCalendarPreview = ["inbox", "today", "upcoming", "completed"].includes(activeView) || (activeView.startsWith("subject_") && !isSubjectNotesView);
-  const nonTaskViews = ["vault", "notes", "datesheet", "syllabus", "insights", "trash"];
+  const nonTaskViews = ["dashboard", "vault", "notes", "datesheet", "syllabus", "insights", "trash"];
   const hasCalendarWidget = activeView === "calendar" || activeView === "reminders" || showCalendarPreview;
 
   const stats = useMemo(() => {
@@ -418,7 +404,7 @@ export default function HomePage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
           <div className="flex-1 overflow-y-auto">
             <div className="px-4 sm:px-6 pt-4 sm:pt-5">
-              <div className={`flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold ${hasCalendarWidget ? "lg:hidden" : ""}`}>
+              <div className={`flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold ${activeView === "dashboard" ? "hidden" : hasCalendarWidget ? "lg:hidden" : ""}`}>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
                     <span className="text-zinc-500">{todos.length} total</span>
@@ -446,9 +432,11 @@ export default function HomePage() {
                   )}
               </div>
 
-              <div className="mt-3 mb-4">
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
-              </div>
+              {activeView !== "dashboard" && (
+                <div className="mt-3 mb-4">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
+                </div>
+              )}
 
               {activeView !== "calendar" && !nonTaskViews.includes(activeView) && !isSubjectNotesView && (
                 <div className={activeView === "reminders" ? "max-w-2xl" : ""}>
@@ -469,9 +457,23 @@ export default function HomePage() {
                 <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
                 <p className="text-zinc-600 text-sm">Loading...</p>
               </div>
+            ) : activeView === "dashboard" ? (
+              <DashboardView
+                todos={todos}
+                subjects={subjects}
+                todoCounts={todoCounts}
+                overdueCount={stats.overdueCount}
+                next24h={reminderTodos.length}
+                getSubjectName={getSubjectName}
+                onEdit={handleEditTodo}
+                onDelete={requestDeleteTodo}
+                onToggle={toggleComplete}
+                onAddTask={handleAddNew}
+                onNavigate={handleViewChange}
+              />
             ) : activeView === "calendar" ? (
               <div className="w-full space-y-4">
-                <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
+                <StatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
                 <CalendarPanel todos={todos} subjects={subjects} />
               </div>
             ) : activeView === "reminders" ? (
@@ -580,7 +582,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="hidden lg:block sticky top-4 space-y-3">
-                    <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
+                    <StatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
                     <CalendarPanel todos={todos} subjects={subjects} compact />
                   </div>
                 </div>
@@ -649,7 +651,7 @@ export default function HomePage() {
                 )}
 
                 <div className="hidden lg:block sticky top-3 space-y-3">
-                  <CalendarStatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
+                  <StatsStrip today={todoCounts.today} overdue={stats.overdueCount} next24h={reminderTodos.length} />
                   <CalendarPanel todos={todos} subjects={subjects} compact />
                 </div>
               </div>

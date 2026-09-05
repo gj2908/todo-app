@@ -21,6 +21,15 @@ interface SidebarProps {
   reminderCount?: number;
 }
 
+const DashboardIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <rect x="2" y="2" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="8.5" y="2" width="5.5" height="8.5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="2" y="9.5" width="5.5" height="4.5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="8.5" y="12.5" width="5.5" height="1.5" rx="0.75" stroke="currentColor" strokeWidth="1.5" />
+  </svg>
+);
+
 const InboxIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <path d="M2 10l2-7h8l2 7H2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -242,6 +251,8 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
     } catch { toast.error("Failed to delete subject"); }
   };
 
+  const dashboardItem = { id: "dashboard", label: "Dashboard", Icon: DashboardIcon, key: "dashboard" };
+
   const taskItems = [
     { id: "inbox", label: "Inbox", Icon: InboxIcon, key: "inbox" },
     { id: "today", label: "Today", Icon: TodayIcon, key: "today" },
@@ -250,6 +261,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
   ];
 
   const viewItems = [
+    dashboardItem,
     ...taskItems,
     { id: "calendar", label: "Calendar", Icon: CalendarIcon, key: "calendar" },
     { id: "reminders", label: "Reminders", Icon: ReminderIcon, key: "reminders" },
@@ -327,6 +339,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
               viewItems.map((item) => renderMenuItem(item))
             ) : (
               <>
+                {renderMenuItem(dashboardItem)}
                 <button
                   onClick={() => setTasksOpen((v) => !v)}
                   className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
