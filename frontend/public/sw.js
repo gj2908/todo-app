@@ -60,21 +60,41 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+// Temporary diagnostic beacon - reports each stage of handling a push event
+// back to the server, since a delivery/display failure on the device is
+// otherwise completely invisible from outside. Safe to remove once push is
+// confirmed working end to end (see api/routes/pushDebug.js).
+const reportPushDebug = (stage, note) =>
+  fetch("/api/push-debug", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ stage, note }),
+  }).catch(() => {});
+
 self.addEventListener("push", (event) => {
   let data = { title: "Taskflow", body: "You have updates waiting." };
+  let parseError = null;
   try {
     if (event.data) data = { ...data, ...event.data.json() };
-  } catch {
-    // ignore malformed payloads, fall back to the default text above
+  } catch (err) {
+    parseError = err?.message || String(err);
   }
 
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: "/favicon_io/favicon-32x32.png",
-      badge: "/favicon_io/favicon-32x32.png",
-    })
-  );
+  const handlePush = (async () => {
+    await reportPushDebug("received", parseError ? `payload parse failed: ${parseError}` : `title="${data.title}"`);
+    try {
+      await self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: "/favicon_io/favicon-32x32.png",
+        badge: "/favicon_io/favicon-32x32.png",
+      });
+      await reportPushDebug("shown", `title="${data.title}"`);
+    } catch (err) {
+      await reportPushDebug("show-failed", err?.message || String(err));
+    }
+  })();
+
+  event.waitUntil(handlePush);
 });
 
 self.addEventListener("notificationclick", (event) => {
