@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -10,6 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import axios from "../axiosConfig";
 
 interface Todo {
   _id: string;
@@ -19,8 +21,14 @@ interface Todo {
   dueDate?: string;
 }
 
+interface Subject {
+  _id: string;
+  name: string;
+}
+
 interface InsightsPanelProps {
   todos: Todo[];
+  subjects?: Subject[];
 }
 
 const tooltipStyle = {
@@ -31,7 +39,23 @@ const tooltipStyle = {
   fontSize: 13,
 };
 
-export default function InsightsPanel({ todos }: InsightsPanelProps) {
+export default function InsightsPanel({ todos, subjects = [] }: InsightsPanelProps) {
+  const [studyData, setStudyData] = useState<{ name: string; value: number }[]>([]);
+
+  useEffect(() => {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    axios.get(`/study-sessions?since=${since}`)
+      .then((res) => {
+        const bySubject = new Map<string, number>();
+        res.data.forEach((s: any) => {
+          const name = subjects.find((sub) => sub._id === s.subject)?.name || "No subject";
+          bySubject.set(name, (bySubject.get(name) || 0) + s.durationMinutes);
+        });
+        setStudyData(Array.from(bySubject, ([name, value]) => ({ name, value })));
+      })
+      .catch(() => setStudyData([]));
+  }, [subjects]);
+
   const stats = {
     total: todos.length,
     completed: todos.filter((t) => t.completed).length,
@@ -137,6 +161,21 @@ export default function InsightsPanel({ todos }: InsightsPanelProps) {
               <YAxis stroke="#71717a" fontSize={12} allowDecimals={false} />
               <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#27272a" }} />
               <Bar dataKey="value" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {studyData.length > 0 && (
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+          <p className="text-sm font-bold text-zinc-200 mb-3">Study time this week (minutes)</p>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={studyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+              <XAxis dataKey="name" stroke="#71717a" fontSize={12} />
+              <YAxis stroke="#71717a" fontSize={12} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#27272a" }} />
+              <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

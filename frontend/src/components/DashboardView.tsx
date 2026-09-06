@@ -5,6 +5,8 @@ import CalendarPanel from "./CalendarPanel";
 import StatsStrip from "./StatsStrip";
 import InsightsPanel from "./InsightsPanel";
 import OnboardingChecklist from "./OnboardingChecklist";
+import StudyTimerWidget from "./StudyTimerWidget";
+import { btn } from "../lib/ui";
 
 interface Subject {
   _id: string;
@@ -65,7 +67,7 @@ export default function DashboardView({
         </div>
         <button
           onClick={onAddTask}
-          className="rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-black hover:bg-amber-400 transition whitespace-nowrap"
+          className={`px-4 py-2.5 text-sm whitespace-nowrap ${btn.primary}`}
         >
           + New Task
         </button>
@@ -110,11 +112,12 @@ export default function DashboardView({
         </div>
 
         <div className="space-y-3">
+          <StudyTimerWidget subjects={subjects} />
           <CalendarPanel todos={todos} subjects={subjects} compact />
         </div>
       </div>
 
-      <InsightsPanel todos={todos} />
+      <InsightsPanel todos={todos} subjects={subjects} />
     </div>
   );
 }

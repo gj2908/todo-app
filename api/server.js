@@ -27,6 +27,7 @@ const documentRoutes = require("./routes/documents");
 const noteRoutes = require("./routes/notes");
 const accountRoutes = require("./routes/account");
 const cronRoutes = require("./routes/cron");
+const studySessionRoutes = require("./routes/studySessions");
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/subjects", subjectRoutes);
@@ -34,6 +35,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/cron", cronRoutes);
+app.use("/api/study-sessions", studySessionRoutes);
 
 const PORT = process.env.PORT || 6002;
 
