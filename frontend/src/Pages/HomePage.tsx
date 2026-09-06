@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import { btn } from "../lib/ui";
+import { useEdgeSwipe } from "../hooks/useEdgeSwipe";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import TodoItem from "../components/TodoItem";
@@ -72,6 +73,7 @@ export default function HomePage() {
   const [activeView, setActiveView] = useState("dashboard");
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEdgeSwipe({ isOpen: sidebarOpen, onOpen: () => setSidebarOpen(true), onClose: () => setSidebarOpen(false) });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [search, setSearch] = useState("");

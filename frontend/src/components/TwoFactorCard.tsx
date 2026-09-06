@@ -95,14 +95,14 @@ export default function TwoFactorCard() {
 
   if (loading) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
         <p className="text-sm text-zinc-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-zinc-200">Two-factor authentication</h3>

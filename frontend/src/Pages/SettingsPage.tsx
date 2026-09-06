@@ -39,7 +39,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       <Navbar />
 
-      <div className="flex-1 flex items-start justify-center px-4 py-6">
+      <div className="flex-1 flex items-start justify-center px-4 sm:px-6 pt-4 sm:pt-5 pb-6">
         <div className="w-full max-w-lg space-y-4">
           <PageHeader title="Settings" />
 
@@ -57,7 +57,7 @@ export default function SettingsPage() {
 
           <div className="space-y-2">
             <SectionLabel>Data</SectionLabel>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-zinc-200">Export your data</h3>

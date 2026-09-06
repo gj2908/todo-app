@@ -14,23 +14,26 @@ const BackIcon = () => (
 );
 
 // The single consistent header pattern for top-level pages reached off the
-// main app shell (Profile, Settings, ...): a back control that always
-// returns straight to /home in one tap, and a separate, non-interactive
-// title - not an arrow-glyph-as-heading like the earlier per-page versions.
+// main app shell (Profile, Settings, ...): a back control styled to match
+// Navbar's hamburger button exactly (same size/padding/hover/press feel,
+// so the header reads as a continuation of the app chrome rather than a
+// separate "modal page" look), and a title sized like every other page's
+// heading in the app - not the small arrow-glyph-as-heading of earlier
+// per-page versions.
 export default function PageHeader({ title, onBack, actions }: PageHeaderProps) {
   const navigate = useNavigate();
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onBack || (() => navigate("/home"))}
           aria-label="Back to workspace"
-          className="p-1.5 -ml-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-90 shrink-0"
+          className="p-2 -ml-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-90 shrink-0"
         >
           <BackIcon />
         </button>
-        <h1 className="text-lg font-bold text-zinc-100 truncate">{title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight truncate">{title}</h1>
       </div>
       {actions && <div className="flex items-center gap-1.5 shrink-0">{actions}</div>}
     </div>

@@ -78,7 +78,7 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
           {onMenuClick && (
             <button
               onClick={onMenuClick}
-              className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
+              className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-90"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
               {menuOpen ? <CloseIcon /> : <MenuIcon />}

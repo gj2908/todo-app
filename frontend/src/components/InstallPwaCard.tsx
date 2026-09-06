@@ -48,7 +48,7 @@ export default function InstallPwaCard() {
   };
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-zinc-200">Install app</h3>

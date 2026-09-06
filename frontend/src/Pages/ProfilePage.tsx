@@ -12,13 +12,6 @@ const CheckIcon = () => (
   </svg>
 );
 
-const SettingsIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M8 10.2a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4z" stroke="currentColor" strokeWidth="1.4" />
-    <path d="M13 8.5a1.1 1.1 0 00.22 1.21l.04.04a1.33 1.33 0 11-1.88 1.88l-.04-.04a1.1 1.1 0 00-1.21-.22 1.1 1.1 0 00-.67 1.01v.11a1.33 1.33 0 11-2.66 0v-.06a1.1 1.1 0 00-.72-1.01 1.1 1.1 0 00-1.21.22l-.04.04a1.33 1.33 0 11-1.88-1.88l.04-.04a1.1 1.1 0 00.22-1.21 1.1 1.1 0 00-1.01-.67h-.11a1.33 1.33 0 110-2.66h.06a1.1 1.1 0 001.01-.72 1.1 1.1 0 00-.22-1.21l-.04-.04a1.33 1.33 0 111.88-1.88l.04.04a1.1 1.1 0 001.21.22h.05a1.1 1.1 0 00.67-1.01v-.11a1.33 1.33 0 112.66 0v.06a1.1 1.1 0 00.67 1.01h.05a1.1 1.1 0 001.21-.22l.04-.04a1.33 1.33 0 111.88 1.88l-.04.04a1.1 1.1 0 00-.22 1.21v.05a1.1 1.1 0 001.01.67h.11a1.33 1.33 0 110 2.66h-.06a1.1 1.1 0 00-1.01.67z" stroke="currentColor" strokeWidth="1.4" />
-  </svg>
-);
-
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -92,22 +85,11 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       <Navbar />
 
-      <div className="flex-1 flex items-start justify-center px-4 py-6">
+      <div className="flex-1 flex items-start justify-center px-4 sm:px-6 pt-4 sm:pt-5 pb-6">
         <div className="w-full max-w-lg space-y-4">
-          <PageHeader
-            title="Profile"
-            actions={
-              <button
-                onClick={() => navigate("/settings")}
-                className="flex items-center gap-1.5 text-sm font-semibold text-zinc-400 hover:text-amber-400 transition-colors duration-200"
-              >
-                <SettingsIcon />
-                Settings
-              </button>
-            }
-          />
+          <PageHeader title="Profile" />
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center text-2xl font-bold text-black shrink-0">
                 {email?.charAt(0).toUpperCase()}
