@@ -2,7 +2,18 @@ import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import OfflineBanner from "./OfflineBanner";
 import { btn } from "../lib/ui";
+import {
+  cacheSnapshot,
+  getCachedSnapshot,
+  isOnline,
+  trySync,
+  createNoteOffline,
+  updateNoteOffline,
+  deleteNoteOffline,
+} from "../utils/offlineSync";
+import { getQueue } from "../utils/offlineDb";
 
 interface Note {
   _id: string;
@@ -28,21 +39,61 @@ export default function NotesPanel() {
   const [tagsInput, setTagsInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
   const fetchNotes = async () => {
     try {
       setLoading(true);
       const res = await axios.get("/notes");
       setNotes(res.data);
+      setIsOffline(false);
+      cacheSnapshot("notes", res.data);
     } catch {
-      toast.error("Failed to load notes");
+      if (!isOnline()) {
+        const cached = await getCachedSnapshot("notes");
+        if (cached) {
+          setNotes(cached);
+          setIsOffline(true);
+        } else {
+          toast.error("Failed to load notes");
+        }
+      } else {
+        toast.error("Failed to load notes");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const refreshPendingSyncCount = async () => {
+    const queue = await getQueue();
+    setPendingSyncCount(queue.filter((op) => (op.entity || "todo") === "note").length);
+  };
+
+  const runSync = async () => {
+    const { synced, remaining } = await trySync();
+    await refreshPendingSyncCount();
+    if (synced > 0) await fetchNotes();
+    setIsOffline(!isOnline());
+    void remaining;
+  };
+
   useEffect(() => {
     fetchNotes();
+    refreshPendingSyncCount();
+    setIsOffline(!isOnline());
+    if (isOnline()) runSync();
+
+    const handleOnline = () => runSync();
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selected = notes.find((n) => n._id === selectedId) || null;
@@ -67,18 +118,28 @@ export default function NotesPanel() {
 
     const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
 
+    const mergeIntoCache = async (updater: (prev: Note[]) => Note[]) => {
+      const cached = (await getCachedSnapshot("notes")) || [];
+      await cacheSnapshot("notes", updater(cached));
+    };
+
     try {
       setSaving(true);
       if (selectedId && selectedId !== "new") {
-        const res = await axios.put(`/notes/${selectedId}`, { title: title.trim(), body, tags });
-        setNotes((prev) => prev.map((n) => (n._id === selectedId ? res.data : n)));
-        toast.success("Note updated");
+        const { synced, data } = await updateNoteOffline(selectedId, { title: title.trim(), body, tags });
+        setNotes((prev) => prev.map((n) => (n._id === selectedId ? { ...n, ...data } : n)));
+        await mergeIntoCache((prev) => prev.map((n) => (n._id === selectedId ? { ...n, ...data } : n)));
+        if (synced) toast.success("Note updated");
+        else toast.info("You're offline - this will sync once you're back online");
       } else {
-        const res = await axios.post("/notes", { title: title.trim(), body, tags });
-        setNotes((prev) => [res.data, ...prev]);
-        setSelectedId(res.data._id);
-        toast.success("Note created");
+        const { synced, data } = await createNoteOffline({ title: title.trim(), body, tags });
+        setNotes((prev) => [data, ...prev]);
+        await mergeIntoCache((prev) => [data, ...prev]);
+        setSelectedId(data._id);
+        if (synced) toast.success("Note created");
+        else toast.info("You're offline - this will sync once you're back online");
       }
+      await refreshPendingSyncCount();
     } catch {
       toast.error("Failed to save note");
     } finally {
@@ -89,12 +150,13 @@ export default function NotesPanel() {
   const handleTogglePin = async (note: Note, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const res = await axios.put(`/notes/${note._id}`, { pinned: !note.pinned });
+      const { data } = await updateNoteOffline(note._id, { pinned: !note.pinned });
       setNotes((prev) =>
-        [...prev.map((n) => (n._id === note._id ? res.data : n))].sort(
+        [...prev.map((n) => (n._id === note._id ? { ...n, ...data } : n))].sort(
           (a, b) => Number(b.pinned) - Number(a.pinned) || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
         )
       );
+      await refreshPendingSyncCount();
     } catch {
       toast.error("Failed to update note");
     }
@@ -105,16 +167,21 @@ export default function NotesPanel() {
     const id = deleteTarget._id;
     setDeleteTarget(null);
     try {
-      await axios.delete(`/notes/${id}`);
+      const { synced } = await deleteNoteOffline(id);
       setNotes((prev) => prev.filter((n) => n._id !== id));
+      const cached = (await getCachedSnapshot("notes")) || [];
+      await cacheSnapshot("notes", cached.filter((n: Note) => n._id !== id));
       if (selectedId === id) selectNote(null);
-      toast.success("Note deleted");
+      toast.success(synced ? "Note deleted" : "Note deleted - will sync once you're back online");
+      await refreshPendingSyncCount();
     } catch {
       toast.error("Failed to delete note");
     }
   };
 
   return (
+    <div className="space-y-3">
+      <OfflineBanner isOffline={isOffline} pendingSyncCount={pendingSyncCount} offlineLabel="showing cached notes" />
     <div className="grid gap-4 lg:grid-cols-[280px_1fr] items-start">
       {/* Note list */}
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
@@ -212,6 +279,7 @@ export default function NotesPanel() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+    </div>
     </div>
   );
 }

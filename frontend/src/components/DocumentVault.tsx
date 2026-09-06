@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import OfflineBanner from "./OfflineBanner";
 import { btn } from "../lib/ui";
+import { cacheSnapshot, getCachedSnapshot, isOnline, trySync, updateDocumentOffline } from "../utils/offlineSync";
+import { getQueue } from "../utils/offlineDb";
 
 interface VaultDocument {
   _id: string;
@@ -31,25 +34,68 @@ export default function DocumentVault() {
   const [editTitle, setEditTitle] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<VaultDocument | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
   const fetchDocuments = async () => {
     try {
       setLoading(true);
       const res = await axios.get("/documents", { params: { kind: "general" } });
       setDocuments(res.data);
+      setIsOffline(false);
+      cacheSnapshot("documents", res.data);
     } catch {
-      toast.error("Failed to load vault documents");
+      if (!isOnline()) {
+        const cached = await getCachedSnapshot("documents");
+        if (cached) {
+          setDocuments(cached);
+          setIsOffline(true);
+        } else {
+          toast.error("Failed to load vault documents");
+        }
+      } else {
+        toast.error("Failed to load vault documents");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const refreshPendingSyncCount = async () => {
+    const queue = await getQueue();
+    setPendingSyncCount(queue.filter((op) => (op.entity || "todo") === "document").length);
+  };
+
+  const runSync = async () => {
+    const { synced } = await trySync();
+    await refreshPendingSyncCount();
+    if (synced > 0) await fetchDocuments();
+    setIsOffline(!isOnline());
+  };
+
   useEffect(() => {
     fetchDocuments();
+    refreshPendingSyncCount();
+    setIsOffline(!isOnline());
+    if (isOnline()) runSync();
+
+    const handleOnline = () => runSync();
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isOnline()) {
+      toast.error("Uploads need a connection - try again once you're back online");
+      return;
+    }
     if (!file) {
       toast.error("Please choose an image or PDF file");
       return;
@@ -77,11 +123,18 @@ export default function DocumentVault() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!isOnline()) {
+      toast.error("Deleting needs a connection - try again once you're back online");
+      setDeleteTarget(null);
+      return;
+    }
     const id = deleteTarget._id;
     setDeleteTarget(null);
     try {
       await axios.delete(`/documents/${id}`);
       setDocuments((prev) => prev.filter((d) => d._id !== id));
+      const cached = (await getCachedSnapshot("documents")) || [];
+      await cacheSnapshot("documents", cached.filter((d: VaultDocument) => d._id !== id));
       toast.success("Document deleted");
     } catch {
       toast.error("Failed to delete document");
@@ -106,9 +159,12 @@ export default function DocumentVault() {
 
     try {
       setSavingEdit(true);
-      const res = await axios.put(`/documents/${id}`, { title: editTitle.trim() });
-      setDocuments((prev) => prev.map((d) => (d._id === id ? res.data : d)));
-      toast.success("Document updated");
+      const { synced, data } = await updateDocumentOffline(id, { title: editTitle.trim() });
+      setDocuments((prev) => prev.map((d) => (d._id === id ? { ...d, ...data } : d)));
+      const cached = (await getCachedSnapshot("documents")) || [];
+      await cacheSnapshot("documents", cached.map((d: VaultDocument) => (d._id === id ? { ...d, ...data } : d)));
+      await refreshPendingSyncCount();
+      toast.success(synced ? "Document updated" : "You're offline - this will sync once you're back online");
       cancelEdit();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to update document");
@@ -125,6 +181,7 @@ export default function DocumentVault() {
 
   return (
     <div className="max-w-5xl space-y-4">
+      <OfflineBanner isOffline={isOffline} pendingSyncCount={pendingSyncCount} offlineLabel="showing cached documents" />
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
         <p className="text-sm text-zinc-500">Upload and store images or PDFs securely in Cloudinary.</p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs">

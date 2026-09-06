@@ -1,10 +1,16 @@
 import { openDB, DBSchema, IDBPDatabase } from "idb";
 
+export type EntityType = "todo" | "note" | "document";
+
 export interface QueuedOperation {
   id?: number;
+  // Absent/undefined means "todo" - keeps already-queued rows from
+  // production (written before entity-tagging existed) valid.
+  entity?: EntityType;
   type: "create" | "update" | "delete";
   tempId?: string;
   todoId?: string;
+  entityId?: string;
   payload?: any;
   createdAt: number;
 }
@@ -24,7 +30,7 @@ let dbPromise: Promise<IDBPDatabase<TaskflowOfflineDB>> | null = null;
 
 const getDb = () => {
   if (!dbPromise) {
-    dbPromise = openDB<TaskflowOfflineDB>("taskflow-offline", 1, {
+    dbPromise = openDB<TaskflowOfflineDB>("taskflow-offline", 2, {
       upgrade(db) {
         if (!db.objectStoreNames.contains("cache")) {
           db.createObjectStore("cache");
@@ -32,6 +38,9 @@ const getDb = () => {
         if (!db.objectStoreNames.contains("queue")) {
           db.createObjectStore("queue", { keyPath: "id", autoIncrement: true });
         }
+        // v1 -> v2: queue rows gained an optional `entity` field (todo/note/
+        // document). No store/index changes needed - existing rows stay
+        // valid since `entity` defaults to "todo" wherever it's read.
       },
     });
   }
