@@ -1,18 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const webpush = require("web-push");
 const User = require("../models/User");
 const Todo = require("../models/Todo");
 const { sendDigestEmail, sendWeeklyRecapEmail, getAppBaseUrl } = require("../utils/email");
-
-const vapidConfigured = process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY;
-if (vapidConfigured) {
-  webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "mailto:admin@example.com",
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
-}
+const { sendPushToUser, vapidConfigured } = require("../utils/pushNotify");
 
 const requireCronSecret = (req, res, next) => {
   const provided = req.header("Authorization")?.replace("Bearer ", "");
@@ -51,27 +42,11 @@ router.get("/daily-digest", requireCronSecret, async (req, res) => {
         }
 
         if (user.notifyByPush && user.pushSubscriptions?.length && vapidConfigured) {
-          const payload = JSON.stringify({
+          const pushResult = await sendPushToUser(user, {
             title: `${dueToday.length} due today${overdue.length ? `, ${overdue.length} overdue` : ""}`,
             body: [...dueToday, ...overdue].slice(0, 3).map((t) => t.title).join(", "),
           });
-
-          const stillValid = [];
-          for (const sub of user.pushSubscriptions) {
-            try {
-              // eslint-disable-next-line no-await-in-loop
-              await webpush.sendNotification(sub, payload);
-              stillValid.push(sub);
-              results.pushesSent++;
-            } catch (err) {
-              // 404/410 means the browser unsubscribed - drop it, keep anything else
-              if (err.statusCode !== 404 && err.statusCode !== 410) stillValid.push(sub);
-            }
-          }
-          if (stillValid.length !== user.pushSubscriptions.length) {
-            user.pushSubscriptions = stillValid;
-            await user.save();
-          }
+          results.pushesSent += pushResult.sent;
         }
       } catch (err) {
         results.errors.push({ user: user.email, message: err?.message });
@@ -127,6 +102,46 @@ router.get("/weekly-recap", requireCronSecret, async (req, res) => {
   } catch (error) {
     console.error("Weekly recap error:", error);
     res.status(500).json({ message: "Failed to run weekly recap" });
+  }
+});
+
+// Sends a generic test push to every user with an active push subscription,
+// regardless of due tasks. Manually triggered (not on the Vercel Cron
+// schedule) - for verifying push delivery end-to-end.
+router.get("/test-notification", requireCronSecret, async (req, res) => {
+  const results = { subscribersChecked: 0, pushesSent: 0, pushesFailed: 0, subscriptionsPruned: 0, errors: [] };
+
+  if (!vapidConfigured) {
+    return res.status(500).json({ message: "VAPID keys are not configured" });
+  }
+
+  try {
+    const users = await User.find({
+      notifyByPush: true,
+      "pushSubscriptions.0": { $exists: true },
+    });
+
+    const payload = {
+      title: "Taskflow test notification",
+      body: "If you can see this, push notifications are working.",
+    };
+
+    for (const user of users) {
+      results.subscribersChecked++;
+      try {
+        const pushResult = await sendPushToUser(user, payload);
+        results.pushesSent += pushResult.sent;
+        results.pushesFailed += pushResult.failed;
+        results.subscriptionsPruned += pushResult.pruned;
+      } catch (err) {
+        results.errors.push({ user: user.email, message: err?.message });
+      }
+    }
+
+    res.json(results);
+  } catch (error) {
+    console.error("Test notification error:", error);
+    res.status(500).json({ message: "Failed to send test notifications" });
   }
 });
 
