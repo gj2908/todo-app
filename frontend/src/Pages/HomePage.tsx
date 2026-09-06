@@ -24,6 +24,8 @@ import DatesheetPanel from "../components/DatesheetPanel";
 import SyllabusPanel from "../components/SyllabusPanel";
 import { isToday, isPast } from "date-fns";
 import { getNotificationPermissionStatus, scheduleExactReminder, scheduleTaskReminder } from "../utils/notifications";
+import { cacheSnapshot, getCachedSnapshot, isOnline, trySync, updateTodoOffline, deleteTodoOffline } from "../utils/offlineSync";
+import { getQueue } from "../utils/offlineDb";
 
 interface Todo {
   _id: string;
@@ -81,6 +83,8 @@ export default function HomePage() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sort, setSort] = useState("dueDate");
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showPersonalReminderModal, setShowPersonalReminderModal] = useState(false);
@@ -105,8 +109,20 @@ export default function HomePage() {
       setLoading(true);
       const res = await axios.get("/todos");
       setTodos(res.data);
+      setIsOffline(false);
+      cacheSnapshot("todos", res.data);
     } catch {
-      toast.error("Failed to fetch todos");
+      if (!isOnline()) {
+        const cached = await getCachedSnapshot("todos");
+        if (cached) {
+          setTodos(cached);
+          setIsOffline(true);
+        } else {
+          toast.error("Failed to fetch todos");
+        }
+      } else {
+        toast.error("Failed to fetch todos");
+      }
     } finally {
       setLoading(false);
     }
@@ -133,6 +149,37 @@ export default function HomePage() {
 
     window.addEventListener("subjects:changed", handleSubjectsChanged);
     return () => window.removeEventListener("subjects:changed", handleSubjectsChanged);
+  }, []);
+
+  const refreshPendingSyncCount = async () => {
+    const queue = await getQueue();
+    setPendingSyncCount(queue.length);
+  };
+
+  const runSync = async () => {
+    const { synced, remaining } = await trySync();
+    setPendingSyncCount(remaining);
+    if (synced > 0) {
+      toast.success(`Synced ${synced} offline change${synced > 1 ? "s" : ""}`);
+      await fetchTodos();
+    }
+    setIsOffline(!isOnline());
+  };
+
+  useEffect(() => {
+    refreshPendingSyncCount();
+    setIsOffline(!isOnline());
+    if (isOnline()) runSync();
+
+    const handleOnline = () => runSync();
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -243,9 +290,14 @@ export default function HomePage() {
 
   const toggleComplete = async (id: string, completed: boolean) => {
     try {
-      await axios.put(`/todos/${id}`, { completed });
+      const { synced } = await updateTodoOffline(id, { completed });
       setTodos(todos.map(t => t._id === id ? { ...t, completed } : t));
-      toast.success(completed ? "Task completed!" : "Task reopened");
+      if (synced) {
+        toast.success(completed ? "Task completed!" : "Task reopened");
+      } else {
+        toast.info("You're offline - this will sync once you're back online");
+        await refreshPendingSyncCount();
+      }
     } catch { toast.error("Failed to update task"); }
   };
 
@@ -258,9 +310,14 @@ export default function HomePage() {
     const id = deleteTarget._id;
     setDeleteTarget(null);
     try {
-      await axios.delete(`/todos/${id}`);
+      const { synced } = await deleteTodoOffline(id);
       setTodos(todos.filter(t => t._id !== id));
-      toast.success("Task moved to trash");
+      if (synced) {
+        toast.success("Task moved to trash");
+      } else {
+        toast.info("You're offline - this delete will sync once you're back online");
+        await refreshPendingSyncCount();
+      }
     } catch { toast.error("Failed to delete task"); }
   };
 
@@ -361,7 +418,7 @@ export default function HomePage() {
     setPersonalReminders((prev) => prev.filter((reminder) => reminder.id !== id));
   };
 
-  const handleSaveTodo = async () => { await fetchTodos(); };
+  const handleSaveTodo = async () => { await fetchTodos(); await refreshPendingSyncCount(); };
 
   const handleViewChange = (view: string) => {
     setActiveView(view);
@@ -476,6 +533,17 @@ export default function HomePage() {
 
         <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
           <div className="flex-1 overflow-y-auto">
+            {(isOffline || pendingSyncCount > 0) && (
+              <div className="px-4 sm:px-6 pt-3">
+                <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                  {isOffline
+                    ? "You're offline - showing cached tasks."
+                    : `Back online - syncing ${pendingSyncCount} pending change${pendingSyncCount > 1 ? "s" : ""}...`}
+                  {isOffline && pendingSyncCount > 0 && ` ${pendingSyncCount} change${pendingSyncCount > 1 ? "s" : ""} pending sync.`}
+                </div>
+              </div>
+            )}
             <div className="px-4 sm:px-6 pt-4 sm:pt-5">
               <div className={`flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold ${activeView === "dashboard" ? "hidden" : hasCalendarWidget ? "lg:hidden" : ""}`}>
                   <div className="flex items-center gap-1.5">

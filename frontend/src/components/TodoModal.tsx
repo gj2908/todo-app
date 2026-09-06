@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "../axiosConfig";
+import { createTodoOffline, updateTodoOffline, cacheSnapshot, getCachedSnapshot } from "../utils/offlineSync";
 
 interface TodoModalProps {
   isOpen: boolean;
@@ -223,11 +224,23 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
       };
 
       if (todo?._id) {
-        await axios.put(`/todos/${todo._id}`, payload);
-        toast.success("Task updated");
+        const { synced, data } = await updateTodoOffline(todo._id, payload);
+        if (synced) {
+          toast.success("Task updated");
+        } else {
+          toast.info("You're offline - this will sync once you're back online");
+          const cached = (await getCachedSnapshot("todos")) || [];
+          await cacheSnapshot("todos", cached.map((t: any) => (t._id === todo._id ? { ...t, ...data } : t)));
+        }
       } else {
-        await axios.post("/todos", payload);
-        toast.success("Task created");
+        const { synced, data } = await createTodoOffline(payload);
+        if (synced) {
+          toast.success("Task created");
+        } else {
+          toast.info("You're offline - this will sync once you're back online");
+          const cached = (await getCachedSnapshot("todos")) || [];
+          await cacheSnapshot("todos", [...cached, data]);
+        }
       }
       onSave(null);
       onClose();
