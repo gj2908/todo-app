@@ -57,19 +57,19 @@ export default function OnboardingChecklist({ hasSubject, hasTask, onAddTask }: 
   if (dismissed || allDone) return null;
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold text-zinc-100">Getting started</h3>
-        <button onClick={dismiss} className="text-xs font-semibold text-zinc-500 hover:text-zinc-300 transition">Dismiss</button>
+        <h3 className="text-sm font-bold text-text">Getting started</h3>
+        <button onClick={dismiss} className="text-xs font-semibold text-muted hover:text-text transition">Dismiss</button>
       </div>
       <div className="space-y-2">
         {items.map((item) => (
           <div key={item.label} className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${item.done ? "bg-amber-500 text-black" : "border border-zinc-700 text-transparent"}`}>
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${item.done ? "bg-amber-500 text-black" : "border border-border-strong text-transparent"}`}>
                 <CheckIcon />
               </span>
-              <span className={`text-sm ${item.done ? "text-zinc-500 line-through" : "text-zinc-300"}`}>{item.label}</span>
+              <span className={`text-sm ${item.done ? "text-muted line-through" : "text-text"}`}>{item.label}</span>
             </div>
             {item.cta}
           </div>

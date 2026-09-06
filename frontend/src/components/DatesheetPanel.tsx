@@ -54,8 +54,8 @@ export default function DatesheetPanel() {
 
   return (
     <div className="max-w-5xl space-y-4">
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 flex items-center justify-between gap-3">
-        <p className="text-sm text-zinc-500">Your current exam schedule. Uploading a new one replaces it.</p>
+      <div className="rounded-xl border border-border bg-surface p-4 flex items-center justify-between gap-3">
+        <p className="text-sm text-muted">Your current exam schedule. Uploading a new one replaces it.</p>
         <label className={`shrink-0 flex items-center justify-center gap-2 px-3 py-2 text-sm cursor-pointer ${btn.primary}`}>
           {uploading ? "Uploading..." : datesheet ? "Replace" : "Upload"}
           <input
@@ -72,28 +72,28 @@ export default function DatesheetPanel() {
         </label>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+      <div className="rounded-xl border border-border bg-surface p-3">
         {loading ? (
-          <p className="text-sm text-zinc-500 p-4">Loading datesheet...</p>
+          <p className="text-sm text-muted p-4">Loading datesheet...</p>
         ) : !datesheet ? (
-          <p className="text-sm text-zinc-500 p-4">No datesheet uploaded yet.</p>
+          <p className="text-sm text-muted p-4">No datesheet uploaded yet.</p>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
-              <p className="text-sm text-zinc-300 truncate">{datesheet.title}</p>
+              <p className="text-sm text-text truncate">{datesheet.title}</p>
               <a
                 href={`/document-vault/${datesheet._id}`}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700 shrink-0"
+                className="rounded-md bg-surface-alt px-2.5 py-1.5 text-xs text-text hover:bg-border-strong shrink-0"
               >
                 Fullscreen
               </a>
             </div>
             {datesheet.fileType === "pdf" ? (
-              <PdfViewer url={datesheet.url} className="w-full h-[70vh] rounded-lg bg-zinc-950" />
+              <PdfViewer url={datesheet.url} className="w-full h-[70vh] rounded-lg bg-page" />
             ) : (
-              <div className="w-full h-[70vh] bg-zinc-950 rounded-lg overflow-auto flex items-center justify-center">
+              <div className="w-full h-[70vh] bg-page rounded-lg overflow-auto flex items-center justify-center">
                 <img src={datesheet.url} alt={datesheet.title} className="max-w-full max-h-full object-contain" />
               </div>
             )}

@@ -63,8 +63,8 @@ export default function DashboardView({
     <div className="max-w-6xl space-y-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{getGreeting()}</h2>
-          <p className="text-sm text-zinc-500 mt-1">Here's where things stand today.</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight">{getGreeting()}</h2>
+          <p className="text-sm text-muted mt-1">Here's where things stand today.</p>
         </div>
         <button
           onClick={onAddTask}
@@ -79,9 +79,9 @@ export default function DashboardView({
       <StatsStrip today={todoCounts.today} overdue={overdueCount} next24h={next24h} />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+        <div className="rounded-xl border border-border bg-surface p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-zinc-100">Needs attention</h3>
+            <h3 className="text-sm font-bold text-text">Needs attention</h3>
             <button
               onClick={() => onNavigate("inbox")}
               className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition"
@@ -108,7 +108,7 @@ export default function DashboardView({
               })}
             </div>
           ) : (
-            <p className="text-sm text-zinc-500">Nothing due or overdue - you're on top of things.</p>
+            <p className="text-sm text-muted">Nothing due or overdue - you're on top of things.</p>
           )}
         </div>
 

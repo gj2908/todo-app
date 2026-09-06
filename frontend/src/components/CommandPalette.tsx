@@ -163,18 +163,18 @@ export default function CommandPalette({ subjects, onViewChange, onSubjectSelect
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center pt-24 px-4" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="relative w-full max-w-lg rounded-2xl border border-zinc-700 bg-zinc-900 shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-lg rounded-2xl border border-border-strong bg-surface shadow-2xl overflow-hidden">
         <input
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Jump to a view, subject, or action..."
-          className="w-full px-5 py-4 bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none border-b border-zinc-800"
+          className="w-full px-5 py-4 bg-transparent text-text placeholder-muted text-sm focus:outline-none border-b border-border"
         />
         <div className="max-h-80 overflow-y-auto py-2">
           {filtered.length === 0 ? (
-            <p className="px-5 py-6 text-sm text-zinc-500 text-center">No matches</p>
+            <p className="px-5 py-6 text-sm text-muted text-center">No matches</p>
           ) : (
             filtered.map((cmd, i) => (
               <button
@@ -182,16 +182,16 @@ export default function CommandPalette({ subjects, onViewChange, onSubjectSelect
                 onClick={cmd.action}
                 onMouseEnter={() => setActiveIndex(i)}
                 className={`w-full flex items-center justify-between gap-3 px-5 py-2.5 text-left text-sm transition ${
-                  i === activeIndex ? "bg-amber-500/15 text-amber-400" : "text-zinc-300"
+                  i === activeIndex ? "bg-amber-500/15 text-amber-400" : "text-text"
                 }`}
               >
                 <span>{cmd.label}</span>
-                <span className="text-[11px] text-zinc-600">{cmd.group}</span>
+                <span className="text-[11px] text-muted">{cmd.group}</span>
               </button>
             ))
           )}
         </div>
-        <div className="px-5 py-2.5 border-t border-zinc-800 text-[11px] text-zinc-600 flex items-center gap-3">
+        <div className="px-5 py-2.5 border-t border-border text-[11px] text-muted flex items-center gap-3">
           <span>↑↓ navigate</span>
           <span>↵ select</span>
           <span>esc close</span>

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "../axiosConfig";
+import { applyTheme, getCurrentTheme, type Theme } from "../utils/theme";
 
 interface NavbarProps {
   onClockClick?: () => void;
@@ -25,6 +26,13 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
   const [userEmail, setUserEmail] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [theme, setTheme] = useState<Theme>(() => getCurrentTheme());
+
+  const toggleTheme = () => {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setTheme(next);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -71,14 +79,14 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
   const userInitials = userEmail.split("@")[0].slice(0, 2).toUpperCase() || "U";
 
   return (
-    <nav className="navbar-root border-b border-zinc-800 bg-zinc-950 text-zinc-100">
+    <nav className="navbar-root border-b border-border bg-page text-text">
       <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 gap-2">
         {/* Logo */}
         <div className="flex items-center gap-2 sm:gap-3">
           {onMenuClick && (
             <button
               onClick={onMenuClick}
-              className="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-90"
+              className="lg:hidden p-2 rounded-lg text-muted hover:text-text hover:bg-surface-alt transition-all duration-200 active:scale-90"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
               {menuOpen ? <CloseIcon /> : <MenuIcon />}
@@ -91,7 +99,7 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
           <div className="logo-mark w-9 h-9 rounded-lg overflow-hidden shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform">
             <img src="/favicon_io/android-chrome-192x192.png" alt="Taskflow" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold text-base sm:text-lg tracking-tight text-white">
+          <span className="font-bold text-base sm:text-lg tracking-tight text-text">
             Taskflow<span className="text-amber-500">.</span>
           </span>
           </div>
@@ -104,19 +112,19 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
             title="Open calendar"
             className="hidden lg:flex flex-col items-center group"
           >
-            <span className="text-xl font-mono font-bold text-white tabular-nums tracking-widest group-hover:text-amber-400 transition">
+            <span className="text-xl font-mono font-bold text-text tabular-nums tracking-widest group-hover:text-amber-400 transition">
               {formatTime(currentTime)}
             </span>
-            <span className="text-xs text-zinc-400 tracking-wider uppercase group-hover:text-amber-400 transition">
+            <span className="text-xs text-muted tracking-wider uppercase group-hover:text-amber-400 transition">
               {formatDate(currentTime)}
             </span>
           </button>
         ) : (
           <div className="hidden lg:flex flex-col items-center">
-            <span className="text-xl font-mono font-bold text-white tabular-nums tracking-widest">
+            <span className="text-xl font-mono font-bold text-text tabular-nums tracking-widest">
               {formatTime(currentTime)}
             </span>
-            <span className="text-xs text-zinc-400 tracking-wider uppercase">
+            <span className="text-xs text-muted tracking-wider uppercase">
               {formatDate(currentTime)}
             </span>
           </div>
@@ -138,18 +146,18 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
             {showProfileMenu && (
               <div
                 id="profile-menu"
-                className="absolute right-0 top-full mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg overflow-hidden z-50"
+                className="absolute right-0 top-full mt-2 w-48 bg-surface border border-border-strong rounded-lg shadow-lg overflow-hidden z-50"
               >
-                <div className="px-4 py-3 border-b border-zinc-800">
-                  <p className="text-xs font-medium text-zinc-500">Signed in as</p>
-                  <p className="text-sm font-semibold text-zinc-200 truncate mt-1">{userEmail}</p>
+                <div className="px-4 py-3 border-b border-border">
+                  <p className="text-xs font-medium text-muted">Signed in as</p>
+                  <p className="text-sm font-semibold text-text truncate mt-1">{userEmail}</p>
                 </div>
                 <button
                   onClick={() => {
                     navigate("/profile");
                     setShowProfileMenu(false);
                   }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-zinc-300 hover:text-amber-400 hover:bg-zinc-800 transition"
+                  className="w-full px-4 py-2.5 text-left text-sm text-text hover:text-amber-400 hover:bg-surface-alt transition"
                 >
                   Profile
                 </button>
@@ -158,13 +166,20 @@ export default function Navbar({ onClockClick, onMenuClick, menuOpen = false }: 
                     navigate("/settings");
                     setShowProfileMenu(false);
                   }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-zinc-300 hover:text-amber-400 hover:bg-zinc-800 transition"
+                  className="w-full px-4 py-2.5 text-left text-sm text-text hover:text-amber-400 hover:bg-surface-alt transition"
                 >
                   Settings
                 </button>
                 <button
+                  onClick={toggleTheme}
+                  className="w-full px-4 py-2.5 flex items-center justify-between text-left text-sm text-text hover:text-amber-400 hover:bg-surface-alt transition border-t border-border"
+                >
+                  <span>Theme</span>
+                  <span className="text-xs font-semibold text-muted">{theme === "dark" ? "Dark" : "Light"}</span>
+                </button>
+                <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 border-t border-zinc-800 transition"
+                  className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 border-t border-border transition"
                 >
                   Sign out
                 </button>

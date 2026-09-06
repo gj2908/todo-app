@@ -29,11 +29,11 @@ interface SyllabusDocument {
 const countdownLabel = (dateStr: string | null) => {
   if (!dateStr) return null;
   const days = differenceInCalendarDays(new Date(dateStr), new Date());
-  if (days < 0) return { text: "Past", cls: "bg-zinc-800 text-zinc-500" };
+  if (days < 0) return { text: "Past", cls: "bg-surface-alt text-muted" };
   if (days === 0) return { text: "Today", cls: "bg-red-500/15 text-red-400" };
   if (days === 1) return { text: "1 day left", cls: "bg-amber-500/15 text-amber-400" };
   if (days <= 7) return { text: `${days} days left`, cls: "bg-amber-500/15 text-amber-400" };
-  return { text: `${days} days left`, cls: "bg-zinc-800 text-zinc-400" };
+  return { text: `${days} days left`, cls: "bg-surface-alt text-muted" };
 };
 
 export default function SyllabusPanel() {
@@ -156,22 +156,22 @@ export default function SyllabusPanel() {
 
   return (
     <div className="max-w-5xl space-y-4">
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <p className="text-sm text-zinc-500">Date-wise syllabus files, per subject or combined for all subjects.</p>
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <p className="text-sm text-muted">Date-wise syllabus files, per subject or combined for all subjects.</p>
       </div>
 
-      <form onSubmit={handleUpload} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+      <form onSubmit={handleUpload} className="rounded-xl border border-border bg-surface p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Optional title..."
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500"
           />
           <select
             value={subjectId}
             onChange={(e) => setSubjectId(e.target.value)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-amber-500 appearance-none cursor-pointer"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text focus:outline-none focus:border-amber-500 appearance-none cursor-pointer"
           >
             <option value="">Combined (all subjects)</option>
             {subjects.map((s) => (
@@ -182,14 +182,14 @@ export default function SyllabusPanel() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-amber-500 [color-scheme:dark]"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text focus:outline-none focus:border-amber-500 [color-scheme:dark]"
           />
         </div>
         <input
           type="file"
           accept="image/*,application/pdf"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 file:mr-3 file:rounded-md file:border-0 file:bg-amber-500 file:px-2.5 file:py-1 file:text-xs file:font-bold file:text-black"
+          className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text file:mr-3 file:rounded-md file:border-0 file:bg-amber-500 file:px-2.5 file:py-1 file:text-xs file:font-bold file:text-black"
         />
         <button
           type="submit"
@@ -200,12 +200,12 @@ export default function SyllabusPanel() {
         </button>
       </form>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <h4 className="text-sm font-bold text-zinc-200 mb-3">Entries</h4>
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <h4 className="text-sm font-bold text-text mb-3">Entries</h4>
         {loading ? (
-          <p className="text-sm text-zinc-500">Loading syllabus...</p>
+          <p className="text-sm text-muted">Loading syllabus...</p>
         ) : entries.length === 0 ? (
-          <p className="text-sm text-zinc-500">No syllabus entries yet.</p>
+          <p className="text-sm text-muted">No syllabus entries yet.</p>
         ) : (
           <div className="space-y-2">
             {entries.map((entry) => {
@@ -213,7 +213,7 @@ export default function SyllabusPanel() {
               const checklist = entry.checklist || [];
               const isExpanded = expandedId === entry._id;
               return (
-                <div key={entry._id} className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5">
+                <div key={entry._id} className="rounded-lg border border-border bg-page px-3 py-2.5">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -225,11 +225,11 @@ export default function SyllabusPanel() {
                             {countdown.text}
                           </span>
                         )}
-                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">
+                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-surface-alt text-muted shrink-0">
                           {subjectName(entry.subject)}
                         </span>
                       </div>
-                      <p className="text-sm text-zinc-100 truncate mt-1">{entry.title}</p>
+                      <p className="text-sm text-text truncate mt-1">{entry.title}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
@@ -256,7 +256,7 @@ export default function SyllabusPanel() {
                   </div>
 
                   {isExpanded && (
-                    <div className="mt-3 pt-3 border-t border-zinc-800 space-y-1.5">
+                    <div className="mt-3 pt-3 border-t border-border space-y-1.5">
                       {checklist.map((item, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <input
@@ -265,12 +265,12 @@ export default function SyllabusPanel() {
                             onChange={() => handleToggleChecklistItem(entry, i)}
                             className="w-3.5 h-3.5 rounded accent-amber-500 shrink-0"
                           />
-                          <span className={`text-sm flex-1 min-w-0 truncate ${item.done ? "text-zinc-500 line-through" : "text-zinc-200"}`}>
+                          <span className={`text-sm flex-1 min-w-0 truncate ${item.done ? "text-muted line-through" : "text-text"}`}>
                             {item.text}
                           </span>
                           <button
                             onClick={() => handleRemoveChecklistItem(entry, i)}
-                            className="text-xs text-zinc-600 hover:text-red-400 transition shrink-0"
+                            className="text-xs text-muted hover:text-red-400 transition shrink-0"
                           >
                             Remove
                           </button>
@@ -282,7 +282,7 @@ export default function SyllabusPanel() {
                           onChange={(e) => setNewItemText(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && handleAddChecklistItem(entry)}
                           placeholder="Add a prep item..."
-                          className="flex-1 min-w-0 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                          className="flex-1 min-w-0 rounded-lg border border-border-strong bg-surface-alt px-3 py-1.5 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500"
                         />
                         <button
                           onClick={() => handleAddChecklistItem(entry)}

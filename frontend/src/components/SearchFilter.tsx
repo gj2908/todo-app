@@ -9,7 +9,7 @@ interface SearchFilterProps {
 }
 
 const SearchIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-500">
+  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-muted">
     <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
     <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
@@ -78,12 +78,12 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={e => handleSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-base font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
+            className="w-full pl-9 pr-4 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-base font-medium focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
           />
           {searchQuery && (
             <button
               onClick={() => handleSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
             >
               ✕
             </button>
@@ -95,7 +95,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
           className={`flex items-center justify-center sm:justify-start gap-2 px-3 py-2.5 rounded-lg text-base font-semibold border transition-all ${
             showFilters || hasActiveFilters
               ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-              : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+              : "bg-surface-alt text-muted border-border-strong hover:border-border-strong hover:text-text"
           }`}
         >
           <FilterIcon />
@@ -116,15 +116,15 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
         >
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
-          <div className="relative w-full max-w-lg max-h-[92vh] bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-zinc-800">
+          <div className="relative w-full max-w-lg max-h-[92vh] bg-surface border border-border-strong rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
               <div>
-                <h2 className="text-base font-bold text-zinc-100">Filters</h2>
-                <p className="text-xs text-zinc-500 mt-0.5">Narrow down and sort your tasks</p>
+                <h2 className="text-base font-bold text-text">Filters</h2>
+                <p className="text-xs text-muted mt-0.5">Narrow down and sort your tasks</p>
               </div>
               <button
                 onClick={() => setShowFilters(false)}
-                className="p-2 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition"
+                className="p-2 rounded-lg text-muted hover:text-text hover:bg-surface-alt transition"
               >
                 ✕
               </button>
@@ -133,7 +133,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
             <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               {/* Priority pills */}
               <div>
-                <p className="text-sm font-medium text-zinc-500 mb-2">Priority</p>
+                <p className="text-sm font-medium text-muted mb-2">Priority</p>
                 <div className="flex flex-wrap gap-2">
                   {priorities.map(p => (
                     <button
@@ -142,7 +142,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
                       className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${
                         activePriority === p.value
                           ? p.color
-                          : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                          : "text-muted bg-surface-alt border-border-strong hover:border-border-strong"
                       }`}
                     >
                       {p.label}
@@ -151,7 +151,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
                   {activePriority && (
                     <button
                       onClick={() => handlePriority("")}
-                      className="px-2 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-300 transition"
+                      className="px-2 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-text transition"
                     >
                       Clear
                     </button>
@@ -161,7 +161,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
               {/* Category */}
               <div>
-                <p className="text-sm font-medium text-zinc-500 mb-2">Category</p>
+                <p className="text-sm font-medium text-muted mb-2">Category</p>
                 <div className="flex flex-wrap gap-2">
                   {["work", "personal", "shopping", "health", "general"].map(cat => (
                     <button
@@ -169,8 +169,8 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
                       onClick={() => handleCategory(cat)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all capitalize ${
                         activeCategory === cat
-                          ? "bg-zinc-600 text-zinc-100 border-zinc-500"
-                          : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+                          ? "bg-border-strong text-text border-border-strong"
+                          : "text-muted bg-surface-alt border-border-strong hover:border-border-strong hover:text-text"
                       }`}
                     >
                       {cat}
@@ -181,7 +181,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
 
               {/* Sort */}
               <div>
-                <p className="text-sm font-medium text-zinc-500 mb-2">Sort by</p>
+                <p className="text-sm font-medium text-muted mb-2">Sort by</p>
                 <div className="flex flex-wrap gap-2">
                   {sorts.map(s => (
                     <button
@@ -189,8 +189,8 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
                       onClick={() => handleSort(s.value)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                         activeSort === s.value
-                          ? "bg-zinc-600 text-zinc-100 border-zinc-500"
-                          : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                          ? "bg-border-strong text-text border-border-strong"
+                          : "text-muted bg-surface-alt border-border-strong hover:border-border-strong"
                       }`}
                     >
                       {s.label}
@@ -200,7 +200,7 @@ export default function SearchFilter({ onSearch, onFilterPriority, onFilterCateg
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-t border-zinc-800">
+            <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-t border-border">
               <button
                 onClick={() => setShowFilters(false)}
                 className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition"

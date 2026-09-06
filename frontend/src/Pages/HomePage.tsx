@@ -492,7 +492,7 @@ export default function HomePage() {
   }, [todos, todoCounts]);
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-zinc-950 overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-page overflow-hidden">
       <Navbar
         onClockClick={() => handleViewChange("calendar")}
         onMenuClick={() => setSidebarOpen((v) => !v)}
@@ -532,18 +532,18 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
+        <div className="flex-1 flex flex-col overflow-hidden bg-page">
           <div className="flex-1 overflow-y-auto">
             <OfflineBanner isOffline={isOffline} pendingSyncCount={pendingSyncCount} offlineLabel="showing cached tasks" />
             <div className="px-4 sm:px-6 pt-4 sm:pt-5">
               <div className={`flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-semibold ${activeView === "dashboard" ? "hidden" : hasCalendarWidget ? "lg:hidden" : ""}`}>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                    <span className="text-zinc-500">{todos.length} total</span>
+                    <span className="text-muted">{todos.length} total</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                    <span className="text-zinc-500">{todoCounts.completed} done</span>
+                    <span className="text-muted">{todoCounts.completed} done</span>
                   </div>
                   {stats.overdueCount > 0 && (
                     <div className="flex items-center gap-1.5">
@@ -553,20 +553,20 @@ export default function HomePage() {
                   )}
                   {todos.length > 0 && (
                     <div className="flex items-center gap-2 ml-0 sm:ml-auto w-full sm:w-auto">
-                      <div className="w-full sm:w-28 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="w-full sm:w-28 h-1.5 bg-surface-alt rounded-full overflow-hidden">
                         <div
                           className="h-full bg-amber-500 rounded-full transition-all duration-700"
                           style={{ width: `${stats.rate}%` }}
                         />
                       </div>
-                      <span className="text-zinc-500 tabular-nums text-base font-bold">{stats.rate}%</span>
+                      <span className="text-muted tabular-nums text-base font-bold">{stats.rate}%</span>
                     </div>
                   )}
               </div>
 
               {activeView !== "dashboard" && (
                 <div className="mt-3 mb-4">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight">{viewInfo.label}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight">{viewInfo.label}</h2>
                 </div>
               )}
 
@@ -587,7 +587,7 @@ export default function HomePage() {
                       className={`shrink-0 rounded-lg px-3 py-2.5 text-sm font-semibold border transition ${
                         selectMode
                           ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                          : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600 hover:text-zinc-300"
+                          : "bg-surface-alt text-muted border-border-strong hover:border-border-strong hover:text-text"
                       }`}
                     >
                       {selectMode ? "Done" : "Select"}
@@ -600,8 +600,8 @@ export default function HomePage() {
             <div key={activeView} className="p-4 sm:p-6 pt-4 animate-fadeSlideDown">
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full gap-3">
-                <div className="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin" />
-                <p className="text-zinc-600 text-sm">Loading...</p>
+                <div className="w-8 h-8 border-2 border-border border-t-amber-500 rounded-full animate-spin" />
+                <p className="text-muted text-sm">Loading...</p>
               </div>
             ) : activeView === "dashboard" ? (
               <DashboardView
@@ -623,7 +623,7 @@ export default function HomePage() {
                 <div className="flex justify-end">
                   <button
                     onClick={handleExportAll}
-                    className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition"
+                    className="rounded-lg bg-surface-alt px-3 py-2 text-xs font-semibold text-text hover:bg-border-strong transition"
                   >
                     Export calendar (.ics)
                   </button>
@@ -634,11 +634,11 @@ export default function HomePage() {
               <div className="max-w-5xl space-y-4">
                 <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                    <div className="rounded-xl border border-border bg-surface p-4">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <h3 className="text-sm font-bold text-zinc-100">Remind me before due date</h3>
-                          <p className="text-xs text-zinc-500 mt-1">
+                          <h3 className="text-sm font-bold text-text">Remind me before due date</h3>
+                          <p className="text-xs text-muted mt-1">
                             {notificationReady
                               ? "Browser notifications are on for this device"
                               : "Turn on browser notifications in Settings to see these"}
@@ -647,14 +647,14 @@ export default function HomePage() {
                         {!notificationReady && (
                           <Link
                             to="/settings"
-                            className="rounded-lg bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-700 transition whitespace-nowrap"
+                            className="rounded-lg bg-surface-alt px-3 py-2 text-xs font-semibold text-text hover:bg-border-strong transition whitespace-nowrap"
                           >
                             Go to Settings
                           </Link>
                         )}
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-zinc-800">
+                      <div className="mt-4 pt-4 border-t border-border">
                         <div className="flex flex-wrap gap-2">
                           {[5, 10, 15, 30, 60].map((m) => (
                             <button
@@ -666,7 +666,7 @@ export default function HomePage() {
                               className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition ${
                                 reminderMinutes === m
                                   ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
-                                  : "border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-zinc-600"
+                                  : "border-border-strong bg-surface-alt text-text hover:border-border-strong"
                               }`}
                             >
                               {m}m
@@ -676,11 +676,11 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+                    <div className="rounded-xl border border-border bg-surface p-4">
                       <div className="flex items-center justify-between gap-3 mb-3">
                         <div>
-                          <h3 className="text-sm font-bold text-zinc-100">Personal reminders</h3>
-                          <p className="text-xs text-zinc-500 mt-1">Create reminders for a specific date and time.</p>
+                          <h3 className="text-sm font-bold text-text">Personal reminders</h3>
+                          <p className="text-xs text-muted mt-1">Create reminders for a specific date and time.</p>
                         </div>
                         <button
                           onClick={handleAddReminder}
@@ -693,15 +693,15 @@ export default function HomePage() {
                       {personalReminders.length > 0 ? (
                         <div className="space-y-2">
                           {personalReminders.map((reminder) => (
-                            <div key={reminder.id} className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 flex items-start justify-between gap-3">
+                            <div key={reminder.id} className="rounded-lg border border-border bg-page px-3 py-2.5 flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-zinc-100 truncate">{reminder.title}</p>
-                                <p className="text-xs text-zinc-500 mt-0.5">{new Date(reminder.dateTime).toLocaleString()}</p>
-                                {reminder.notes && <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{reminder.notes}</p>}
+                                <p className="text-sm font-medium text-text truncate">{reminder.title}</p>
+                                <p className="text-xs text-muted mt-0.5">{new Date(reminder.dateTime).toLocaleString()}</p>
+                                {reminder.notes && <p className="text-xs text-muted mt-1 line-clamp-2">{reminder.notes}</p>}
                               </div>
                               <button
                                 onClick={() => handleDeletePersonalReminder(reminder.id)}
-                                className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700 shrink-0"
+                                className="rounded-md bg-surface-alt px-2.5 py-1.5 text-xs text-text hover:bg-border-strong shrink-0"
                               >
                                 Remove
                               </button>
@@ -709,12 +709,12 @@ export default function HomePage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-zinc-500">No personal reminders yet.</p>
+                        <p className="text-sm text-muted">No personal reminders yet.</p>
                       )}
                     </div>
 
-                    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-                      <p className="text-sm font-semibold text-zinc-200 mb-2">Due reminders</p>
+                    <div className="rounded-xl border border-border bg-surface p-4">
+                      <p className="text-sm font-semibold text-text mb-2">Due reminders</p>
                       {filteredTodos.length > 0 ? (
                         <div className="space-y-2">
                           {filteredTodos.map(todo => (
@@ -732,7 +732,7 @@ export default function HomePage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-zinc-500">No reminders due in the next 24 hours.</p>
+                        <p className="text-sm text-muted">No reminders due in the next 24 hours.</p>
                       )}
                     </div>
                   </div>
@@ -791,7 +791,7 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-4 px-2 w-full">
-                    <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-2xl bg-surface border border-border flex items-center justify-center">
                       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                         <rect x="4" y="6" width="20" height="18" rx="3" stroke="#52525b" strokeWidth="1.5" />
                         <path d="M9 14h10M9 18h7" stroke="#52525b" strokeWidth="1.5" strokeLinecap="round" />
@@ -799,10 +799,10 @@ export default function HomePage() {
                       </svg>
                     </div>
                     <div className="text-center">
-                      <p className="text-zinc-400 font-semibold">
+                      <p className="text-muted font-semibold">
                         {search ? "No tasks match your search" : activeView === "completed" ? "No completed tasks" : "All clear"}
                       </p>
-                      <p className="text-zinc-600 text-sm mt-1">
+                      <p className="text-muted text-sm mt-1">
                         {search ? "Try a different search term" : activeView !== "completed" ? "Add a task to get started" : "Complete some tasks first"}
                       </p>
                     </div>
@@ -841,7 +841,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-4 px-2">
-                <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-2xl bg-surface border border-border flex items-center justify-center">
                   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                     <rect x="4" y="6" width="20" height="18" rx="3" stroke="#52525b" strokeWidth="1.5" />
                     <path d="M9 14h10M9 18h7" stroke="#52525b" strokeWidth="1.5" strokeLinecap="round" />
@@ -849,10 +849,10 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-zinc-400 font-semibold">
+                  <p className="text-muted font-semibold">
                     {search ? "No tasks match your search" : activeView === "completed" ? "No completed tasks" : "All clear"}
                   </p>
-                  <p className="text-zinc-600 text-sm mt-1">
+                  <p className="text-muted text-sm mt-1">
                     {search ? "Try a different search term" : activeView !== "completed" ? "Add a task to get started" : "Complete some tasks first"}
                   </p>
                 </div>

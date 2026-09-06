@@ -102,16 +102,16 @@ export default function DocumentViewerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-200 flex items-center justify-center">
-        <p className="text-sm text-zinc-400">Loading document...</p>
+      <div className="min-h-screen bg-page text-text flex items-center justify-center">
+        <p className="text-sm text-muted">Loading document...</p>
       </div>
     );
   }
 
   if (error || !doc) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-200 flex items-center justify-center p-4">
-        <div className="max-w-md w-full rounded-xl border border-zinc-800 bg-zinc-900 p-5 text-center">
+      <div className="min-h-screen bg-page text-text flex items-center justify-center p-4">
+        <div className="max-w-md w-full rounded-xl border border-border bg-surface p-5 text-center">
           <p className="text-sm text-red-400">{error || "Unable to open document"}</p>
           <button
             onClick={() => navigate("/home")}
@@ -152,12 +152,12 @@ export default function DocumentViewerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200 p-3 sm:p-5">
+    <div className="min-h-screen bg-page text-text p-3 sm:p-5">
       <div className="max-w-6xl mx-auto space-y-3">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="rounded-xl border border-border bg-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-base font-bold text-zinc-100 truncate">{doc.title}</p>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-base font-bold text-text truncate">{doc.title}</p>
+            <p className="text-xs text-muted mt-1">
               {doc.fileType.toUpperCase()} • {formatBytes(doc.bytes)} • {new Date(doc.createdAt).toLocaleString()}
             </p>
           </div>
@@ -189,8 +189,8 @@ export default function DocumentViewerPage() {
           ref={previewRef}
           className={
             isFullscreen
-              ? "relative bg-zinc-950 h-screen w-screen p-2 sm:p-3"
-              : "relative rounded-xl border border-zinc-800 bg-zinc-900 p-2 sm:p-3 min-h-[70vh]"
+              ? "relative bg-page h-screen w-screen p-2 sm:p-3"
+              : "relative rounded-xl border border-border bg-surface p-2 sm:p-3 min-h-[70vh]"
           }
         >
           {isFullscreen && (
@@ -204,14 +204,14 @@ export default function DocumentViewerPage() {
           {doc.fileType === "pdf" ? (
             <PdfViewer
               url={doc.url}
-              className={isFullscreen ? "w-full h-full bg-zinc-950" : "w-full h-[70vh] sm:h-[78vh] rounded-lg bg-zinc-950"}
+              className={isFullscreen ? "w-full h-full bg-page" : "w-full h-[70vh] sm:h-[78vh] rounded-lg bg-page"}
             />
           ) : (
             <div
               className={
                 isFullscreen
-                  ? "w-full h-full bg-zinc-950 flex items-center justify-center"
-                  : "w-full h-[70vh] sm:h-[78vh] bg-zinc-950 rounded-lg overflow-auto flex items-center justify-center"
+                  ? "w-full h-full bg-page flex items-center justify-center"
+                  : "w-full h-[70vh] sm:h-[78vh] bg-page rounded-lg overflow-auto flex items-center justify-center"
               }
             >
               <img

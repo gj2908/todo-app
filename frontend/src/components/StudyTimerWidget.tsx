@@ -197,10 +197,10 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
   const progressPct = totalSeconds > 0 ? Math.min(100, (elapsed / totalSeconds) * 100) : 0;
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-zinc-100">Focus timer</h3>
+          <h3 className="text-sm font-bold text-text">Focus timer</h3>
           {status !== "idle" && (
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
@@ -215,7 +215,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
       </div>
 
       {status !== "idle" && (
-        <div className="mb-3 h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+        <div className="mb-3 h-1.5 w-full rounded-full bg-surface-alt overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${phase === "focus" ? "bg-amber-500" : "bg-green-500"}`}
             style={{ width: `${progressPct}%` }}
@@ -227,7 +227,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
         value={subjectId}
         onChange={(e) => setSubjectId(e.target.value)}
         disabled={running}
-        className="w-full mb-3 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition disabled:opacity-50"
+        className="w-full mb-3 px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition disabled:opacity-50"
       >
         <option value="">No subject</option>
         {subjects.map((s) => (
@@ -236,7 +236,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
       </select>
 
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-muted">
           Focus (min)
           <input
             type="number"
@@ -245,10 +245,10 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
             value={focusMinutes}
             disabled={status !== "idle"}
             onChange={(e) => setFocusMinutes(Math.max(1, Number(e.target.value) || DEFAULT_FOCUS_MIN))}
-            className="mt-1 w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 disabled:opacity-50"
+            className="mt-1 w-full px-2 py-1.5 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 disabled:opacity-50"
           />
         </label>
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-muted">
           Break (min)
           <input
             type="number"
@@ -257,7 +257,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
             value={breakMinutes}
             disabled={status !== "idle"}
             onChange={(e) => setBreakMinutes(Math.max(1, Number(e.target.value) || DEFAULT_BREAK_MIN))}
-            className="mt-1 w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 disabled:opacity-50"
+            className="mt-1 w-full px-2 py-1.5 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 disabled:opacity-50"
           />
         </label>
       </div>
@@ -274,7 +274,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
           {running ? (
             <button
               onClick={handlePause}
-              className="flex-1 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-bold transition"
+              className="flex-1 py-2 rounded-lg bg-surface-alt hover:bg-border-strong text-text text-sm font-bold transition"
             >
               Pause
             </button>
@@ -288,7 +288,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
           )}
           <button
             onClick={handleSkip}
-            className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-bold transition"
+            className="px-3 py-2 rounded-lg bg-surface-alt hover:bg-border-strong text-text text-sm font-bold transition"
           >
             Skip
           </button>
@@ -303,7 +303,7 @@ export default function StudyTimerWidget({ subjects }: StudyTimerWidgetProps) {
       )}
 
       {cycleCount > 0 && (
-        <p className="mt-2 text-[11px] text-zinc-500 text-center">{cycleCount} focus {cycleCount === 1 ? "cycle" : "cycles"} completed</p>
+        <p className="mt-2 text-[11px] text-muted text-center">{cycleCount} focus {cycleCount === 1 ? "cycle" : "cycles"} completed</p>
       )}
     </div>
   );

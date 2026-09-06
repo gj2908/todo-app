@@ -184,8 +184,8 @@ export default function NotesPanel() {
       <OfflineBanner isOffline={isOffline} pendingSyncCount={pendingSyncCount} offlineLabel="showing cached notes" />
     <div className="grid gap-4 lg:grid-cols-[280px_1fr] items-start">
       {/* Note list */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
-        <div className="p-3 border-b border-zinc-800">
+      <div className="rounded-xl border border-border bg-surface overflow-hidden">
+        <div className="p-3 border-b border-border">
           <button
             onClick={handleNew}
             className={`w-full py-2 text-sm ${btn.primary}`}
@@ -195,28 +195,28 @@ export default function NotesPanel() {
         </div>
         <div className="max-h-[60vh] overflow-y-auto">
           {loading ? (
-            <p className="text-sm text-zinc-500 p-4">Loading...</p>
+            <p className="text-sm text-muted p-4">Loading...</p>
           ) : notes.length === 0 ? (
-            <p className="text-sm text-zinc-500 p-4">No notes yet.</p>
+            <p className="text-sm text-muted p-4">No notes yet.</p>
           ) : (
             notes.map((note) => (
               <button
                 key={note._id}
                 onClick={() => selectNote(note)}
-                className={`w-full text-left px-4 py-3 border-b border-zinc-800/60 transition ${
-                  selectedId === note._id ? "bg-amber-500/10" : "hover:bg-zinc-800/60"
+                className={`w-full text-left px-4 py-3 border-b border-border/60 transition ${
+                  selectedId === note._id ? "bg-amber-500/10" : "hover:bg-surface-alt/60"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-zinc-200 truncate">{note.title}</p>
+                  <p className="text-sm font-semibold text-text truncate">{note.title}</p>
                   <span
                     onClick={(e) => handleTogglePin(note, e)}
-                    className={note.pinned ? "text-amber-400 shrink-0" : "text-zinc-600 hover:text-zinc-400 shrink-0"}
+                    className={note.pinned ? "text-amber-400 shrink-0" : "text-muted hover:text-muted shrink-0"}
                   >
                     <PinIcon filled={note.pinned} />
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{note.body || "No content"}</p>
+                <p className="text-xs text-muted truncate mt-0.5">{note.body || "No content"}</p>
               </button>
             ))
           )}
@@ -224,26 +224,26 @@ export default function NotesPanel() {
       </div>
 
       {/* Editor */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 min-h-[60vh]">
+      <div className="rounded-xl border border-border bg-surface p-5 min-h-[60vh]">
         {selectedId ? (
           <div className="flex flex-col h-full gap-3">
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Note title"
-              className="w-full bg-transparent text-lg font-bold text-zinc-100 placeholder-zinc-600 focus:outline-none"
+              className="w-full bg-transparent text-lg font-bold text-text placeholder-muted focus:outline-none"
             />
             <input
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="Tags, comma separated"
-              className="w-full bg-transparent text-xs text-zinc-500 placeholder-zinc-600 focus:outline-none"
+              className="w-full bg-transparent text-xs text-muted placeholder-muted focus:outline-none"
             />
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write in markdown..."
-              className="w-full flex-1 min-h-[300px] bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500 resize-none font-mono"
+              className="w-full flex-1 min-h-[300px] bg-page border border-border rounded-lg p-3 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500 resize-none font-mono"
             />
             <div className="flex gap-2">
               <button
@@ -264,7 +264,7 @@ export default function NotesPanel() {
             </div>
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center text-center text-zinc-500 text-sm">
+          <div className="h-full flex items-center justify-center text-center text-muted text-sm">
             Select a note, or create a new one.
           </div>
         )}

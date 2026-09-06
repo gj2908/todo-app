@@ -297,7 +297,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         } ${
           isActive
             ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-            : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+            : "text-muted hover:text-text hover:bg-surface-alt"
         }`}
       >
         <span className="flex items-center gap-2 min-w-0">
@@ -310,7 +310,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         </span>
         {!isCollapsed && count > 0 && (
           <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded transition-opacity duration-200 ${
-            isActive ? "bg-amber-500/25 text-amber-400" : "bg-zinc-700 text-zinc-400"
+            isActive ? "bg-amber-500/25 text-amber-400" : "bg-border-strong text-muted"
           }`}>
             {count}
           </span>
@@ -320,16 +320,16 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
   };
 
   return (
-    <div className={`sidebar bg-zinc-900 border-r border-zinc-800 flex flex-col h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-out ${
+    <div className={`sidebar bg-surface border-r border-border flex flex-col h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-out ${
       isCollapsed ? "w-14" : "w-64 sm:w-60 lg:w-56"
     }`}>
       {/* Collapse toggle (desktop rail only) */}
       {!forceExpanded && (
-        <div className={`shrink-0 flex items-center py-2 px-2 border-b border-zinc-800 ${isCollapsed ? "justify-center" : "justify-end"}`}>
+        <div className={`shrink-0 flex items-center py-2 px-2 border-b border-border ${isCollapsed ? "justify-center" : "justify-end"}`}>
           <button
             onClick={() => setCollapsed((v) => !v)}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 active:scale-90 transition-all duration-150"
+            className="p-1.5 rounded-lg text-muted hover:text-text hover:bg-surface-alt active:scale-90 transition-all duration-150"
           >
             <CollapseIcon collapsed={isCollapsed} />
           </button>
@@ -340,7 +340,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
       <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Views */}
         <div className="p-2.5 pt-3">
-          {!isCollapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Views</p>}
+          {!isCollapsed && <p className="text-[11px] font-bold text-muted tracking-widest uppercase px-2 mb-1.5">Views</p>}
           <nav className="space-y-0.5">
             {isCollapsed ? (
               viewItems.map((item) => renderMenuItem(item))
@@ -352,7 +352,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                   className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] ${
                     isTaskViewActive && !tasksOpen
                       ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                      : "text-muted hover:text-text hover:bg-surface-alt"
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -374,7 +374,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
 
         {/* Tools */}
         <div className="p-2.5 pt-1">
-          {!isCollapsed && <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase px-2 mb-1.5">Tools</p>}
+          {!isCollapsed && <p className="text-[11px] font-bold text-muted tracking-widest uppercase px-2 mb-1.5">Tools</p>}
           <nav className="space-y-0.5">
             {toolItems.map((item) => renderMenuItem(item))}
           </nav>
@@ -384,10 +384,10 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
         {!isCollapsed && (
           <div className="p-2.5 pt-1">
             <div className="flex items-center justify-between px-2 mb-1.5">
-              <p className="text-[11px] font-bold text-zinc-500 tracking-widest uppercase">Subjects</p>
+              <p className="text-[11px] font-bold text-muted tracking-widest uppercase">Subjects</p>
               <button
                 onClick={() => setShowNewSubject(!showNewSubject)}
-                className="text-zinc-500 hover:text-amber-400 hover:bg-zinc-800 rounded-md active:scale-90 transition-all duration-150 p-1"
+                className="text-muted hover:text-amber-400 hover:bg-surface-alt rounded-md active:scale-90 transition-all duration-150 p-1"
                 title="New subject"
               >
                 <PlusIcon />
@@ -395,7 +395,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
             </div>
 
             {showNewSubject && (
-              <div className="mb-2 p-2 bg-zinc-800 rounded-lg border border-zinc-700 space-y-2 animate-fadeSlideDown">
+              <div className="mb-2 p-2 bg-surface-alt rounded-lg border border-border-strong space-y-2 animate-fadeSlideDown">
                 <input
                   type="text"
                   placeholder="Subject name..."
@@ -403,7 +403,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                   onChange={e => setNewSubjectName(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleCreateSubject()}
                   autoFocus
-                  className="w-full px-2.5 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                  className="w-full px-2.5 py-1.5 bg-surface border border-border-strong rounded text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500"
                 />
                 <div className="flex gap-1.5">
                   <button
@@ -425,7 +425,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
 
             <div className="space-y-0.5">
               {subjects.length === 0 && (
-                <p className="text-xs text-zinc-500 px-2 py-2.5 text-center font-medium">No subjects yet</p>
+                <p className="text-xs text-muted px-2 py-2.5 text-center font-medium">No subjects yet</p>
               )}
               {subjects.map(subject => {
                 const isActive = activeView === `subject_${subject._id}`;
@@ -437,14 +437,14 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                     className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer group transition-all duration-150 active:scale-[0.99] ${
                       isActive
                         ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-                        : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                        : "text-muted hover:text-text hover:bg-surface-alt"
                     }`}
                   >
                     <span className="flex items-center gap-2 text-sm font-semibold min-w-0">
                       <span className="text-xs" style={{ color: subject.color || "#f59e0b" }}>{subject.icon || "◆"}</span>
                       <span className="truncate">{subject.name}</span>
                       {!isOwner && (
-                        <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 capitalize shrink-0">
+                        <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-border-strong text-muted capitalize shrink-0">
                           {subject.role}
                         </span>
                       )}
@@ -452,7 +452,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                     <span className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0">
                       <button
                         onClick={e => { e.stopPropagation(); onSubjectNotesOpen?.(subject._id); }}
-                        className="p-1.5 rounded-md text-zinc-500 hover:text-amber-400 hover:bg-zinc-700/60 active:scale-90 transition-all duration-150"
+                        className="p-1.5 rounded-md text-muted hover:text-amber-400 hover:bg-border-strong/60 active:scale-90 transition-all duration-150"
                         title="Subject notes"
                       >
                         <SubjectNotesSmallIcon />
@@ -460,7 +460,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                       {isOwner && (
                         <button
                           onClick={e => { e.stopPropagation(); setManageTarget(subject); }}
-                          className="p-1.5 rounded-md text-zinc-500 hover:text-amber-400 hover:bg-zinc-700/60 active:scale-90 transition-all duration-150"
+                          className="p-1.5 rounded-md text-muted hover:text-amber-400 hover:bg-border-strong/60 active:scale-90 transition-all duration-150"
                           title="Share subject"
                         >
                           <ShareIcon />
@@ -469,7 +469,7 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
                       {isOwner && (
                         <button
                           onClick={e => { e.stopPropagation(); setDeleteTarget(subject); }}
-                          className="p-1.5 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-150"
+                          className="p-1.5 rounded-md text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all duration-150"
                           title="Delete subject"
                         >
                           <TrashIcon />
@@ -486,8 +486,8 @@ export default function Sidebar({ activeView, onViewChange, onSubjectSelect, onS
 
       {/* Footer */}
       {!isCollapsed && (
-        <div className="shrink-0 py-1.5 border-t border-zinc-800">
-          <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center">Taskflow</p>
+        <div className="shrink-0 py-1.5 border-t border-border">
+          <p className="text-[10px] font-bold text-muted uppercase tracking-widest text-center">Taskflow</p>
         </div>
       )}
 

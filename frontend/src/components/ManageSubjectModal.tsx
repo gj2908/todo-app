@@ -116,11 +116,11 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl">
-        <h3 className="text-base font-bold text-zinc-100">Manage "{subjectName}"</h3>
+      <div className="relative w-full max-w-md rounded-2xl border border-border-strong bg-surface p-5 shadow-2xl">
+        <h3 className="text-base font-bold text-text">Manage "{subjectName}"</h3>
 
         <div className="mt-4">
-          <p className="text-sm font-medium text-zinc-500 mb-2">Color</p>
+          <p className="text-sm font-medium text-muted mb-2">Color</p>
           <div className="flex flex-wrap gap-2">
             {COLOR_SWATCHES.map((c) => (
               <button
@@ -128,7 +128,7 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
                 onClick={() => handlePickColor(c)}
                 disabled={savingAppearance}
                 style={{ backgroundColor: c }}
-                className={`w-7 h-7 rounded-full transition ${subjectColor === c ? "ring-2 ring-offset-2 ring-offset-zinc-900 ring-zinc-100" : "hover:opacity-80"}`}
+                className={`w-7 h-7 rounded-full transition ${subjectColor === c ? "ring-2 ring-offset-2 ring-offset-zinc-900 ring-text" : "hover:opacity-80"}`}
                 aria-label={`Set color ${c}`}
               />
             ))}
@@ -136,7 +136,7 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
         </div>
 
         <div className="mt-4">
-          <p className="text-sm font-medium text-zinc-500 mb-2">Icon</p>
+          <p className="text-sm font-medium text-muted mb-2">Icon</p>
           <div className="flex flex-wrap gap-2">
             {ICON_SWATCHES.map((i) => (
               <button
@@ -144,7 +144,7 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
                 onClick={() => handlePickIcon(i)}
                 disabled={savingAppearance}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center text-base border transition ${
-                  subjectIcon === i ? "border-amber-500 bg-amber-500/10" : "border-zinc-700 bg-zinc-800 hover:border-zinc-600"
+                  subjectIcon === i ? "border-amber-500 bg-amber-500/10" : "border-border-strong bg-surface-alt hover:border-border-strong"
                 }`}
               >
                 {i}
@@ -153,9 +153,9 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
           </div>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-zinc-800">
-          <p className="text-sm font-bold text-zinc-200">Share</p>
-          <p className="text-sm text-zinc-500 mt-1">Invite by email - they need an existing Taskflow account.</p>
+        <div className="mt-5 pt-4 border-t border-border">
+          <p className="text-sm font-bold text-text">Share</p>
+          <p className="text-sm text-muted mt-1">Invite by email - they need an existing Taskflow account.</p>
         </div>
 
         <div className="mt-3 flex gap-2">
@@ -165,12 +165,12 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleInvite()}
             placeholder="teammate@example.com"
-            className="flex-1 min-w-0 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+            className="flex-1 min-w-0 rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500"
           />
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as "editor" | "viewer")}
-            className="rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-zinc-200 focus:outline-none focus:border-amber-500"
+            className="rounded-lg border border-border-strong bg-surface-alt px-2 py-2 text-sm text-text focus:outline-none focus:border-amber-500"
           >
             <option value="editor">Editor</option>
             <option value="viewer">Viewer</option>
@@ -186,15 +186,15 @@ export default function ManageSubjectModal({ isOpen, subjectId, subjectName, sub
 
         <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
           {loading ? (
-            <p className="text-sm text-zinc-500">Loading...</p>
+            <p className="text-sm text-muted">Loading...</p>
           ) : members.length === 0 ? (
-            <p className="text-sm text-zinc-500">Not shared with anyone yet.</p>
+            <p className="text-sm text-muted">Not shared with anyone yet.</p>
           ) : (
             members.map((m) => (
-              <div key={m.userId} className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
+              <div key={m.userId} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-page px-3 py-2">
                 <div className="min-w-0">
-                  <p className="text-sm text-zinc-200 truncate">{m.email}</p>
-                  <p className="text-xs text-zinc-500 capitalize">{m.role}</p>
+                  <p className="text-sm text-text truncate">{m.email}</p>
+                  <p className="text-xs text-muted capitalize">{m.role}</p>
                 </div>
                 <button
                   onClick={() => setRemoveTarget(m)}

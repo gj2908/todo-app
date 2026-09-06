@@ -75,28 +75,28 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-zinc-700 border-t-amber-500 rounded-full animate-spin" />
+      <div className="min-h-screen bg-page flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-border-strong border-t-amber-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-page flex flex-col">
       <Navbar />
 
       <div className="flex-1 flex items-start justify-center px-4 sm:px-6 pt-4 sm:pt-5 pb-6">
         <div className="w-full max-w-lg space-y-4">
           <PageHeader title="Profile" />
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <div className="bg-surface border border-border rounded-xl p-5">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center text-2xl font-bold text-black shrink-0">
                 {email?.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-base font-bold text-zinc-100 truncate">{email}</p>
+                  <p className="text-base font-bold text-text truncate">{email}</p>
                   {emailVerified ? (
                     <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded bg-green-500/15 text-green-400 shrink-0">
                       <CheckIcon />
@@ -112,15 +112,15 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </div>
-                <p className="text-sm text-zinc-500 mt-0.5">Your email can't be changed on Taskflow</p>
+                <p className="text-sm text-muted mt-0.5">Your email can't be changed on Taskflow</p>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-zinc-800">
+            <div className="mt-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-200">Password</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">Update your account password</p>
+                  <h3 className="text-sm font-bold text-text">Password</h3>
+                  <p className="text-xs text-muted mt-0.5">Update your account password</p>
                 </div>
                 <button
                   onClick={() => setShowPasswordForm(!showPasswordForm)}
@@ -133,7 +133,7 @@ export default function ProfilePage() {
               {showPasswordForm && (
                 <form onSubmit={handleChangePassword} className="space-y-3 mt-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1.5">Current Password</label>
+                    <label className="block text-sm font-medium text-muted mb-1.5">Current Password</label>
                     <input
                       type="password"
                       value={currentPassword}
@@ -143,7 +143,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1.5">New Password</label>
+                    <label className="block text-sm font-medium text-muted mb-1.5">New Password</label>
                     <input
                       type="password"
                       value={newPassword}
@@ -153,7 +153,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1.5">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-muted mb-1.5">Confirm New Password</label>
                     <input
                       type="password"
                       value={confirmPassword}

@@ -56,21 +56,21 @@ export default function TrashPanel() {
 
   return (
     <div className="max-w-2xl space-y-3">
-      <p className="text-sm text-zinc-500">Deleted tasks stay here until you remove them for good.</p>
+      <p className="text-sm text-muted">Deleted tasks stay here until you remove them for good.</p>
 
       {loading ? (
-        <p className="text-sm text-zinc-500">Loading...</p>
+        <p className="text-sm text-muted">Loading...</p>
       ) : items.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
-          <p className="text-zinc-400 font-semibold">Trash is empty</p>
+        <div className="rounded-xl border border-border bg-surface p-8 text-center">
+          <p className="text-muted font-semibold">Trash is empty</p>
         </div>
       ) : (
         <div className="space-y-2">
           {items.map((item) => (
-            <div key={item._id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3">
+            <div key={item._id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-zinc-200 truncate">{item.title}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">Deleted {new Date(item.deletedAt).toLocaleDateString()}</p>
+                <p className="text-sm font-semibold text-text truncate">{item.title}</p>
+                <p className="text-xs text-muted mt-0.5">Deleted {new Date(item.deletedAt).toLocaleDateString()}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button

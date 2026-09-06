@@ -98,7 +98,7 @@ export default function PdfViewer({ url, className }: PdfViewerProps) {
   if (error) {
     return (
       <div className="h-full flex items-center justify-center text-center p-4">
-        <p className="text-sm text-zinc-400">{error}</p>
+        <p className="text-sm text-muted">{error}</p>
       </div>
     );
   }
@@ -107,7 +107,7 @@ export default function PdfViewer({ url, className }: PdfViewerProps) {
     <div ref={containerRef} className={`flex flex-col items-center ${className || ""}`}>
       {loading ? (
         <div className="flex-1 w-full flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-zinc-700 border-t-amber-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-border-strong border-t-amber-500 rounded-full animate-spin" />
         </div>
       ) : (
         <>
@@ -115,7 +115,7 @@ export default function PdfViewer({ url, className }: PdfViewerProps) {
             <canvas ref={canvasRef} className="max-w-full h-auto rounded-lg" />
           </div>
           {numPages > 1 && (
-            <div className="shrink-0 flex items-center gap-3 mt-2 px-3 py-1.5 rounded-lg bg-zinc-900/90 border border-zinc-800">
+            <div className="shrink-0 flex items-center gap-3 mt-2 px-3 py-1.5 rounded-lg bg-surface/90 border border-border">
               <button
                 onClick={() => setPageNum((p) => Math.max(1, p - 1))}
                 disabled={pageNum <= 1}
@@ -123,7 +123,7 @@ export default function PdfViewer({ url, className }: PdfViewerProps) {
               >
                 Prev
               </button>
-              <span className="text-xs text-zinc-400 tabular-nums">
+              <span className="text-xs text-muted tabular-nums">
                 Page {pageNum} of {numPages}
               </span>
               <button

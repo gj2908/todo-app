@@ -48,11 +48,11 @@ export default function InstallPwaCard() {
   };
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className="bg-surface border border-border rounded-xl p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-zinc-200">Install app</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <h3 className="text-sm font-bold text-text">Install app</h3>
+          <p className="text-xs text-muted mt-0.5">
             {installed
               ? "Taskflow is installed - notifications come from the app, not the browser."
               : "Install Taskflow for a full-screen app experience and app-attributed notifications."}
@@ -74,7 +74,7 @@ export default function InstallPwaCard() {
       </div>
 
       {!installed && !deferredPrompt && (
-        <p className="text-xs text-zinc-600 mt-3 pt-3 border-t border-zinc-800">
+        <p className="text-xs text-muted mt-3 pt-3 border-t border-border">
           {isIos()
             ? 'On iPhone/iPad: tap the Share icon in Safari, then "Add to Home Screen".'
             : "Your browser doesn't support one-click install here, or Taskflow was already dismissed - look for an install icon in the address bar."}

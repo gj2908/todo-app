@@ -40,7 +40,7 @@ const categoryColors: Record<string, string> = {
   personal: "bg-purple-500/15 text-purple-400",
   shopping: "bg-pink-500/15 text-pink-400",
   health:   "bg-teal-500/15 text-teal-400",
-  general:  "bg-zinc-700 text-zinc-400",
+  general:  "bg-border-strong text-muted",
 };
 
 export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon, onEdit, onDelete, onToggle, selectable, selected, onSelectToggle, assigneeLabel }: TodoItemProps) {
@@ -51,14 +51,14 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
     if (isPast(d) && !isToday(d)) return { label: "Overdue", cls: "text-red-400 bg-red-500/10" };
     if (isToday(d)) return { label: "Today", cls: "text-amber-400 bg-amber-500/10" };
     if (isTomorrow(d)) return { label: "Tomorrow", cls: "text-blue-400 bg-blue-500/10" };
-    return { label: format(d, "MMM d"), cls: "text-zinc-400 bg-zinc-800" };
+    return { label: format(d, "MMM d"), cls: "text-muted bg-surface-alt" };
   };
 
   const dateInfo = todo.dueDate ? getDateInfo(todo.dueDate) : null;
 
   return (
     <div
-      className={`group relative flex items-start gap-2 p-2 sm:gap-2.5 sm:p-2.5 rounded-xl border-l-2 border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150 ${pc.border} ${
+      className={`group relative flex items-start gap-2 p-2 sm:gap-2.5 sm:p-2.5 rounded-xl border-l-2 border border-border bg-surface hover:bg-surface-alt/70 hover:border-border-strong transition-all duration-150 ${pc.border} ${
         todo.completed ? "opacity-50" : ""
       }`}
     >
@@ -78,7 +78,7 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
         className={`mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${
           todo.completed
             ? "bg-amber-500 border-amber-500"
-            : "border-zinc-600 hover:border-amber-500"
+            : "border-border-strong hover:border-amber-500"
         }`}
         aria-label="Toggle complete"
       >
@@ -92,7 +92,7 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
-          <h3 className={`text-sm sm:text-base font-bold leading-snug ${todo.completed ? "line-through text-zinc-500" : "text-zinc-100"}`}>
+          <h3 className={`text-sm sm:text-base font-bold leading-snug ${todo.completed ? "line-through text-muted" : "text-text"}`}>
             {todo.title}
           </h3>
 
@@ -100,14 +100,14 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
           <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
             <button
               onClick={() => onEdit(todo)}
-              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-muted hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all"
             >
               <EditIcon />
               Edit
             </button>
             <button
               onClick={() => onDelete(todo._id)}
-              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-zinc-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-semibold text-muted hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
             >
               <DeleteIcon />
             </button>
@@ -115,7 +115,7 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
         </div>
 
         {todo.description && (
-          <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed font-medium line-clamp-2">{todo.description}</p>
+          <p className="text-xs text-muted mt-0.5 leading-relaxed font-medium line-clamp-2">{todo.description}</p>
         )}
 
         {/* Tags row */}
@@ -145,7 +145,7 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
 
           {/* Assignee */}
           {assigneeLabel && (
-            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-zinc-700 text-zinc-300">
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-border-strong text-text">
               @ {assigneeLabel}
             </span>
           )}
@@ -169,28 +169,28 @@ export default function TodoItem({ todo, subjectName, subjectColor, subjectIcon,
 
           {/* Tags */}
           {todo.tags?.map((tag: string, idx: number) => (
-            <span key={idx} className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+            <span key={idx} className="text-xs font-medium px-1.5 py-0.5 rounded bg-surface-alt text-muted">
               #{tag}
             </span>
           ))}
 
           {/* Subtask progress */}
           {todo.subtasks?.length > 0 && (
-            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-surface-alt text-muted">
               {todo.subtasks.filter((s: any) => s.completed).length}/{todo.subtasks.length} done
             </span>
           )}
 
           {/* Attachment count */}
           {todo.attachments?.length > 0 && (
-            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-surface-alt text-muted">
               {todo.attachments.length} file{todo.attachments.length > 1 ? "s" : ""}
             </span>
           )}
 
           {/* Comment count */}
           {todo.comments?.filter((c: any) => c.type === "comment").length > 0 && (
-            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-surface-alt text-muted">
               💬 {todo.comments.filter((c: any) => c.type === "comment").length}
             </span>
           )}

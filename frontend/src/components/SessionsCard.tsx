@@ -74,11 +74,11 @@ export default function SessionsCard() {
   const otherSessionCount = sessions.filter((s) => !s.current).length;
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className="bg-surface border border-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-3 gap-3">
         <div>
-          <h3 className="text-sm font-bold text-zinc-200">Active sessions</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">Devices currently signed in to your account</p>
+          <h3 className="text-sm font-bold text-text">Active sessions</h3>
+          <p className="text-xs text-muted mt-0.5">Devices currently signed in to your account</p>
         </div>
         {otherSessionCount > 0 && (
           <button
@@ -91,9 +91,9 @@ export default function SessionsCard() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-zinc-500">Loading sessions...</p>
+        <p className="text-sm text-muted">Loading sessions...</p>
       ) : sessions.length === 0 ? (
-        <p className="text-sm text-zinc-500">No active sessions found.</p>
+        <p className="text-sm text-muted">No active sessions found.</p>
       ) : (
         <div className="space-y-2">
           {sessions.map((s) => {
@@ -102,18 +102,18 @@ export default function SessionsCard() {
             return (
               <div
                 key={s.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3"
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-page px-4 py-3"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-zinc-200 truncate">{device}</p>
+                    <p className="text-sm font-semibold text-text truncate">{device}</p>
                     {s.current && (
                       <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">
                         This device
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <p className="text-xs text-muted mt-0.5">
                     {location} &middot; active {formatRelative(s.lastSeenAt)}
                   </p>
                 </div>
@@ -121,7 +121,7 @@ export default function SessionsCard() {
                   <button
                     onClick={() => handleRevoke(s.id)}
                     disabled={revokingId === s.id}
-                    className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs text-zinc-300 hover:bg-red-500/15 hover:text-red-400 transition disabled:opacity-50 shrink-0"
+                    className="rounded-lg bg-surface-alt px-3 py-1.5 text-xs text-text hover:bg-red-500/15 hover:text-red-400 transition disabled:opacity-50 shrink-0"
                   >
                     {revokingId === s.id ? "Signing out..." : "Sign out"}
                   </button>

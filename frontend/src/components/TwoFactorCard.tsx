@@ -95,18 +95,18 @@ export default function TwoFactorCard() {
 
   if (loading) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-        <p className="text-sm text-zinc-500">Loading...</p>
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <p className="text-sm text-muted">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className="bg-surface border border-border rounded-xl p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-zinc-200">Two-factor authentication</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <h3 className="text-sm font-bold text-text">Two-factor authentication</h3>
+          <p className="text-xs text-muted mt-0.5">
             {enabled ? "Enabled - an authenticator code is required to sign in" : "Add an authenticator app code as a second step at sign in"}
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function TwoFactorCard() {
             <button
               onClick={() => setShowDisableForm((v) => !v)}
               className={`px-3 py-2 text-xs whitespace-nowrap ${
-                showDisableForm ? btn.secondary : "bg-zinc-800 hover:bg-red-500/10 text-red-400 font-semibold rounded-lg transition-all duration-200 active:scale-[0.97]"
+                showDisableForm ? btn.secondary : "bg-surface-alt hover:bg-red-500/10 text-red-400 font-semibold rounded-lg transition-all duration-200 active:scale-[0.97]"
               }`}
             >
               {showDisableForm ? "Cancel" : "Disable"}
@@ -133,14 +133,14 @@ export default function TwoFactorCard() {
       </div>
 
       {showDisableForm && stage === "idle" && (
-        <div className="mt-3 pt-3 border-t border-zinc-800 space-y-2">
-          <label className="block text-sm font-medium text-zinc-400">Confirm your password to disable</label>
+        <div className="mt-3 pt-3 border-t border-border space-y-2">
+          <label className="block text-sm font-medium text-muted">Confirm your password to disable</label>
           <input
             type="password"
             value={disablePassword}
             onChange={(e) => setDisablePassword(e.target.value)}
             placeholder="Password"
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+            className="w-full px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 transition"
           />
           <button
             onClick={handleDisable}
@@ -153,20 +153,20 @@ export default function TwoFactorCard() {
       )}
 
       {stage === "setup" && (
-        <div className="mt-3 pt-3 border-t border-zinc-800 space-y-3">
-          <p className="text-sm text-zinc-300">Scan this with your authenticator app (Google Authenticator, 1Password, Authy...):</p>
-          {qrCode && <img src={qrCode} alt="Two-factor setup QR code" className="rounded-lg border border-zinc-800 w-40 h-40" />}
-          <p className="text-xs text-zinc-500">Can't scan it? Enter this key manually:</p>
-          <p className="text-xs font-mono text-zinc-300 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 break-all">{secret}</p>
+        <div className="mt-3 pt-3 border-t border-border space-y-3">
+          <p className="text-sm text-text">Scan this with your authenticator app (Google Authenticator, 1Password, Authy...):</p>
+          {qrCode && <img src={qrCode} alt="Two-factor setup QR code" className="rounded-lg border border-border w-40 h-40" />}
+          <p className="text-xs text-muted">Can't scan it? Enter this key manually:</p>
+          <p className="text-xs font-mono text-text bg-page border border-border rounded-lg px-3 py-2 break-all">{secret}</p>
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Enter the 6-digit code to confirm</label>
+            <label className="block text-sm font-medium text-muted mb-1.5">Enter the 6-digit code to confirm</label>
             <input
               type="text"
               inputMode="numeric"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="123456"
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm text-center tracking-[0.3em] focus:outline-none focus:border-amber-500 transition"
+              className="w-full px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm text-center tracking-[0.3em] focus:outline-none focus:border-amber-500 transition"
             />
           </div>
           <div className="flex gap-2">
@@ -188,14 +188,14 @@ export default function TwoFactorCard() {
       )}
 
       {stage === "backup-codes" && (
-        <div className="mt-3 pt-3 border-t border-zinc-800 space-y-3">
+        <div className="mt-3 pt-3 border-t border-border space-y-3">
           <p className="text-sm font-semibold text-amber-400">Save these backup codes now</p>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-muted">
             Each one lets you sign in once if you lose access to your authenticator app. They won't be shown again.
           </p>
           <div className="grid grid-cols-2 gap-2">
             {backupCodes.map((c) => (
-              <p key={c} className="font-mono text-sm text-zinc-200 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-center">
+              <p key={c} className="font-mono text-sm text-text bg-page border border-border rounded-lg px-3 py-2 text-center">
                 {c}
               </p>
             ))}

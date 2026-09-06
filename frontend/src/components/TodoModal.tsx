@@ -262,20 +262,20 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg max-h-[92vh] bg-zinc-900 border border-zinc-700 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-lg max-h-[92vh] bg-surface border border-border-strong rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
           <div>
-            <h2 className="text-base font-bold text-zinc-100">
+            <h2 className="text-base font-bold text-text">
               {todo ? "Edit Task" : "New Task"}
             </h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               {todo ? "Update task details" : "Add a new task to your workspace"}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition"
+            className="p-2 rounded-lg text-muted hover:text-text hover:bg-surface-alt transition"
           >
             <CloseIcon />
           </button>
@@ -285,7 +285,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+            <label className="block text-sm font-medium text-muted mb-1.5">
               Task Title *
             </label>
             <input
@@ -294,13 +294,13 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               onChange={e => set("title", e.target.value)}
               placeholder="What needs to be done?"
               autoFocus
-              className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
+              className="w-full px-3.5 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+            <label className="block text-sm font-medium text-muted mb-1.5">
               Description
             </label>
             <textarea
@@ -308,7 +308,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               onChange={e => set("description", e.target.value)}
               placeholder="Add details (optional)..."
               rows={2}
-              className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition resize-none"
+              className="w-full px-3.5 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition resize-none"
             />
           </div>
 
@@ -316,7 +316,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Priority */}
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-muted mb-1.5">
                 Priority
               </label>
               <div className="flex gap-1.5">
@@ -327,8 +327,8 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                     onClick={() => set("priority", opt.value)}
                     className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-1 ${
                       formData.priority === opt.value
-                        ? `${opt.color} bg-zinc-700 border-zinc-500`
-                        : "text-zinc-500 bg-zinc-800 border-zinc-700 hover:border-zinc-600"
+                        ? `${opt.color} bg-border-strong border-border-strong`
+                        : "text-muted bg-surface-alt border-border-strong hover:border-border-strong"
                     }`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
@@ -340,13 +340,13 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-muted mb-1.5">
                 Category
               </label>
               <select
                 value={formData.category}
                 onChange={e => set("category", e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+                className="w-full px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
               >
                 {categoryOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>
@@ -361,20 +361,20 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-muted mb-1.5">
                 Due Date
               </label>
               <input
                 type="date"
                 value={formData.dueDate}
                 onChange={e => set("dueDate", e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition [color-scheme:dark]"
+                className="w-full px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition [color-scheme:dark]"
               />
             </div>
 
             {/* Subject */}
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-muted mb-1.5">
                 Subject
               </label>
               {!showNewSubjectForm ? (
@@ -382,7 +382,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                   <select
                     value={formData.subject}
                     onChange={e => set("subject", e.target.value)}
-                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+                    className="flex-1 px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
                   >
                     <option value="">No Subject</option>
                     {subjects.map(s => (
@@ -408,7 +408,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                     onChange={e => setNewSubjectName(e.target.value)}
                     placeholder="Subject name..."
                     autoFocus
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition"
+                    className="w-full px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition"
                   />
                   <div className="flex gap-2">
                     <button
@@ -422,7 +422,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                     <button
                       type="button"
                       onClick={() => { setShowNewSubjectForm(false); setNewSubjectName(""); }}
-                      className="flex-1 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs rounded-lg transition"
+                      className="flex-1 py-2 bg-border-strong hover:bg-border-strong text-text text-xs rounded-lg transition"
                     >
                       Cancel
                     </button>
@@ -433,13 +433,13 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
             {/* Assignee */}
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-muted mb-1.5">
                 Assignee
               </label>
               <select
                 value={formData.assignee}
                 onChange={e => set("assignee", e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+                className="w-full px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
               >
                 <option value="">Unassigned</option>
                 {currentUser && <option value={currentUser.id}>Myself</option>}
@@ -454,12 +454,12 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
           {/* Repeat */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Repeat</label>
+            <label className="block text-sm font-medium text-muted mb-1.5">Repeat</label>
             <div className="flex gap-2">
               <select
                 value={formData.recurFreq}
                 onChange={e => set("recurFreq", e.target.value)}
-                className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
+                className="flex-1 px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm focus:outline-none focus:border-amber-500 transition appearance-none cursor-pointer"
               >
                 {repeatOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -467,13 +467,13 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
               </select>
               {formData.recurFreq && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-zinc-500">every</span>
+                  <span className="text-xs text-muted">every</span>
                   <input
                     type="number"
                     min={1}
                     value={formData.recurInterval}
                     onChange={e => set("recurInterval", e.target.value)}
-                    className="w-16 px-2 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm text-center focus:outline-none focus:border-amber-500 transition"
+                    className="w-16 px-2 py-2 bg-surface-alt border border-border-strong rounded-lg text-text text-sm text-center focus:outline-none focus:border-amber-500 transition"
                   />
                 </div>
               )}
@@ -485,36 +485,36 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+            <label className="block text-sm font-medium text-muted mb-1.5">
               Tags
-              <span className="text-zinc-600 font-normal ml-1">(comma separated)</span>
+              <span className="text-muted font-normal ml-1">(comma separated)</span>
             </label>
             <input
               type="text"
               value={formData.tags}
               onChange={e => set("tags", e.target.value)}
               placeholder="e.g. urgent, review, frontend"
-              className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
+              className="w-full px-3.5 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
             />
           </div>
 
           {/* Subtasks */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Subtasks</label>
+            <label className="block text-sm font-medium text-muted mb-1.5">Subtasks</label>
             {subtasks.length > 0 && (
               <div className="space-y-1.5 mb-2">
                 {subtasks.map((s, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2">
+                  <div key={i} className="flex items-center gap-2 bg-surface-alt border border-border-strong rounded-lg px-3 py-2">
                     <input
                       type="checkbox"
                       checked={s.completed}
                       onChange={() => toggleSubtask(i)}
                       className="w-4 h-4 accent-amber-500 shrink-0"
                     />
-                    <span className={`flex-1 text-sm ${s.completed ? "line-through text-zinc-500" : "text-zinc-200"}`}>
+                    <span className={`flex-1 text-sm ${s.completed ? "line-through text-muted" : "text-text"}`}>
                       {s.title}
                     </span>
-                    <button type="button" onClick={() => removeSubtask(i)} className="text-zinc-500 hover:text-red-400 transition shrink-0">
+                    <button type="button" onClick={() => removeSubtask(i)} className="text-muted hover:text-red-400 transition shrink-0">
                       <CloseIcon />
                     </button>
                   </div>
@@ -528,12 +528,12 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                 onChange={(e) => setNewSubtask(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
                 placeholder="Add a subtask..."
-                className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+                className="flex-1 px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 transition"
               />
               <button
                 type="button"
                 onClick={addSubtask}
-                className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-sm font-semibold rounded-lg transition"
+                className="px-3 py-2 bg-surface-alt hover:bg-border-strong border border-border-strong text-text text-sm font-semibold rounded-lg transition"
               >
                 Add
               </button>
@@ -542,20 +542,20 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
 
           {/* Attachments */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Attachments</label>
+            <label className="block text-sm font-medium text-muted mb-1.5">Attachments</label>
             {attachments.length > 0 && (
               <div className="space-y-1.5 mb-2">
                 {attachments.map((a) => (
-                  <div key={a._id} className="flex items-center justify-between gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2">
-                    <span className="text-sm text-zinc-200 truncate">{a.title}</span>
-                    <button type="button" onClick={() => removeAttachment(a._id)} className="text-zinc-500 hover:text-red-400 transition shrink-0">
+                  <div key={a._id} className="flex items-center justify-between gap-2 bg-surface-alt border border-border-strong rounded-lg px-3 py-2">
+                    <span className="text-sm text-text truncate">{a.title}</span>
+                    <button type="button" onClick={() => removeAttachment(a._id)} className="text-muted hover:text-red-400 transition shrink-0">
                       <CloseIcon />
                     </button>
                   </div>
                 ))}
               </div>
             )}
-            <label className="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-dashed border-zinc-700 text-zinc-400 text-sm font-semibold rounded-lg transition cursor-pointer">
+            <label className="flex items-center justify-center gap-2 px-3 py-2 bg-surface-alt hover:bg-border-strong border border-dashed border-border-strong text-muted text-sm font-semibold rounded-lg transition cursor-pointer">
               {uploadingAttachment ? "Uploading..." : "Attach a file"}
               <input
                 type="file"
@@ -574,21 +574,21 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
           {/* Comments & activity */}
           {todo?._id && (
             <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-1.5">Activity</label>
+              <label className="block text-sm font-medium text-muted mb-1.5">Activity</label>
               <div className="space-y-2 max-h-48 overflow-y-auto mb-2">
                 {loadingComments ? (
-                  <p className="text-sm text-zinc-500">Loading...</p>
+                  <p className="text-sm text-muted">Loading...</p>
                 ) : comments.length === 0 ? (
-                  <p className="text-sm text-zinc-500">No comments yet.</p>
+                  <p className="text-sm text-muted">No comments yet.</p>
                 ) : (
                   comments.map((c, i) => (
-                    <div key={i} className={c.type === "activity" ? "text-xs text-zinc-500 italic px-1" : "bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2"}>
+                    <div key={i} className={c.type === "activity" ? "text-xs text-muted italic px-1" : "bg-surface-alt border border-border-strong rounded-lg px-3 py-2"}>
                       {c.type === "activity" ? (
                         <span>{c.user?.name || c.user?.email || "Someone"} {c.text}</span>
                       ) : (
                         <>
                           <p className="text-xs font-semibold text-amber-400">{c.user?.name || c.user?.email || "Someone"}</p>
-                          <p className="text-sm text-zinc-200 mt-0.5">{c.text}</p>
+                          <p className="text-sm text-text mt-0.5">{c.text}</p>
                         </>
                       )}
                     </div>
@@ -602,7 +602,7 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handlePostComment())}
                   placeholder="Add a comment..."
-                  className="flex-1 min-w-0 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500 transition"
+                  className="flex-1 min-w-0 px-3 py-2 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 transition"
                 />
                 <button
                   type="button"
@@ -618,11 +618,11 @@ const TodoModal: React.FC<TodoModalProps> = ({ isOpen, todo, onClose, onSave, de
         </form>
 
         {/* Footer */}
-        <div className="flex flex-col-reverse sm:flex-row gap-3 px-4 sm:px-6 py-4 border-t border-zinc-800 bg-zinc-900/50">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 px-4 sm:px-6 py-4 border-t border-border bg-surface/50">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-zinc-400 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition"
+            className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-muted bg-surface-alt hover:bg-border-strong border border-border-strong transition"
           >
             Cancel
           </button>

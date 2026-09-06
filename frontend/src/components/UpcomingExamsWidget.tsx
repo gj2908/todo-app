@@ -47,9 +47,9 @@ export default function UpcomingExamsWidget({ subjects, onNavigate }: UpcomingEx
   const subjectName = (id: string | null) => (id ? subjects.find((s) => s._id === id)?.name : null);
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold text-zinc-100">Upcoming exams</h3>
+        <h3 className="text-sm font-bold text-text">Upcoming exams</h3>
         <button
           onClick={() => onNavigate("syllabus")}
           className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition"
@@ -59,11 +59,11 @@ export default function UpcomingExamsWidget({ subjects, onNavigate }: UpcomingEx
       </div>
       <div className="space-y-1.5">
         {entries.map((entry) => (
-          <div key={entry._id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
+          <div key={entry._id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-page px-3 py-2">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-zinc-200 truncate">{entry.title}</p>
+              <p className="text-sm font-semibold text-text truncate">{entry.title}</p>
               {subjectName(entry.subject) && (
-                <p className="text-xs text-zinc-500 mt-0.5">{subjectName(entry.subject)}</p>
+                <p className="text-xs text-muted mt-0.5">{subjectName(entry.subject)}</p>
               )}
             </div>
             <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 shrink-0">

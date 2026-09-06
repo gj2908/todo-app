@@ -22,12 +22,12 @@ export default function VerifyEmailPage() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl p-8 text-center shadow-2xl">
+    <div className="min-h-screen bg-page flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-surface border border-border rounded-2xl p-8 text-center shadow-2xl">
         {status === "checking" && (
           <>
-            <div className="w-8 h-8 border-2 border-zinc-700 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-sm text-zinc-400">Verifying your email...</p>
+            <div className="w-8 h-8 border-2 border-border-strong border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-sm text-muted">Verifying your email...</p>
           </>
         )}
         {status === "success" && (
@@ -37,8 +37,8 @@ export default function VerifyEmailPage() {
                 <path d="M5 11l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h1 className="text-lg font-bold text-zinc-100 mb-1">Email verified</h1>
-            <p className="text-sm text-zinc-500 mb-6">Your email address is confirmed.</p>
+            <h1 className="text-lg font-bold text-text mb-1">Email verified</h1>
+            <p className="text-sm text-muted mb-6">Your email address is confirmed.</p>
           </>
         )}
         {status === "error" && (
@@ -48,8 +48,8 @@ export default function VerifyEmailPage() {
                 <path d="M6 6l10 10M16 6L6 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <h1 className="text-lg font-bold text-zinc-100 mb-1">Verification failed</h1>
-            <p className="text-sm text-zinc-500 mb-6">{message}</p>
+            <h1 className="text-lg font-bold text-text mb-1">Verification failed</h1>
+            <p className="text-sm text-muted mb-6">{message}</p>
           </>
         )}
         {status !== "checking" && (

@@ -29,11 +29,11 @@ export default function PageHeader({ title, onBack, actions }: PageHeaderProps) 
         <button
           onClick={onBack || (() => navigate("/home"))}
           aria-label="Back to workspace"
-          className="p-2 -ml-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-all duration-200 active:scale-90 shrink-0"
+          className="p-2 -ml-2 rounded-lg text-muted hover:text-text hover:bg-surface-alt transition-all duration-200 active:scale-90 shrink-0"
         >
           <BackIcon />
         </button>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight truncate">{title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-text tracking-tight truncate">{title}</h1>
       </div>
       {actions && <div className="flex items-center gap-1.5 shrink-0">{actions}</div>}
     </div>

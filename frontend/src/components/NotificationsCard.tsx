@@ -117,25 +117,25 @@ export default function NotificationsCard() {
 
   if (loading) {
     return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-        <p className="text-sm text-zinc-500">Loading...</p>
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <p className="text-sm text-muted">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-      <div className="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-zinc-800">
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <div className="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-border">
         <div>
-          <h3 className="text-sm font-bold text-zinc-200">Browser notifications</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">Required for push and the per-task due-date reminder to show up</p>
+          <h3 className="text-sm font-bold text-text">Browser notifications</h3>
+          <p className="text-xs text-muted mt-0.5">Required for push and the per-task due-date reminder to show up</p>
         </div>
         {permission === "granted" ? (
           <span className="text-[11px] font-bold px-2 py-1 rounded bg-green-500/15 text-green-400 whitespace-nowrap">On</span>
         ) : permission === "denied" ? (
           <span className="text-[11px] font-bold px-2 py-1 rounded bg-red-500/15 text-red-400 whitespace-nowrap" title="Blocked in browser settings">Blocked</span>
         ) : permission === "unsupported" ? (
-          <span className="text-[11px] font-bold px-2 py-1 rounded bg-zinc-700 text-zinc-400 whitespace-nowrap">Unsupported</span>
+          <span className="text-[11px] font-bold px-2 py-1 rounded bg-border-strong text-muted whitespace-nowrap">Unsupported</span>
         ) : (
           <button
             onClick={handleRequestPermission}
@@ -146,14 +146,14 @@ export default function NotificationsCard() {
         )}
       </div>
 
-      <h3 className="text-sm font-bold text-zinc-200">Daily digest</h3>
-      <p className="text-xs text-zinc-500 mt-0.5">
+      <h3 className="text-sm font-bold text-text">Daily digest</h3>
+      <p className="text-xs text-muted mt-0.5">
         One summary each morning of what's due today and overdue - separate from the per-task reminder in the Reminders view.
       </p>
 
       <div className="mt-3 space-y-2">
-        <label className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 cursor-pointer">
-          <span className="text-sm text-zinc-200">Email digest</span>
+        <label className="flex items-center justify-between gap-3 rounded-lg border border-border bg-page px-3 py-2.5 cursor-pointer">
+          <span className="text-sm text-text">Email digest</span>
           <input
             type="checkbox"
             checked={notifyByEmail}
@@ -162,8 +162,8 @@ export default function NotificationsCard() {
             className="w-4 h-4 accent-amber-500"
           />
         </label>
-        <label className={`flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 ${pushSupported ? "cursor-pointer" : "opacity-50"}`}>
-          <span className="text-sm text-zinc-200">Push notification digest</span>
+        <label className={`flex items-center justify-between gap-3 rounded-lg border border-border bg-page px-3 py-2.5 ${pushSupported ? "cursor-pointer" : "opacity-50"}`}>
+          <span className="text-sm text-text">Push notification digest</span>
           <input
             type="checkbox"
             checked={notifyByPush}
@@ -173,7 +173,7 @@ export default function NotificationsCard() {
           />
         </label>
         {!pushSupported && (
-          <p className="text-xs text-zinc-600">Push notifications aren't supported in this browser.</p>
+          <p className="text-xs text-muted">Push notifications aren't supported in this browser.</p>
         )}
       </div>
     </div>

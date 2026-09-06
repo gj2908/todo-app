@@ -22,6 +22,19 @@ module.exports = {
           900: "#064e3b",
           950: "#022c22",
         },
+        // Semantic tokens bound to the CSS custom properties in index.css -
+        // resolve to light values by default, dark values under a `.dark`
+        // class on <html> (see utils/theme.ts). Named additively alongside
+        // the literal zinc/amber classes still used throughout the app,
+        // rather than replacing them outright.
+        page: "var(--color-bg)",
+        surface: "var(--color-surface)",
+        "surface-alt": "var(--color-surface-alt)",
+        border: "var(--color-border)",
+        "border-strong": "var(--color-border-strong)",
+        text: "var(--color-text)",
+        muted: "var(--color-muted)",
+        accent: "var(--color-accent)",
       },
       keyframes: {
         fadeSlideDown: {

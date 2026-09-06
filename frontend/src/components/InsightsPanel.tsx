@@ -86,9 +86,9 @@ export default function InsightsPanel({ todos, subjects = [] }: InsightsPanelPro
 
   if (stats.total === 0) {
     return (
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-10 text-center">
-        <p className="text-zinc-400 font-semibold">Nothing to show yet</p>
-        <p className="text-zinc-600 text-sm mt-1">Add a few tasks and your insights will show up here.</p>
+      <div className="rounded-xl border border-border bg-surface p-10 text-center">
+        <p className="text-muted font-semibold">Nothing to show yet</p>
+        <p className="text-muted text-sm mt-1">Add a few tasks and your insights will show up here.</p>
       </div>
     );
   }
@@ -96,35 +96,35 @@ export default function InsightsPanel({ todos, subjects = [] }: InsightsPanelPro
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-          <p className="text-xs font-medium text-zinc-500">Total tasks</p>
-          <p className="text-2xl font-bold text-zinc-100 mt-1">{stats.total}</p>
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <p className="text-xs font-medium text-muted">Total tasks</p>
+          <p className="text-2xl font-bold text-text mt-1">{stats.total}</p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-          <p className="text-xs font-medium text-zinc-500">Completed</p>
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <p className="text-xs font-medium text-muted">Completed</p>
           <p className="text-2xl font-bold text-green-400 mt-1">{stats.completed}</p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-          <p className="text-xs font-medium text-zinc-500">Pending</p>
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <p className="text-xs font-medium text-muted">Pending</p>
           <p className="text-2xl font-bold text-amber-400 mt-1">{stats.pending}</p>
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-          <p className="text-xs font-medium text-zinc-500">Overdue</p>
+        <div className="rounded-xl border border-border bg-surface p-4">
+          <p className="text-xs font-medium text-muted">Overdue</p>
           <p className="text-2xl font-bold text-red-400 mt-1">{stats.overdue}</p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-        <p className="text-sm font-bold text-zinc-200 mb-3">Completion rate</p>
-        <div className="w-full bg-zinc-800 rounded-full h-3 overflow-hidden">
+      <div className="rounded-xl border border-border bg-surface p-5">
+        <p className="text-sm font-bold text-text mb-3">Completion rate</p>
+        <div className="w-full bg-surface-alt rounded-full h-3 overflow-hidden">
           <div className="h-full bg-amber-500 rounded-full transition-all duration-700" style={{ width: `${completionRate}%` }} />
         </div>
-        <p className="text-xs text-zinc-500 mt-2">{stats.completed} of {stats.total} tasks completed ({completionRate}%)</p>
+        <p className="text-xs text-muted mt-2">{stats.completed} of {stats.total} tasks completed ({completionRate}%)</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-          <p className="text-sm font-bold text-zinc-200 mb-3">Status</p>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <p className="text-sm font-bold text-text mb-3">Status</p>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={statusData} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
@@ -135,8 +135,8 @@ export default function InsightsPanel({ todos, subjects = [] }: InsightsPanelPro
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-          <p className="text-sm font-bold text-zinc-200 mb-3">Priority</p>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <p className="text-sm font-bold text-text mb-3">Priority</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={priorityData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -152,8 +152,8 @@ export default function InsightsPanel({ todos, subjects = [] }: InsightsPanelPro
       </div>
 
       {categoryData.length > 0 && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-          <p className="text-sm font-bold text-zinc-200 mb-3">By category</p>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <p className="text-sm font-bold text-text mb-3">By category</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={categoryData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -167,8 +167,8 @@ export default function InsightsPanel({ todos, subjects = [] }: InsightsPanelPro
       )}
 
       {studyData.length > 0 && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-          <p className="text-sm font-bold text-zinc-200 mb-3">Study time this week (minutes)</p>
+        <div className="rounded-xl border border-border bg-surface p-5">
+          <p className="text-sm font-bold text-text mb-3">Study time this week (minutes)</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={studyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />

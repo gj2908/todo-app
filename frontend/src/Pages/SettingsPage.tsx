@@ -9,7 +9,7 @@ import PageHeader from "../components/PageHeader";
 import { btn } from "../lib/ui";
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs font-bold text-zinc-500 tracking-widest uppercase px-1 pt-1">{children}</p>
+  <p className="text-xs font-bold text-muted tracking-widest uppercase px-1 pt-1">{children}</p>
 );
 
 export default function SettingsPage() {
@@ -36,7 +36,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-page flex flex-col">
       <Navbar />
 
       <div className="flex-1 flex items-start justify-center px-4 sm:px-6 pt-4 sm:pt-5 pb-6">
@@ -57,11 +57,11 @@ export default function SettingsPage() {
 
           <div className="space-y-2">
             <SectionLabel>Data</SectionLabel>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <div className="bg-surface border border-border rounded-xl p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-200">Export your data</h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">Download every task, subject, note, and document record as one JSON file</p>
+                  <h3 className="text-sm font-bold text-text">Export your data</h3>
+                  <p className="text-xs text-muted mt-0.5">Download every task, subject, note, and document record as one JSON file</p>
                 </div>
                 <button
                   onClick={handleExport}

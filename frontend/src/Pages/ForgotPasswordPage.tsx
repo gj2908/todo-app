@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-page flex items-center justify-center p-4">
       {/* Background grid */}
       <div
         className="absolute inset-0 opacity-[0.03]"
@@ -63,21 +63,21 @@ export default function ForgotPasswordPage() {
           <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-blue-500/40">
             <img src="/favicon_io/android-chrome-192x192.png" alt="Taskflow" className="w-full h-full object-cover" />
           </div>
-          <span className="text-2xl font-bold text-white tracking-tight">
+          <span className="text-2xl font-bold text-text tracking-tight">
             Taskflow<span className="text-amber-500">.</span>
           </span>
         </div>
 
         {/* Card */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-surface border border-border rounded-2xl p-8 shadow-2xl">
           {step === "email" ? (
             <>
-              <h1 className="text-xl font-bold text-zinc-100 mb-1">Forgot password?</h1>
-              <p className="text-sm text-zinc-500 mb-7">Enter your email to receive a password reset link</p>
+              <h1 className="text-xl font-bold text-text mb-1">Forgot password?</h1>
+              <p className="text-sm text-muted mb-7">Enter your email to receive a password reset link</p>
 
               <form onSubmit={handleRequestReset} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+                  <label className="block text-sm font-medium text-muted mb-1.5">
                     Email
                   </label>
                   <input
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-600 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
+                    className="w-full px-4 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
                   />
                 </div>
 
@@ -105,12 +105,12 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-zinc-100 mb-1">Reset password</h1>
-              <p className="text-sm text-zinc-500 mb-7">Enter your new password</p>
+              <h1 className="text-xl font-bold text-text mb-1">Reset password</h1>
+              <p className="text-sm text-muted mb-7">Enter your new password</p>
 
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+                  <label className="block text-sm font-medium text-muted mb-1.5">
                     New Password
                   </label>
                   <div className="relative">
@@ -119,12 +119,12 @@ export default function ForgotPasswordPage() {
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
                       placeholder="Min. 6 characters"
-                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-600 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition pr-11"
+                      className="w-full px-4 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition pr-11"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs font-medium transition"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text text-xs font-medium transition"
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -132,7 +132,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-1.5">
+                  <label className="block text-sm font-medium text-muted mb-1.5">
                     Confirm Password
                   </label>
                   <input
@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter password"
-                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 placeholder-zinc-600 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
+                    className="w-full px-4 py-2.5 bg-surface-alt border border-border-strong rounded-lg text-text placeholder-muted text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition"
                   />
                 </div>
 
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <p className="text-center text-sm text-zinc-600 mt-5">
+        <p className="text-center text-sm text-muted mt-5">
           Remember your password?{" "}
           <Link to="/login" className="text-amber-500 hover:text-amber-400 font-semibold transition">
             Sign in

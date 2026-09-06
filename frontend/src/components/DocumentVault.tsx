@@ -182,28 +182,28 @@ export default function DocumentVault() {
   return (
     <div className="max-w-5xl space-y-4">
       <OfflineBanner isOffline={isOffline} pendingSyncCount={pendingSyncCount} offlineLabel="showing cached documents" />
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <p className="text-sm text-zinc-500">Upload and store images or PDFs securely in Cloudinary.</p>
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <p className="text-sm text-muted">Upload and store images or PDFs securely in Cloudinary.</p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs">
-          <span className="rounded-md bg-zinc-800 px-2.5 py-1 text-zinc-300">Total: {counts.total}</span>
-          <span className="rounded-md bg-zinc-800 px-2.5 py-1 text-zinc-300">Images: {counts.images}</span>
-          <span className="rounded-md bg-zinc-800 px-2.5 py-1 text-zinc-300">PDFs: {counts.pdfs}</span>
+          <span className="rounded-md bg-surface-alt px-2.5 py-1 text-text">Total: {counts.total}</span>
+          <span className="rounded-md bg-surface-alt px-2.5 py-1 text-text">Images: {counts.images}</span>
+          <span className="rounded-md bg-surface-alt px-2.5 py-1 text-text">PDFs: {counts.pdfs}</span>
         </div>
       </div>
 
-      <form onSubmit={handleUpload} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+      <form onSubmit={handleUpload} className="rounded-xl border border-border bg-surface p-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Optional title..."
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500"
           />
           <input
             type="file"
             accept="image/*,application/pdf"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 file:mr-3 file:rounded-md file:border-0 file:bg-amber-500 file:px-2.5 file:py-1 file:text-xs file:font-bold file:text-black"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text file:mr-3 file:rounded-md file:border-0 file:bg-amber-500 file:px-2.5 file:py-1 file:text-xs file:font-bold file:text-black"
           />
         </div>
         <button
@@ -215,23 +215,23 @@ export default function DocumentVault() {
         </button>
       </form>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-        <h4 className="text-sm font-bold text-zinc-200 mb-3">Stored files</h4>
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <h4 className="text-sm font-bold text-text mb-3">Stored files</h4>
         {loading ? (
-          <p className="text-sm text-zinc-500">Loading vault...</p>
+          <p className="text-sm text-muted">Loading vault...</p>
         ) : documents.length === 0 ? (
-          <p className="text-sm text-zinc-500">No files uploaded yet.</p>
+          <p className="text-sm text-muted">No files uploaded yet.</p>
         ) : (
           <div className="space-y-2">
             {documents.map((doc) => (
-              <div key={doc._id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5">
+              <div key={doc._id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-page px-3 py-2.5">
                 <div className="min-w-0">
                   {editingId === doc._id ? (
                     <div className="flex items-center gap-2">
                       <input
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:border-amber-500"
+                        className="w-full rounded-md border border-border-strong bg-surface px-2 py-1 text-sm text-text focus:outline-none focus:border-amber-500"
                       />
                       <button
                         onClick={() => handleUpdate(doc._id)}
@@ -248,9 +248,9 @@ export default function DocumentVault() {
                       </button>
                     </div>
                   ) : (
-                    <p className="text-sm text-zinc-100 truncate">{doc.title}</p>
+                    <p className="text-sm text-text truncate">{doc.title}</p>
                   )}
-                  <p className="text-xs text-zinc-500 truncate">
+                  <p className="text-xs text-muted truncate">
                     {doc.fileType.toUpperCase()} • {formatBytes(doc.bytes)} • {new Date(doc.createdAt).toLocaleDateString()}
                   </p>
                 </div>

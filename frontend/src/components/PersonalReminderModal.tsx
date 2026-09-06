@@ -44,29 +44,29 @@ export default function PersonalReminderModal({ isOpen, onSave, onClose }: Perso
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl">
-        <h3 className="text-base font-bold text-zinc-100">Add reminder</h3>
-        <p className="text-sm text-zinc-500 mt-1">Choose the exact date and time you want to be notified.</p>
+      <div className="relative w-full max-w-md rounded-2xl border border-border-strong bg-surface p-5 shadow-2xl">
+        <h3 className="text-base font-bold text-text">Add reminder</h3>
+        <p className="text-sm text-muted mt-1">Choose the exact date and time you want to be notified.</p>
 
         <div className="mt-4 space-y-3">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Reminder title"
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500"
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-500"
+              className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text focus:outline-none focus:border-amber-500"
             />
             <input
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-500"
+              className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text focus:outline-none focus:border-amber-500"
             />
           </div>
           <textarea
@@ -74,14 +74,14 @@ export default function PersonalReminderModal({ isOpen, onSave, onClose }: Perso
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Optional note"
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500 resize-none"
+            className="w-full rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text placeholder-muted focus:outline-none focus:border-amber-500 resize-none"
           />
         </div>
 
         <div className="mt-5 flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700"
+            className="flex-1 rounded-lg border border-border-strong bg-surface-alt px-3 py-2 text-sm text-text hover:bg-border-strong"
           >
             Cancel
           </button>

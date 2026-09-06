@@ -4,13 +4,35 @@
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
+/* Light is the default palette; .dark (toggled on <html> - see
+   utils/theme.ts and the pre-hydration script in public/index.html)
+   overrides these same tokens with today's original dark values. */
 :root {
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f4f4f5;
+  --color-border: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+  --color-text: #18181b;
+  --color-muted: #71717a;
+  --color-accent: #f59e0b;
+  --color-scrollbar-track: #f4f4f5;
+  --color-scrollbar-thumb: #d4d4d8;
+  --color-scrollbar-thumb-hover: #a1a1aa;
+}
+
+.dark {
   --color-bg: #09090b;
   --color-surface: #18181b;
+  --color-surface-alt: #27272a;
   --color-border: #27272a;
+  --color-border-strong: #3f3f46;
   --color-text: #f4f4f5;
   --color-muted: #71717a;
   --color-accent: #f59e0b;
+  --color-scrollbar-track: #18181b;
+  --color-scrollbar-thumb: #3f3f46;
+  --color-scrollbar-thumb-hover: #52525b;
 }
 
 * {
@@ -42,36 +64,40 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #18181b;
+  background: var(--color-scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: var(--color-scrollbar-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: var(--color-scrollbar-thumb-hover);
 }
 
-/* Toastify overrides for dark theme */
+/* Toastify overrides, theme-aware via the same custom properties */
 .Toastify__toast {
-  background: #18181b !important;
-  color: #f4f4f5 !important;
-  border: 1px solid #27272a !important;
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: 12px !important;
   font-family: 'Manrope', sans-serif !important;
   font-size: 13px !important;
   font-weight: 500 !important;
 }
 .Toastify__progress-bar {
-  background: #f59e0b !important;
+  background: var(--color-accent) !important;
 }
 .Toastify__close-button {
-  color: #71717a !important;
+  color: var(--color-muted) !important;
 }
 
-/* Date input dark styling */
-input[type="date"]::-webkit-calendar-picker-indicator {
+/* Date input: only the dark palette needs the picker icon inverted -
+   it renders dark-on-dark otherwise; light mode's icon is already legible. */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.6);
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
