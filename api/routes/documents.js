@@ -208,6 +208,7 @@ router.put("/:id", protect, async (req, res) => {
 
     const update = { title };
     if (req.body.tags !== undefined) update.tags = req.body.tags;
+    if (req.body.checklist !== undefined) update.checklist = req.body.checklist;
 
     const document = await Document.findOneAndUpdate(
       { _id: req.params.id, user: req.user },

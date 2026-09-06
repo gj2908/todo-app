@@ -14,6 +14,15 @@ const documentSchema = new mongoose.Schema({
   subject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject", default: null },
   date: { type: Date, default: null },
   tags: { type: [String], default: [] },
+  checklist: {
+    type: [
+      {
+        text: { type: String, required: true },
+        done: { type: Boolean, default: false },
+      },
+    ],
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
