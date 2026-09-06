@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { differenceInCalendarDays } from "date-fns";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
@@ -9,6 +10,11 @@ interface Subject {
   name: string;
 }
 
+interface ChecklistItem {
+  text: string;
+  done: boolean;
+}
+
 interface SyllabusDocument {
   _id: string;
   title: string;
@@ -17,7 +23,18 @@ interface SyllabusDocument {
   subject: string | null;
   date: string | null;
   createdAt: string;
+  checklist?: ChecklistItem[];
 }
+
+const countdownLabel = (dateStr: string | null) => {
+  if (!dateStr) return null;
+  const days = differenceInCalendarDays(new Date(dateStr), new Date());
+  if (days < 0) return { text: "Past", cls: "bg-zinc-800 text-zinc-500" };
+  if (days === 0) return { text: "Today", cls: "bg-red-500/15 text-red-400" };
+  if (days === 1) return { text: "1 day left", cls: "bg-amber-500/15 text-amber-400" };
+  if (days <= 7) return { text: `${days} days left`, cls: "bg-amber-500/15 text-amber-400" };
+  return { text: `${days} days left`, cls: "bg-zinc-800 text-zinc-400" };
+};
 
 export default function SyllabusPanel() {
   const [entries, setEntries] = useState<SyllabusDocument[]>([]);
@@ -29,6 +46,8 @@ export default function SyllabusPanel() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<SyllabusDocument | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [newItemText, setNewItemText] = useState("");
 
   const fetchEntries = async () => {
     try {
@@ -109,6 +128,32 @@ export default function SyllabusPanel() {
     }
   };
 
+  const saveChecklist = async (entry: SyllabusDocument, checklist: ChecklistItem[]) => {
+    setEntries((prev) => prev.map((e) => (e._id === entry._id ? { ...e, checklist } : e)));
+    try {
+      await axios.put(`/documents/${entry._id}`, { title: entry.title, checklist });
+    } catch {
+      toast.error("Failed to update checklist");
+    }
+  };
+
+  const handleAddChecklistItem = (entry: SyllabusDocument) => {
+    if (!newItemText.trim()) return;
+    const checklist = [...(entry.checklist || []), { text: newItemText.trim(), done: false }];
+    setNewItemText("");
+    saveChecklist(entry, checklist);
+  };
+
+  const handleToggleChecklistItem = (entry: SyllabusDocument, index: number) => {
+    const checklist = (entry.checklist || []).map((item, i) => (i === index ? { ...item, done: !item.done } : item));
+    saveChecklist(entry, checklist);
+  };
+
+  const handleRemoveChecklistItem = (entry: SyllabusDocument, index: number) => {
+    const checklist = (entry.checklist || []).filter((_, i) => i !== index);
+    saveChecklist(entry, checklist);
+  };
+
   return (
     <div className="max-w-5xl space-y-4">
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
@@ -163,37 +208,94 @@ export default function SyllabusPanel() {
           <p className="text-sm text-zinc-500">No syllabus entries yet.</p>
         ) : (
           <div className="space-y-2">
-            {entries.map((entry) => (
-              <div key={entry._id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 shrink-0">
-                      {entry.date ? new Date(entry.date).toLocaleDateString() : "No date"}
-                    </span>
-                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">
-                      {subjectName(entry.subject)}
-                    </span>
+            {entries.map((entry) => {
+              const countdown = countdownLabel(entry.date);
+              const checklist = entry.checklist || [];
+              const isExpanded = expandedId === entry._id;
+              return (
+                <div key={entry._id} className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 shrink-0">
+                          {entry.date ? new Date(entry.date).toLocaleDateString() : "No date"}
+                        </span>
+                        {countdown && (
+                          <span className={`text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${countdown.cls}`}>
+                            {countdown.text}
+                          </span>
+                        )}
+                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">
+                          {subjectName(entry.subject)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-zinc-100 truncate mt-1">{entry.title}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => { setExpandedId(isExpanded ? null : entry._id); setNewItemText(""); }}
+                        className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
+                      >
+                        {checklist.length > 0 ? `Checklist (${checklist.filter((c) => c.done).length}/${checklist.length})` : "Checklist"}
+                      </button>
+                      <a
+                        href={`/document-vault/${entry._id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
+                      >
+                        Open
+                      </a>
+                      <button
+                        onClick={() => setDeleteTarget(entry)}
+                        className={`px-2.5 py-1.5 text-xs ${btn.dangerGhost}`}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm text-zinc-100 truncate mt-1">{entry.title}</p>
+
+                  {isExpanded && (
+                    <div className="mt-3 pt-3 border-t border-zinc-800 space-y-1.5">
+                      {checklist.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={item.done}
+                            onChange={() => handleToggleChecklistItem(entry, i)}
+                            className="w-3.5 h-3.5 rounded accent-amber-500 shrink-0"
+                          />
+                          <span className={`text-sm flex-1 min-w-0 truncate ${item.done ? "text-zinc-500 line-through" : "text-zinc-200"}`}>
+                            {item.text}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveChecklistItem(entry, i)}
+                            className="text-xs text-zinc-600 hover:text-red-400 transition shrink-0"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 pt-1">
+                        <input
+                          value={newItemText}
+                          onChange={(e) => setNewItemText(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleAddChecklistItem(entry)}
+                          placeholder="Add a prep item..."
+                          className="flex-1 min-w-0 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500"
+                        />
+                        <button
+                          onClick={() => handleAddChecklistItem(entry)}
+                          className={`px-3 py-1.5 text-xs ${btn.primary}`}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={`/document-vault/${entry._id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
-                  >
-                    Open
-                  </a>
-                  <button
-                    onClick={() => setDeleteTarget(entry)}
-                    className={`px-2.5 py-1.5 text-xs ${btn.dangerGhost}`}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

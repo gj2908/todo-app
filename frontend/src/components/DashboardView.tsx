@@ -6,6 +6,7 @@ import StatsStrip from "./StatsStrip";
 import InsightsPanel from "./InsightsPanel";
 import OnboardingChecklist from "./OnboardingChecklist";
 import StudyTimerWidget from "./StudyTimerWidget";
+import UpcomingExamsWidget from "./UpcomingExamsWidget";
 import { btn } from "../lib/ui";
 
 interface Subject {
@@ -113,6 +114,7 @@ export default function DashboardView({
 
         <div className="space-y-3">
           <StudyTimerWidget subjects={subjects} />
+          <UpcomingExamsWidget subjects={subjects} onNavigate={onNavigate} />
           <CalendarPanel todos={todos} subjects={subjects} compact />
         </div>
       </div>
