@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import { btn } from "../lib/ui";
+import PdfViewer from "./PdfViewer";
 
 interface DatesheetDocument {
   _id: string;
@@ -90,11 +91,7 @@ export default function DatesheetPanel() {
               </a>
             </div>
             {datesheet.fileType === "pdf" ? (
-              <object data={datesheet.url} type="application/pdf" className="w-full h-[70vh] rounded-lg bg-zinc-950">
-                <div className="h-full flex items-center justify-center text-sm text-zinc-400 p-4">
-                  Preview is unavailable in this browser.
-                </div>
-              </object>
+              <PdfViewer url={datesheet.url} className="w-full h-[70vh] rounded-lg bg-zinc-950" />
             ) : (
               <div className="w-full h-[70vh] bg-zinc-950 rounded-lg overflow-auto flex items-center justify-center">
                 <img src={datesheet.url} alt={datesheet.title} className="max-w-full max-h-full object-contain" />

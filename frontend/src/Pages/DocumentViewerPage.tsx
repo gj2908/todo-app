@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "../axiosConfig";
 import { btn } from "../lib/ui";
+import PdfViewer from "../components/PdfViewer";
 
 const BackIcon = () => (
   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -201,23 +202,10 @@ export default function DocumentViewerPage() {
             </button>
           )}
           {doc.fileType === "pdf" ? (
-            <object
-              data={doc.url}
-              type="application/pdf"
+            <PdfViewer
+              url={doc.url}
               className={isFullscreen ? "w-full h-full bg-zinc-950" : "w-full h-[70vh] sm:h-[78vh] rounded-lg bg-zinc-950"}
-            >
-              <div className="h-full flex items-center justify-center text-center p-4">
-                <div>
-                  <p className="text-sm text-zinc-400">Preview is unavailable in this browser.</p>
-                  <button
-                    onClick={handleDownload}
-                    className={`mt-3 px-3 py-2 text-xs ${btn.primary}`}
-                  >
-                    Download file
-                  </button>
-                </div>
-              </div>
-            </object>
+            />
           ) : (
             <div
               className={
