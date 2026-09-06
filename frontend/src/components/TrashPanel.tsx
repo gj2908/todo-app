@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import { btn } from "../lib/ui";
 
 interface TrashedTodo {
   _id: string;
@@ -74,13 +75,13 @@ export default function TrashPanel() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleRestore(item._id)}
-                  className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-700"
+                  className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
                 >
                   Restore
                 </button>
                 <button
                   onClick={() => setDeleteTarget(item)}
-                  className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/20"
+                  className={`px-2.5 py-1.5 text-xs ${btn.dangerGhost}`}
                 >
                   Delete forever
                 </button>

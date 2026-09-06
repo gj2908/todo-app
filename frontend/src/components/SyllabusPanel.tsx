@@ -181,13 +181,13 @@ export default function SyllabusPanel() {
                     href={`/document-vault/${entry._id}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+                    className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
                   >
                     Open
                   </a>
                   <button
                     onClick={() => setDeleteTarget(entry)}
-                    className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
+                    className={`px-2.5 py-1.5 text-xs ${btn.dangerGhost}`}
                   >
                     Delete
                   </button>

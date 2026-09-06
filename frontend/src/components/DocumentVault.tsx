@@ -179,13 +179,13 @@ export default function DocumentVault() {
                       <button
                         onClick={() => handleUpdate(doc._id)}
                         disabled={savingEdit}
-                        className="rounded-md bg-amber-500 px-2 py-1 text-xs font-bold text-black disabled:opacity-50"
+                        className={`px-2 py-1 text-xs ${btn.primary}`}
                       >
                         Save
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="rounded-md bg-zinc-800 px-2 py-1 text-xs text-zinc-300"
+                        className={`px-2 py-1 text-xs ${btn.secondary}`}
                       >
                         Cancel
                       </button>
@@ -202,19 +202,19 @@ export default function DocumentVault() {
                     href={`/document-vault/${doc._id}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+                    className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
                   >
                     Open
                   </a>
                   <button
                     onClick={() => startEdit(doc)}
-                    className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+                    className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => setDeleteTarget(doc)}
-                    className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
+                    className={`px-2.5 py-1.5 text-xs ${btn.dangerGhost}`}
                   >
                     Delete
                   </button>

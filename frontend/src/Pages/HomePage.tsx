@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
+import { btn } from "../lib/ui";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import TodoItem from "../components/TodoItem";
@@ -747,7 +748,7 @@ export default function HomePage() {
                     {!search && activeView !== "completed" && (
                       <button
                         onClick={handleAddNew}
-                        className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                        className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 text-sm ${btn.cta}`}
                       >
                         <PlusIcon />
                         Add Task
@@ -797,7 +798,7 @@ export default function HomePage() {
                 {!search && activeView !== "completed" && (
                   <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                    className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 text-sm ${btn.cta}`}
                   >
                     <PlusIcon />
                     Add Task

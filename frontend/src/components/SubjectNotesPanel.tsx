@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import ConfirmDialog from "./ConfirmDialog";
+import { btn } from "../lib/ui";
 
 interface NoteDocument {
   _id: string;
@@ -117,7 +118,7 @@ export default function SubjectNotesPanel({ subjectId, subjectName }: SubjectNot
         <button
           type="submit"
           disabled={uploading}
-          className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black hover:bg-amber-400 disabled:opacity-50"
+          className={`px-4 py-2 text-sm ${btn.primary}`}
         >
           {uploading ? "Uploading..." : "Add Note"}
         </button>
@@ -144,13 +145,13 @@ export default function SubjectNotesPanel({ subjectId, subjectName }: SubjectNot
                     href={`/document-vault/${note._id}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700"
+                    className={`px-2.5 py-1.5 text-xs ${btn.secondary}`}
                   >
                     Open
                   </a>
                   <button
                     onClick={() => setDeleteTarget(note)}
-                    className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
+                    className={`px-2.5 py-1.5 text-xs ${btn.dangerGhost}`}
                   >
                     Delete
                   </button>

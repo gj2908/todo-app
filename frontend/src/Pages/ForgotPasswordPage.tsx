@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "../axiosConfig";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { btn } from "../lib/ui";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function ForgotPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<"email" | "reset">(token ? "reset" : "email");
+  const [step] = useState<"email" | "reset">(token ? "reset" : "email");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleRequestReset = async (e: React.FormEvent) => {
@@ -91,7 +92,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 mt-2 rounded-xl font-bold text-sm text-black bg-amber-500 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                  className={`w-full py-3 mt-2 text-sm ${btn.cta}`}
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -146,7 +147,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 mt-2 rounded-xl font-bold text-sm text-black bg-amber-500 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                  className={`w-full py-3 mt-2 text-sm ${btn.cta}`}
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">

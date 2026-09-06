@@ -189,7 +189,7 @@ export default function NotesPanel() {
               {selected && (
                 <button
                   onClick={() => setDeleteTarget(selected)}
-                  className="rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold px-4 py-2 transition-all duration-200 active:scale-[0.97]"
+                  className={`px-4 py-2 text-sm ${btn.dangerGhost}`}
                 >
                   Delete
                 </button>

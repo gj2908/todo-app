@@ -1,5 +1,6 @@
 import { addMonths, eachDayOfInterval, endOfMonth, format, getDay, isSameDay, isSameMonth, startOfMonth, subMonths } from "date-fns";
 import { useMemo, useState } from "react";
+import { btn } from "../lib/ui";
 
 interface TodoLite {
   _id: string;
@@ -61,7 +62,7 @@ export default function CalendarPanel({ todos, subjects = [], compact = false }:
         <div className={`flex items-center justify-between gap-1.5 w-full ${compact ? "rounded-lg border border-zinc-800 bg-zinc-900 px-1 py-1" : "sm:w-auto"}`}>
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className={`${compact ? "px-2 py-1 text-base font-semibold" : "px-2.5 py-1.5 text-lg font-semibold"} rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition`}
+            className={`${compact ? "px-2 py-1 text-base font-semibold" : "px-2.5 py-1.5 text-lg font-semibold"} ${btn.ghost}`}
           >
             Prev
           </button>
@@ -70,7 +71,7 @@ export default function CalendarPanel({ todos, subjects = [], compact = false }:
           </span>
           <button
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className={`${compact ? "px-2 py-1 text-base font-semibold" : "px-2.5 py-1.5 text-lg font-semibold"} rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition`}
+            className={`${compact ? "px-2 py-1 text-base font-semibold" : "px-2.5 py-1.5 text-lg font-semibold"} ${btn.ghost}`}
           >
             Next
           </button>

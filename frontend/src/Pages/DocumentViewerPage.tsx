@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "../axiosConfig";
+import { btn } from "../lib/ui";
+
+const BackIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+    <path d="M10 3.5L5 8l5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 type FullscreenDocument = Document & {
   webkitFullscreenElement?: Element | null;
@@ -107,7 +114,7 @@ export default function DocumentViewerPage() {
           <p className="text-sm text-red-400">{error || "Unable to open document"}</p>
           <button
             onClick={() => navigate("/home")}
-            className="mt-4 rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black hover:bg-amber-400"
+            className={`mt-4 px-4 py-2 text-sm ${btn.primary}`}
           >
             Back to Home
           </button>
@@ -156,20 +163,21 @@ export default function DocumentViewerPage() {
           <div className="flex items-center gap-2">
             <Link
               to="/home"
-              className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs ${btn.secondary}`}
             >
+              <BackIcon />
               Back
             </Link>
             <button
               onClick={toggleFullscreen}
-              className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
+              className={`px-3 py-2 text-xs ${btn.secondary}`}
             >
               {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             </button>
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400 disabled:opacity-60"
+              className={`px-3 py-2 text-xs ${btn.primary}`}
             >
               {downloading ? "Downloading..." : "Download"}
             </button>
@@ -187,7 +195,7 @@ export default function DocumentViewerPage() {
           {isFullscreen && (
             <button
               onClick={toggleFullscreen}
-              className="absolute top-4 right-4 z-10 rounded-lg border border-zinc-700 bg-zinc-800/90 px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700"
+              className={`absolute top-4 right-4 z-10 px-3 py-2 text-xs ${btn.secondary}`}
             >
               Exit Fullscreen
             </button>
@@ -203,7 +211,7 @@ export default function DocumentViewerPage() {
                   <p className="text-sm text-zinc-400">Preview is unavailable in this browser.</p>
                   <button
                     onClick={handleDownload}
-                    className="mt-3 rounded-lg bg-amber-500 px-3 py-2 text-xs font-bold text-black hover:bg-amber-400"
+                    className={`mt-3 px-3 py-2 text-xs ${btn.primary}`}
                   >
                     Download file
                   </button>
