@@ -2,6 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const router = express.Router();
 const PushDebugLog = require("../models/PushDebugLog");
+const User = require("../models/User");
 
 const urlBase64ToBuffer = (str) => {
   const padded = str + "=".repeat((4 - (str.length % 4)) % 4);
@@ -73,6 +74,33 @@ router.get("/", requireCronSecret, async (req, res) => {
 
 router.get("/vapid-check", requireCronSecret, (req, res) => {
   res.json(checkVapidKeypair());
+});
+
+// Structural health check on stored subscriptions - lengths and endpoint
+// hosts only, never the actual key material. A p256dh/auth string with an
+// unexpected length would mean the subscription data itself is corrupt
+// (e.g. truncated, double-encoded, or mangled in transit/storage), which
+// would make every send silently undecryptable on the client regardless of
+// how correct the VAPID keys and payload are.
+router.get("/subscriptions", requireCronSecret, async (req, res) => {
+  const users = await User.find({ "pushSubscriptions.0": { $exists: true } }, "email pushSubscriptions");
+  const report = users.map((u) => ({
+    email: u.email,
+    subscriptions: u.pushSubscriptions.map((s) => {
+      let endpointHost = null;
+      try {
+        endpointHost = new URL(s.endpoint).host;
+      } catch {
+        endpointHost = "invalid-url";
+      }
+      return {
+        endpointHost,
+        p256dhLength: s.keys?.p256dh?.length ?? null,
+        authLength: s.keys?.auth?.length ?? null,
+      };
+    }),
+  }));
+  res.json(report);
 });
 
 router.delete("/", requireCronSecret, async (req, res) => {
